@@ -1,8 +1,3423 @@
-"use strict";(()=>{var ia=Object.defineProperty;var c=(e,t)=>()=>(e&&(t=e(e=0)),t);var I=(e,t)=>{for(var n in t)ia(e,n,{get:t[n],enumerable:!0})};var ue,fe,b,ze,ne,re,me=c(()=>{"use strict";ue=window.nativeModuleProxy,fe=ue.MMKVManager;b=ue.DCDFileManager??ue.RTNFileManager;ze=ue.InfoDictionaryManager??ue.RTNClientInfoManager;ne=ue.DCDDeviceManager??ue.RTNDeviceManager,re=ue.BundleUpdaterManager});var At,Q,ft=c(()=>{At=["a","b","i"],Q=new Map});function ir(e,t,n,r,o){let a=Q.get(t)?.[e];if(!a)return o?Reflect.construct(t[e],n,r):t[e].apply(r,n);for(let s of a.b.values()){let m=s.call(r,n);Array.isArray(m)&&(n=m)}let i=[...a.i.values()].reduce(function(s,m){return function(){for(var d=arguments.length,_=new Array(d),P=0;P<d;P++)_[P]=arguments[P];return m.call(r,_,s)}},function(){for(var s=arguments.length,m=new Array(s),d=0;d<s;d++)m[d]=arguments[d];return o?Reflect.construct(a.o,m,r):a.o.apply(r,m)})(...n);for(let s of a.a.values())i=s.call(r,n,i)??i;return i}var sr=c(()=>{ft()});function Dt(e,t,n,r){let o=Q.get(e),a=o?.[t];return a?.[r].has(n)?(a[r].delete(n),At.every(function(i){return a[i].size===0})&&(Reflect.defineProperty(e,t,{value:a.o,writable:!0,configurable:!0})||(e[t]=a.o),delete o[t]),Object.keys(o).length==0&&Q.delete(e),!0):!1}function cr(){for(let[e,t]of Q.entries())for(let n in t)for(let r of At)for(let o of t[n]?.[r].keys()??[])Dt(e,n,o,r)}var Pt=c(()=>{ft()});function mt(e){return function(t,n,r){let o=arguments.length>3&&arguments[3]!==void 0?arguments[3]:!1;if(typeof n[t]!="function")throw new Error(`${t} is not a function in ${n.constructor.name}`);Q.has(n)||Q.set(n,Object.create(null));let a=Q.get(n);if(!a[t]){let m=n[t];a[t]={o:m,b:new Map,i:new Map,a:new Map};let d=function(C,O,U){let be=ir(t,n,O,C,U);return o&&s(),be},_=new Proxy(m,{apply:function(C,O,U){return d(O,U,!1)},construct:function(C,O){return d(m,O,!0)},get:function(C,O,U){return O=="toString"?m.toString.bind(m):Reflect.get(C,O,U)}});Reflect.defineProperty(n,t,{value:_,configurable:!0,writable:!0})||(n[t]=_)}let i=Symbol(),s=function(){return Dt(n,t,i,e)};return a[t][e].set(i,r),s}}var lr=c(()=>{sr();ft();Pt()});var Bt={};I(Bt,{after:()=>R,before:()=>Mt,instead:()=>we,unpatchAll:()=>cr});var Mt,we,R,Lt=c(()=>{lr();Pt();Mt=mt("b"),we=mt("i"),R=mt("a")});var ur,$=c(()=>{"use strict";Lt();Lt();ur={...Bt}});function Ft(){return{listeners:Object.values(Ot).reduce(function(e,t){return e[t]=new Set,e},{}),on(e,t){this.listeners[e].has(t)||this.listeners[e].add(t)},off(e,t){this.listeners[e].delete(t)},once(e,t){var n=this;let r=function(o,a){n.off(o,r),t(o,a)};this.on(e,r)},emit(e,t){for(let n of this.listeners[e])n(e,t)}}}var Ot,fr=c(()=>{"use strict";(function(e){e.GET="GET",e.SET="SET",e.DEL="DEL"})(Ot||(Ot={}))});var mr,dt,kt,Gt,de,pt,Le,dr=c(()=>{"use strict";me();h();mr=/[<>:"/\\|?*]/g,dt=function(e){return l.Platform.select({default:e,ios:b.saveFileToGallery?e:`Documents/${e}`})},kt=function(e){return mr.test(e)&&(e=e.replace(mr,"-").replace(/-+/g,"-")),`vd_mmkv/${e}`},Gt=async function(e){await fe.getItem(e)&&fe.removeItem(e);let t=kt(e);await b.fileExists(`${b.getConstants().DocumentsDirPath}/${t}`)&&await b.removeFile?.("documents",t)},de=function(e){let t=kt(e);return Le(t,async function(){try{let n=`${b.getConstants().DocumentsDirPath}/${t}`;if(await b.fileExists(n))return;let r=await fe.getItem(e)??"{}";if(r==="!!LARGE_VALUE!!"){let o=`${b.getConstants().CacheDirPath}/mmkv/${e}`;await b.fileExists(o)?r=await b.readFile(o,"utf8"):(console.log(`${e}: Experienced data loss :(`),r="{}")}await b.writeFile("documents",dt(t),r,"utf8"),await fe.getItem(e)!==null&&(fe.removeItem(e),console.log(`Successfully migrated ${e} store from MMKV storage to fs`))}catch(n){console.error("Failed to migrate to fs from MMKVManager ",n)}}())},pt=function(e){let t=kt(e);return b.removeFile("documents",dt(t))},Le=function(e,t){let n;return{get:async function(){await t;let r=`${b.getConstants().DocumentsDirPath}/${e}`;return!n&&!await b.fileExists(r)?(n=!0,b.writeFile("documents",dt(e),"{}","utf8")):JSON.parse(await b.readFile(r,"utf8"))},set:async function(r){await t,await b.writeFile("documents",dt(e),JSON.stringify(r),"utf8")}}}});var Vt={};I(Vt,{awaitSyncWrapper:()=>Oe,createFileBackend:()=>Le,createMMKVBackend:()=>de,createProxy:()=>hr,createStorage:()=>oe,purgeStorage:()=>Gt,removeMMKVBackend:()=>pt,useProxy:()=>w,wrapSync:()=>pe});function hr(){let e=arguments.length>0&&arguments[0]!==void 0?arguments[0]:{},t=Ft();function n(r,o){return new Proxy(r,{get(a,i){if(i===pr)return t;let s=[...o,i],m=a[i];return m!=null?(t.emit("GET",{path:s,value:m}),typeof m=="object"?n(m,s):m):m},set(a,i,s){return a[i]=s,t.emit("SET",{path:[...o,i],value:s}),!0},deleteProperty(a,i){let s=delete a[i];return s&&t.emit("DEL",{path:[...o,i]}),s}})}return{proxy:n(e,[]),emitter:t}}function w(e){if(e[Ut])throw e[Ut];let t=e[pr];if(!t)throw new Error(`InvalidArgumentExcpetion - storage[emitterSymbol] is ${typeof t}`);let[,n]=React.useReducer(function(r){return~r},0);return React.useEffect(function(){let r=function(){return n()};return t.on("SET",r),t.on("DEL",r),function(){t.off("SET",r),t.off("DEL",r)}},[t]),e}async function oe(e){let t=await e.get(),{proxy:n,emitter:r}=hr(t),o=function(){return e.set(n)};return r.on("SET",o),r.on("DEL",o),n}function pe(e){let t,n,r=[],o=function(a){return t?a():r.push(a)};return e.then(function(a){t=a,r.forEach(function(i){return i()})}).catch(function(a){n=a}),new Proxy({},{...Object.fromEntries(Object.getOwnPropertyNames(Reflect).map(function(a){return[a,function(i){for(var s=arguments.length,m=new Array(s>1?s-1:0),d=1;d<s;d++)m[d-1]=arguments[d];return Reflect[a](t??i,...m)}]})),get(a,i,s){return i===Ut?n:i===gr?o:Reflect.get(t??a,i,s)}})}var pr,gr,Ut,Oe,j=c(()=>{"use strict";fr();dr();pr=Symbol.for("vendetta.storage.emitter"),gr=Symbol.for("vendetta.storage.accessor"),Ut=Symbol.for("vendetta.storage.error");Oe=function(e){return new Promise(function(t){return e[gr](t)})}});function ae(e,t){return gt(e,t,{walkable:["props","children","child","sibling"]})}var Rr=c(()=>{"use strict";ge()});function Ht(e,t,n,r){if(!(r>n.maxDepth)&&e){try{if(t(e))return e}catch{}if(Array.isArray(e)){for(let o of e)if(!(typeof o!="object"||o===null))try{let a=Ht(o,t,n,r+1);if(a)return a}catch{}}else if(typeof e=="object"){for(let o of Object.keys(e))if(!(typeof e[o]!="object"||e[o]===null)&&!(n.walkable.length&&!n.walkable.includes(o))&&!n.ignore.includes(o))try{let a=Ht(e[o],t,n,r+1);if(a)return a}catch{}}}}function gt(e,t){let{walkable:n=[],ignore:r=[],maxDepth:o=100}=arguments.length>2&&arguments[2]!==void 0?arguments[2]:{};return Ht(e,t,{walkable:n,ignore:r,maxDepth:o},0)}var Er=c(()=>{"use strict"});async function he(e,t){let n=arguments.length>2&&arguments[2]!==void 0?arguments[2]:1e4,r=await fetch(e,{signal:sa(n),...t});if(!r.ok)throw new Error("Request returned non-ok");return r}function sa(e){let t=new AbortController;return setTimeout(function(){return t.abort(`Timed out after ${e}ms`)},e),t.signal}var yr=c(()=>{"use strict"});function $t(e){return Object.isFrozen(e)?Object.assign({},e):e}var _r=c(()=>{"use strict"});function K(e){for(var t=arguments.length,n=new Array(t>1?t-1:0),r=1;r<t;r++)n[r-1]=arguments[r];let o={...e};return n.forEach(function(a){return delete o[a]}),o}var Sr=c(()=>{"use strict"});var jt={};I(jt,{findInReactTree:()=>ae,findInTree:()=>gt,safeFetch:()=>he,unfreeze:()=>$t,without:()=>K});var ge=c(()=>{"use strict";Rr();Er();yr();_r();Sr()});var Yt={};I(Yt,{find:()=>W,findAll:()=>Xe,findByDisplayName:()=>Wt,findByDisplayNameAll:()=>ma,findByName:()=>F,findByNameAll:()=>fa,findByProps:()=>u,findByPropsAll:()=>ua,findByStoreName:()=>Fe,findByTypeName:()=>da,findByTypeNameAll:()=>pa,modules:()=>Kt});var ca,xr,br,Kt,W,Xe,wr,Tr,vr,Cr,la,u,ua,F,fa,Wt,ma,da,pa,Fe,x=c(()=>{"use strict";ca=window.ErrorUtils.getGlobalHandler(),xr=function(e){return Object.defineProperty(window.modules,e,{value:window.modules[e],enumerable:!1,configurable:!0,writable:!0})};for(let e in window.modules){let t=Number(e),n=window.modules[t]?.publicModule?.exports;(!n||n===window||n.proxygone===null)&&xr(t)}br=function(e){let t=arguments.length>1&&arguments[1]!==void 0?arguments[1]:!1;return function(n){let r=[];for(let o in e){let a=Number(o),i=e[a]?.publicModule?.exports;if(!e[a].isInitialized)try{let s=Function.prototype.toString;Object.defineProperty(Function.prototype,"toString",{value:s,configurable:!0,writable:!1}),window.ErrorUtils.setGlobalHandler(null),__r(a),window.ErrorUtils.setGlobalHandler(ca),Object.defineProperty(Function.prototype,"toString",{value:s,configurable:!0,writable:!0})}catch{}if(!i){xr(a);continue}if(i.default&&i.__esModule&&n(i.default)){if(t)return i.default;r.push(i.default)}if(n(i)){if(t)return i;r.push(i)}}if(!t)return r}},Kt=window.modules,W=br(Kt,!0),Xe=br(Kt),wr=function(e){return function(t){return e.every(function(n){return t[n]!==void 0})}},Tr=function(e,t){return t?function(n){return n?.name===e}:function(n){return n?.default?.name===e}},vr=function(e,t){return t?function(n){return n?.displayName===e}:function(n){return n?.default?.displayName===e}},Cr=function(e,t){return t?function(n){return n?.type?.name===e}:function(n){return n?.default?.type?.name===e}},la=function(e){return function(t){return t.getName&&t.getName.length===0&&t.getName()===e}},u=function(){for(var e=arguments.length,t=new Array(e),n=0;n<e;n++)t[n]=arguments[n];return W(wr(t))},ua=function(){for(var e=arguments.length,t=new Array(e),n=0;n<e;n++)t[n]=arguments[n];return Xe(wr(t))},F=function(e){let t=arguments.length>1&&arguments[1]!==void 0?arguments[1]:!0;return W(Tr(e,t))},fa=function(e){let t=arguments.length>1&&arguments[1]!==void 0?arguments[1]:!0;return Xe(Tr(e,t))},Wt=function(e){let t=arguments.length>1&&arguments[1]!==void 0?arguments[1]:!0;return W(vr(e,t))},ma=function(e){let t=arguments.length>1&&arguments[1]!==void 0?arguments[1]:!0;return Xe(vr(e,t))},da=function(e){let t=arguments.length>1&&arguments[1]!==void 0?arguments[1]:!0;return W(Cr(e,t))},pa=function(e){let t=arguments.length>1&&arguments[1]!==void 0?arguments[1]:!0;return Xe(Cr(e,t))},Fe=function(e){return W(la(e))}});var zt,ga,N,Te=c(()=>{"use strict";x();zt=u("setLogFn").default,ga=new zt("Revenge"),N=ga});var Qt={};I(Qt,{color:()=>ie,fetchTheme:()=>qe,getCurrentTheme:()=>Ie,initThemes:()=>Zt,installTheme:()=>ve,patchChatBackground:()=>qt,removeTheme:()=>Jt,selectTheme:()=>Ce,themes:()=>k,updateThemes:()=>Nr});async function Xt(e){if(typeof e!="object")throw new Error("Theme must be an object");await Le("vendetta_theme.json").set(e)}function qt(){let e=Ie()?.data?.background;if(!e)return;let t=F("MessagesWrapperConnected",!1);if(!t)return;let{MessagesWrapper:n}=u("MessagesWrapper");if(!n)return;let r=[R("default",t,function(o,a){return React.createElement(l.ImageBackground,{style:{flex:1,height:"100%"},source:{uri:e.url},blurRadius:typeof e.blur=="number"?e.blur:0,children:a})}),R("render",n.prototype,function(o,a){let i=ae(a,function(s){return s?.props&&"HACK_fixModalInteraction"in s.props&&s?.props?.style});i?i.props.style=Object.assign(l.StyleSheet.flatten(i.props.style??{}),{backgroundColor:"#0000"}):N.error("Didn't find Messages when patching MessagesWrapper!")})];return function(){return r.forEach(function(o){return o()})}}function Ir(e){if(se.valid(e))return se(e).hex();let t=Number(l.processColor(e));return se.rgb(t>>16&255,t>>8&255,t&255,t>>24&255).hex()}function Ra(e){if(e.semanticColors){let t=e.semanticColors;for(let n in t)for(let r in t[n])t[n][r]&&=Ir(t[n][r])}if(e.rawColors){let t=e.rawColors;for(let n in t)e.rawColors[n]=Ir(t[n]);l.Platform.OS==="android"&&Ea(t)}return e}function Ea(e){let t={BLACK_ALPHA_60:["BLACK",.6],BRAND_NEW_360_ALPHA_20:["BRAND_360",.2],BRAND_NEW_360_ALPHA_25:["BRAND_360",.25],BRAND_NEW_500_ALPHA_20:["BRAND_500",.2],PRIMARY_DARK_500_ALPHA_20:["PRIMARY_500",.2],PRIMARY_DARK_700_ALPHA_60:["PRIMARY_700",.6],STATUS_GREEN_500_ALPHA_20:["GREEN_500",.2],STATUS_RED_500_ALPHA_20:["RED_500",.2]};for(let n in t){let[r,o]=t[n];e[r]&&(e[n]=se(e[r]).alpha(o).hex())}}async function qe(e){let t=arguments.length>1&&arguments[1]!==void 0?arguments[1]:!1,n;try{n=await(await he(e,{cache:"no-store"})).json()}catch{throw new Error(`Failed to fetch theme at ${e}`)}k[e]={id:e,selected:t,data:Ra(n)},t&&Xt(k[e])}async function ve(e){if(typeof e!="string"||e in k)throw new Error("Theme already installed");await qe(e)}async function Ce(e){if(e==="default")return await Xt({});let t=Object.values(k).find(function(n){return n.selected})?.id;t&&(k[t].selected=!1),k[e].selected=!0,await Xt(k[e])}async function Jt(e){let t=k[e];return t.selected&&await Ce("default"),delete k[e],t.selected}function Ie(){let e=window.__vendetta_loader?.features?.themes?.prop;return e&&window[e]||null}async function Nr(){await Oe(k);let e=Ie();await Promise.allSettled(Object.keys(k).map(function(t){return qe(t,e?.id===t)}))}async function Zt(){let e=Ie();if(!e)return;let t=ie.default.unsafe_rawColors;ie.default.unsafe_rawColors=new Proxy(t,{get:function(n,r){return e?e.data?.rawColors?.[r]??Reflect.get(t,r):Reflect.get(t,r)}}),we("resolveSemanticColor",ie.default.meta??ie.default.internal,function(n,r){if(!e)return r(...n);let[o,a]=n,[i,s]=Ar(o,a),m=o==="amoled"?2:o==="light"?1:0;let d=ha[i]??i,_=(e.data?.semanticColors?.[i]??e.data?.semanticColors?.[d])?.[m];if(i==="CHAT_BACKGROUND"&&typeof e.data?.background?.alpha=="number")return se(_||"black").alpha(1-e.data.background.alpha).hex();if(_)return _;let P=e.data?.rawColors?.[s.raw];return P?s.opacity===1?P:se(P).alpha(s.opacity).hex():r(...n)}),await Nr()}function Ar(e,t){let n=t[Ar._sym??=Object.getOwnPropertySymbols(t)[0]],r=ie.SemanticColor[n];return[n,r[e.toLowerCase()]]}var ie,k,ha,Y=c(()=>{"use strict";$();j();ge();h();x();Te();ie=u("SemanticColor"),k=pe(oe(de("VENDETTA_THEMES"))),ha={BG_BACKDROP:"BACKGROUND_FLOATING",BG_BASE_PRIMARY:"BACKGROUND_PRIMARY",BG_BASE_SECONDARY:"BACKGROUND_SECONDARY",BG_BASE_TERTIARY:"BACKGROUND_SECONDARY_ALT",BG_MOD_FAINT:"BACKGROUND_MODIFIER_ACCENT",BG_MOD_STRONG:"BACKGROUND_MODIFIER_ACCENT",BG_MOD_SUBTLE:"BACKGROUND_MODIFIER_ACCENT",BG_SURFACE_OVERLAY:"BACKGROUND_FLOATING",BG_SURFACE_OVERLAY_TMP:"BACKGROUND_FLOATING",BG_SURFACE_RAISED:"BACKGROUND_MOBILE_PRIMARY"}});var ht,Dr,l,se,Rt=c(()=>{"use strict";$();Y();ht=function(e){for(let t in window.modules){let n=window.modules[t]?.publicModule.exports;if(n&&e(n))return n}},Dr=ht(function(e){return e?.default?.name==="requireNativeComponent"});Dr&&we("default",Dr,function(e,t){try{return t(...e)}catch{return e[0]}});window.React=ht(function(e){return e.createElement});l=ht(function(e){return e.AppRegistry}),se=ht(function(e){return e.brewer});if(window.__vendetta_loader?.features.themes)try{Zt()}catch(e){console.error("[Revenge] Failed to initialize themes...",e)}});var on={};I(on,{Flux:()=>wa,FluxDispatcher:()=>yt,NavigationNative:()=>ce,React:()=>Ae,ReactNative:()=>l,assets:()=>Je,channels:()=>tn,chroma:()=>se,clipboard:()=>z,commands:()=>Et,constants:()=>ke,i18n:()=>Ne,invites:()=>Sa,lodash:()=>_t,moment:()=>rn,navigation:()=>xa,navigationStack:()=>ba,stylesheet:()=>M,toasts:()=>nn,url:()=>Ge,util:()=>Ta});function _a(e){if(en){for(let t in e)e[t]=new Proxy(l.StyleSheet.flatten(e[t]),{get(n,r,o){let a=Reflect.get(n,r,o);return Pr.isSemanticColor(a)?Pr.resolveSemanticColor(ya.theme,a):a}});return e}}var ya,en,Pr,ke,tn,Ne,Ge,nn,M,z,Je,Sa,Et,xa,ba,ce,wa,yt,Ae,rn,_t,Ta,h=c(()=>{"use strict";Rt();x();Rt();Rt();ya=Fe("ThemeStore"),en=u("colors","unsafe_rawColors"),Pr=en?.internal??en?.meta;ke=u("Fonts","Permissions"),tn=u("getVoiceChannelId"),Ne=u("Messages"),Ge=u("openURL","openDeeplink"),nn=W(function(e){return e.open&&e.close&&!e.startDrag&&!e.init&&!e.openReplay&&!e.setAlwaysOnTop&&!e.setAccountFlag}),M={...W(function(e){return e.createStyles&&!e.ActionSheet}),createThemedStyleSheet:_a,...u("createThemedStyleSheet")},z=u("setString","getString","hasString"),Je=u("registerAsset"),Sa=u("acceptInviteAndTransitionToInviteChannel"),Et=u("getBuiltInCommands"),xa=u("pushLazy"),ba=u("createStackNavigator"),ce=u("NavigationContainer"),wa=u("connectStores"),yt=u("_currentDispatchActionType"),Ae=window.React,rn=u("isMoment"),_t=u("forEachRight"),Ta=u("inspect","isNullOrUndefined")});var A,Mr,Br,Ze,De=c(()=>{(function(e){e.BRAND="brand",e.RED="red",e.GREEN="green",e.PRIMARY="primary",e.TRANSPARENT="transparent",e.GREY="grey",e.LIGHTGREY="lightgrey",e.WHITE="white",e.LINK="link"})(A||(A={}));(function(e){e[e.BUILT_IN=0]="BUILT_IN",e[e.BUILT_IN_TEXT=1]="BUILT_IN_TEXT",e[e.BUILT_IN_INTEGRATION=2]="BUILT_IN_INTEGRATION",e[e.BOT=3]="BOT",e[e.PLACEHOLDER=4]="PLACEHOLDER"})(Mr||(Mr={}));(function(e){e[e.SUB_COMMAND=1]="SUB_COMMAND",e[e.SUB_COMMAND_GROUP=2]="SUB_COMMAND_GROUP",e[e.STRING=3]="STRING",e[e.INTEGER=4]="INTEGER",e[e.BOOLEAN=5]="BOOLEAN",e[e.USER=6]="USER",e[e.CHANNEL=7]="CHANNEL",e[e.ROLE=8]="ROLE",e[e.MENTIONABLE=9]="MENTIONABLE",e[e.NUMBER=10]="NUMBER",e[e.ATTACHMENT=11]="ATTACHMENT"})(Br||(Br={}));(function(e){e[e.CHAT=1]="CHAT",e[e.USER=2]="USER",e[e.MESSAGE=3]="MESSAGE"})(Ze||(Ze={}))});var sn={};I(sn,{patchCommands:()=>an,registerCommand:()=>va});function an(){let e=R("getBuiltInCommands",Et,function(t,n){let[r]=t;if(r===Ze.CHAT)return n.concat(Qe)});return function(){Qe=[],e()}}function va(e){let t=Et.getBuiltInCommands(Ze.CHAT,!0,!1);t.sort(function(r,o){return Number.parseInt(o.id)-Number.parseInt(r.id)});let n=t[t.length-1];return e.id=(Number.parseInt(n.id,10)-1).toString(),Qe.push(e),function(){return Qe=Qe.filter(function(r){let{id:o}=r;return o!==e.id})}}var Qe,cn=c(()=>{"use strict";$();h();De();Qe=[]});var p,X,V=c(()=>{"use strict";j();p=pe(oe(de("VENDETTA_SETTINGS"))),X=pe(oe(Le("vendetta_loader.json")))});var un={};I(un,{all:()=>le,find:()=>Ca,getAssetByID:()=>Na,getAssetByName:()=>Ia,getAssetIDByName:()=>f,patchAssets:()=>ln});function ln(){let e=R("registerAsset",Je,function(t,n){let r=t[0];le[r.name]={...r,id:n}});for(let t=1;;t++){let n=Je.getAssetByID(t);if(!n)break;le[n.name]||(le[n.name]={...n,id:t})}return e}var le,Ca,Ia,Na,f,S=c(()=>{"use strict";$();h();le={};Ca=function(e){return Object.values(le).find(e)},Ia=function(e){return le[e]},Na=function(e){return Je.getAssetByID(e)},f=function(e){return le[e]?.id}});var fn={};I(fn,{showToast:()=>g});var Aa,g,ee=c(()=>{"use strict";h();x();({uuid4:Aa}=u("uuid4")),g=function(e,t){return nn.open({key:`vd-toast-${Aa()}`,content:e,source:t,icon:t})}});var pn={};I(pn,{connectToDebugger:()=>mn,getDebugInfo:()=>tt,patchLogHook:()=>dn,socket:()=>q,toggleSafeMode:()=>et,versionHash:()=>St});async function et(){p.safeMode={...p.safeMode,enabled:!p.safeMode?.enabled},window.__vendetta_loader?.features.themes&&(Ie()?.id&&(p.safeMode.currentThemeId=Ie()?.id),p.safeMode?.enabled?await Ce("default"):p.safeMode?.currentThemeId&&await Ce(p.safeMode?.currentThemeId)),setTimeout(re.reload,400)}function mn(e){if(q!==void 0&&q.readyState!==WebSocket.CLOSED&&q.close(),!e){g("Invalid debugger URL!",f("Small"));return}q=new WebSocket(`ws://${e}`),q.addEventListener("open",function(){return g("Connected to debugger.",f("Check"))}),q.addEventListener("message",function(t){try{(0,eval)(t.data)}catch(n){console.error(n)}}),q.addEventListener("error",function(t){console.log(`Debugger error: ${t.message}`),g("An error occurred with the debugger connection!",f("Small"))})}function dn(){let e=R("nativeLoggingHook",globalThis,function(t){q?.readyState===WebSocket.OPEN&&q.send(JSON.stringify({message:t[0],level:t[1]})),N.log(t[0])});return function(){q?.close(),e()}}function tt(){let e=window.HermesInternal.getRuntimeProperties(),t=e["OSS Release Version"],n="for RN ",r=l.Platform.constants,o=r.reactNativeVersion;return{vendetta:{version:St,loader:window.__vendetta_loader?.name??"Unknown"},discord:{version:ze.Version,build:ze.Build},react:{version:React.version,nativeVersion:t.startsWith(n)?t.substring(n.length):`${o.major}.${o.minor}.${o.patch}`},hermes:{version:t,buildType:e.Build,bytecodeVersion:e["Bytecode Version"]},...l.Platform.select({android:{os:{name:"Android",version:r.Release,sdk:r.Version}},ios:{os:{name:r.systemName,version:r.osVersion}}}),...l.Platform.select({android:{device:{manufacturer:r.Manufacturer,brand:r.Brand,model:r.Model,codename:ne.device}},ios:{device:{manufacturer:ne.deviceManufacturer,brand:ne.deviceBrand,model:ne.deviceModel,codename:ne.device}}})}}var q,St,Ue=c(()=>{"use strict";Te();me();$();V();Y();h();S();ee();St="42fb873"});function Fr(e){let{locale:t}=e;try{Lr&&(Lr.overrideTheme(Da?.theme??"dark"),Or&&Pa.useAMOLEDTheme===2&&Or.setAMOLEDThemeEnabled(!0))}catch(n){N.error("Failed to fix theme...",n)}try{rn.locale(t.toLowerCase())}catch(n){N.error("Failed to fix timestamps...",n)}yt.unsubscribe("I18N_LOAD_SUCCESS",Fr)}function kr(){return yt.subscribe("I18N_LOAD_SUCCESS",Fr)}var Lr,Or,Da,Pa,Gr=c(()=>{"use strict";Te();h();x();Lr=u("updateTheme","overrideTheme"),Or=u("setAMOLEDThemeEnabled"),Da=Fe("ThemeStore"),Pa=Fe("UnsyncedUserSettingsStore")});var Ma,Ba,La,Ur,Vr=c(()=>{"use strict";Ma=function(e){return{status:"fulfilled",value:e}},Ba=function(e){return{status:"rejected",reason:e}},La=function(e){return Promise.resolve(e).then(Ma,Ba)},Ur=function(e){return Promise.all(Array.from(e).map(La))}});var En={};I(En,{evalPlugin:()=>Hr,fetchPlugin:()=>Ve,getSettings:()=>Rn,initPlugins:()=>hn,installPlugin:()=>Re,plugins:()=>D,removePlugin:()=>gn,startPlugin:()=>He,stopPlugin:()=>$e});async function Ve(e){e.endsWith("/")||(e+="/");let t=D[e],n;try{n=await(await he(`${e}manifest.json`,{cache:"no-store"})).json()}catch{throw new Error(`Failed to fetch manifest for ${e}`)}let r;if(t?.manifest.hash!==n.hash)try{r=await(await he(e+(n.main||"index.js"),{cache:"no-store"})).text()}catch{}if(!r&&!t)throw new Error(`Failed to fetch JS for ${e}`);D[e]={id:e,manifest:n,enabled:t?.enabled??!1,update:t?.update??!0,js:r??t.js}}async function Re(e){let t=arguments.length>1&&arguments[1]!==void 0?arguments[1]:!0;if(e.endsWith("/")||(e+="/"),typeof e!="string"||e in D)throw new Error("Plugin already installed");await Ve(e),t&&await He(e)}async function Hr(e){let t={...window.vendetta,plugin:{id:e.id,manifest:e.manifest,storage:await oe(de(e.id))},logger:new zt(`Vendetta \xBB ${e.manifest.name}`)},n=`vendetta=>{return ${e.js}}
-//# sourceURL=${e.id}`,r=(0,eval)(n)(t),o=typeof r=="function"?r():r;return o?.default??o??{}}async function He(e){e.endsWith("/")||(e+="/");let t=D[e];if(!t)throw new Error("Attempted to start non-existent plugin");try{if(!p.safeMode?.enabled){let n=await Hr(t);Pe[e]=n,n.onLoad?.()}t.enabled=!0}catch(n){N.error(`Plugin ${t.id} errored whilst loading, and will be unloaded`,n);try{Pe[t.id]?.onUnload?.()}catch(r){N.error(`Plugin ${t.id} errored whilst unloading`,r)}delete Pe[e],t.enabled=!1}}function $e(e){let t=arguments.length>1&&arguments[1]!==void 0?arguments[1]:!0;e.endsWith("/")||(e+="/");let n=D[e],r=Pe[e];if(!n)throw new Error("Attempted to stop non-existent plugin");if(!p.safeMode?.enabled){try{r?.onUnload?.()}catch(o){N.error(`Plugin ${n.id} errored whilst unloading`,o)}delete Pe[e]}t&&(n.enabled=!1)}async function gn(e){e.endsWith("/")||(e+="/"),D[e].enabled&&$e(e),delete D[e],await Gt(e)}async function hn(){await Oe(p),await Oe(D);let e=Object.keys(D);return p.safeMode?.enabled||(await Ur(e.filter(function(t){return D[t].enabled}).map(async function(t){return D[t].update&&await Ve(t).catch(function(n){return N.error(n.message)}),await He(t)})),e.filter(function(t){return!D[t].enabled&&D[t].update}).forEach(function(t){return Ve(t)})),Oa}var D,Pe,Oa,Rn,Ee=c(()=>{"use strict";Te();Vr();V();j();ge();D=pe(oe(de("VENDETTA_PLUGINS"))),Pe={};Oa=function(){return Object.keys(Pe).forEach(function(e){return $e(e,!1)})},Rn=function(e){return Pe[e]?.settings}});var Cn={};I(Cn,{DISCORD_SERVER:()=>yn,DISCORD_SERVER_ID:()=>_n,DISCORD_VENDETTA_SERVER_ID:()=>Sn,ESCAPE_REGEX:()=>vn,GITHUB:()=>Tn,HTTP_REGEX:()=>ka,HTTP_REGEX_MULTI:()=>rt,PLUGINS_CHANNEL_ID:()=>xn,PLUGINS_VENDETTA_CHANNEL_ID:()=>bn,PROXY_PREFIX:()=>Fa,PROXY_PREFIXES:()=>Me,THEMES_CHANNEL_ID:()=>nt,THEMES_VENDETTA_CHANNEL_ID:()=>wn});var yn,_n,Sn,xn,bn,nt,wn,Tn,Fa,Me,ka,rt,vn,ye=c(()=>{"use strict";yn="https://discord.com/invite/ddcQf3s2Uq",_n="1205207689832038522",Sn="1015931589865246730",xn="1205876359037980742",bn="1091880384561684561",nt="1205876424188104715",wn="1091880434939482202",Tn="https://github.com/revenge-mod",Fa="https://vd-plugins.github.io/proxy",Me=["https://vd-plugins.github.io/proxy"],ka=/^https?:\/\/(?:www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b(?:[-a-zA-Z0-9()@:%_+.~#?&/=]*)$/,rt=/https?:\/\/(?:www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b(?:[-a-zA-Z0-9()@:%_+.~#?&//=]*)/g,vn=/[.*+?^${}()|[\]\\]/g});var Nn={};I(Nn,{rawColors:()=>In,semanticColors:()=>E});var E,In,_e=c(()=>{"use strict";Y();h();E=ie?.default?.colors??ke?.ThemeColorMap,In=ie?.default?.unsafe_rawColors??ke?.Colors});function Se(e){let{selectable:t,style:n,children:r}=e;return t?l.Platform.select({ios:React.createElement(Ga,{style:n,children:r}),default:React.createElement($r,{style:n,children:r,selectable:!0})}):React.createElement($r,{style:n,children:r})}var jr,Ga,$r,Kr=c(()=>{"use strict";h();_e();jr=M.createThemedStyleSheet({codeBlock:{fontFamily:ke.Fonts.CODE_SEMIBOLD,fontSize:12,textAlignVertical:"center",backgroundColor:E.BACKGROUND_SECONDARY,color:E.TEXT_NORMAL,borderWidth:1,borderRadius:4,borderColor:E.BACKGROUND_TERTIARY,padding:10}}),Ga=function(e){let{style:t,children:n}=e;return React.createElement(l.TextInput,{editable:!1,multiline:!0,style:[jr.codeBlock,t&&t],value:n})},$r=function(e){let{selectable:t,style:n,children:r}=e;return React.createElement(l.Text,{selectable:t,style:[jr.codeBlock,n&&n]},r)}});function Wr(e,t){if(!(e instanceof t))throw new TypeError("Cannot call a class as a function")}var Yr=c(()=>{});function zr(e,t){for(var n=0;n<t.length;n++){var r=t[n];r.enumerable=r.enumerable||!1,r.configurable=!0,"value"in r&&(r.writable=!0),Object.defineProperty(e,r.key,r)}}function Xr(e,t,n){return t&&zr(e.prototype,t),n&&zr(e,n),e}var qr=c(()=>{});function Jr(e,t,n){return t in e?Object.defineProperty(e,t,{value:n,enumerable:!0,configurable:!0,writable:!0}):e[t]=n,e}var Zr=c(()=>{});function xt(e,t){return xt=Object.setPrototypeOf||function(r,o){return r.__proto__=o,r},xt(e,t)}var Qr=c(()=>{});function eo(e,t){if(typeof t!="function"&&t!==null)throw new TypeError("Super expression must either be null or a function");e.prototype=Object.create(t&&t.prototype,{constructor:{value:e,writable:!0,configurable:!0}}),t&&xt(e,t)}var to=c(()=>{Qr()});function ot(e){return ot=Object.setPrototypeOf?Object.getPrototypeOf:function(n){return n.__proto__||Object.getPrototypeOf(n)},ot(e)}var no=c(()=>{});function ro(){if(typeof Reflect>"u"||!Reflect.construct||Reflect.construct.sham)return!1;if(typeof Proxy=="function")return!0;try{return Boolean.prototype.valueOf.call(Reflect.construct(Boolean,[],function(){})),!0}catch{return!1}}var oo=c(()=>{});function ao(e){if(e===void 0)throw new ReferenceError("this hasn't been initialised - super() hasn't been called");return e}var io=c(()=>{});function so(e){"@swc/helpers - typeof";return e&&typeof Symbol<"u"&&e.constructor===Symbol?"symbol":typeof e}var co=c(()=>{});function lo(e,t){return t&&(so(t)==="object"||typeof t=="function")?t:ao(e)}var uo=c(()=>{io();co()});function fo(e){var t=ro();return function(){var r=ot(e),o;if(t){var a=ot(this).constructor;o=Reflect.construct(r,arguments,a)}else o=r.apply(this,arguments);return lo(this,o)}}var mo=c(()=>{no();oo();uo()});var po,Ua,T,An=c(()=>{"use strict";Yr();qr();Zr();to();mo();h();v();po=M.createThemedStyleSheet({view:{flex:1,flexDirection:"column",margin:10},title:{fontSize:20,textAlign:"center",marginBottom:5}}),T=function(e){"use strict";eo(n,e);var t=fo(n);function n(r){Wr(this,n);var o;return o=t.call(this,r),o.state={hasErr:!1},o}return Xr(n,[{key:"render",value:function(){var o=this;return this.state.hasErr?Ae.createElement(l.ScrollView,{style:po.view},Ae.createElement(y.FormText,{style:po.title},"Uh oh."),Ae.createElement(Se,{selectable:!0,style:{marginBottom:5}},this.state.errText),Ae.createElement(te,{color:te.Colors.RED,size:te.Sizes.MEDIUM,look:te.Looks.FILLED,onPress:function(){return o.setState({hasErr:!1,errText:void 0})},text:"Retry"})):this.props.children}}]),n}(Ua=Ae.Component);Jr(T,"getDerivedStateFromError",function(e){return{hasErr:!0,errText:e.message}})});function je(e){let{onChangeText:t,placeholder:n,style:r}=e;return bt.TextInput?React.createElement(bt.TextInput,{style:[Dn.redesignSearch,r],size:"sm",placeholder:n,onChange:t,isClearable:!0,leadingIcon:function(){return React.createElement(l.Image,{source:f("MagnifyingGlassIcon"),style:Dn.icon})},returnKeyType:"search"}):React.createElement(Va,{style:[Dn.search,r],placeholder:n,onChangeText:t})}var Va,Dn,go=c(()=>{"use strict";h();x();v();S();_e();Va=F("StaticSearchBarContainer"),Dn=M.createThemedStyleSheet({search:{margin:0,padding:0,borderBottomWidth:0,backgroundColor:"none"},redesignSearch:{paddingHorizontal:8,marginBottom:4},icon:{width:16,height:16,tintColor:E.INTERACTIVE_NORMAL}})});function Ke(e){let{label:t,icon:n,noPadding:r=!1,noAnimation:o=!1,children:a}=e,{FormRow:i,FormDivider:s}=y,[m,d]=React.useState(!0);return React.createElement(React.Fragment,null,React.createElement(i,{label:t,leading:n&&React.createElement(i.Icon,{source:f(n)}),trailing:React.createElement(i.Arrow,{style:{transform:[{rotate:`${m?180:90}deg`}]}}),onPress:function(){d(!m),o||l.LayoutAnimation.configureNext(l.LayoutAnimation.Presets.easeInEaseOut)}}),!m&&React.createElement(React.Fragment,null,React.createElement(s,null),React.createElement(l.View,{style:!r&&{paddingHorizontal:15}},a)))}var ho=c(()=>{"use strict";h();S();v()});var Ln={};I(Ln,{Alert:()=>Pn,Button:()=>te,Codeblock:()=>Se,ErrorBoundary:()=>T,Forms:()=>y,General:()=>Ha,HelpMessage:()=>Mn,Redesign:()=>bt,SafeAreaView:()=>Bn,Search:()=>je,Summary:()=>Ke});var y,Ha,Pn,te,Mn,Bn,bt,v=c(()=>{"use strict";x();Kr();An();go();ho();y=u("Form","FormSection"),Ha=u("Button","Text","View"),Pn=Wt("FluxContainer(Alert)"),te=u("Looks","Colors","Sizes"),Mn=F("HelpMessage"),Bn=u("useSafeAreaInsets").SafeAreaView,bt=u("Button","ContextMenu","TextInput")??{}});function On(e){let{title:t,confirmText:n,confirmColor:r,onConfirm:o,cancelText:a,placeholder:i,initialValue:s="",secureTextEntry:m}=e,[d,_]=React.useState(s),[P,C]=React.useState("");function O(){Promise.resolve(o(d)).then(function(){Ro.close()}).catch(function(be){C(be.message)})}return React.createElement(Pn,{title:t,confirmText:n,confirmColor:r,isConfirmButtonDisabled:P.length!==0,onConfirm:O,cancelText:a,onCancel:function(){return Ro.close()}},React.createElement($a,{placeholder:i,value:d,onChange:function(U){_(typeof U=="string"?U:U.text),P&&C("")},returnKeyType:"done",onSubmitEditing:O,error:P||void 0,secureTextEntry:m,autoFocus:!0,showBorder:!0,style:{paddingVertical:5,alignSelf:"stretch",paddingHorizontal:0}}))}var $a,Ro,Eo=c(()=>{"use strict";x();v();({FormInput:$a}=y),Ro=u("openLazy","close")});var kn={};I(kn,{showConfirmationAlert:()=>G,showCustomAlert:()=>_o,showInputAlert:()=>Fn});function G(e){let t=e;return t.body=e.content,t.content=void 0,t.isDismissable??=!0,yo.show(t)}var yo,_o,Fn,xe=c(()=>{"use strict";x();Eo();yo=u("openLazy","close");_o=function(e,t){return yo.openLazy({importer:async function(){return function(){return React.createElement(e,t)}}})},Fn=function(e){return _o(On,e)}});async function So(e){return{patcher:K(ur,"unpatchAll"),metro:{...Yt,common:{...on}},constants:Cn,utils:jt,debug:K(pn,"versionHash","patchLogHook","toggleSafeMode"),ui:{components:Ln,toasts:fn,alerts:kn,assets:un,...Nn},plugins:K(En,"initPlugins","evalPlugin"),themes:K(Qt,"initThemes"),commands:K(sn,"patchCommands"),storage:Vt,settings:p,loader:{identity:window.__vendetta_loader,config:X},logger:N,version:St,unload:function(){e.filter(function(t){return typeof t=="function"}).forEach(function(t){return t()}),window.vendetta=void 0}}}var xo=c(()=>{"use strict";cn();ye();Ue();Te();$();Ee();V();j();Y();ge();h();x();xe();S();_e();v();ee()});function bo(){return R("default",ja,function(e,t){let[{thread:n}]=e;n.guild_id!==_n||(n.guild_id,Sn);let r;if(n.parent_id===xn)r="Plugin";else if(n.parent_id===nt&&window.__vendetta_loader?.features.themes)r="Theme";else if(n.parent_id===bn)r="Plugin";else if(n.parent_id===wn&&window.__vendetta_loader?.features.themes)r="Theme";else return;let{firstMessage:o}=Ya(n),a=o?.content?.match(rt);if(!a)return;r==="Plugin"?a=a.filter(function(d){return Me.some(function(_){return d.startsWith(_)})}):a=a.filter(function(d){return d.endsWith(".json")});let i=a[0];if(!i)return;let s=ae(t,function(d){return d?.[0]?.key}),m=s[0].type;s.unshift(React.createElement(m,{key:"install"},React.createElement(Ka,{leading:React.createElement(Wa,{style:{opacity:1},source:f("ic_download_24px")}),label:`Install ${r}`,onPress:function(){return(r==="Plugin"?Re:ve)(i).then(function(){g(`Successfully installed ${n.name}`,f("Check"))}).catch(function(d){g(d.message,f("Small"))}).finally(function(){return za()})}})))})}var ja,Ka,Wa,Ya,za,wo=c(()=>{"use strict";ye();$();Ee();Y();ge();x();S();v();ee();ja=F("ForumPostLongPressActionSheet",!1),{FormRow:Ka,FormIcon:Wa}=y,{useFirstForumPostMessage:Ya}=u("useFirstForumPostMessage"),{hideActionSheet:za}=u("openLazy","hideActionSheet")});function To(e){if(Me.filter(function(t){return e.startsWith(t)}).length>0)return"Plugin";if(e.endsWith(".json")&&window.__vendetta_loader?.features.themes)return"Theme"}function vo(e,t){(e==="Plugin"?Re:ve)(t).then(function(){g("Successfully installed",f("Check"))}).catch(function(n){g(n.message,f("Small"))})}function Co(){let e=new Array;return e.push(R("showSimpleActionSheet",Xa,function(t){if(t[0].key!=="LongPressUrl")return;let{header:{title:n},options:r}=t[0],o=To(n);o&&r.push({label:`Install ${o}`,onPress:function(){return vo(o,n)}})})),e.push(we("handleClick",qa,async function(t,n){let{href:r}=t[0],o=To(r);if(!o)return n.apply(this,t);if(o==="Theme"&&Qa(Za())?.parent_id!==nt)return n.apply(this,t);G({title:"Hold Up",content:["This link is a ",React.createElement(l.Text,{style:ei["text-md/semibold"]},o),", would you like to install it?"],onConfirm:function(){return vo(o,r)},confirmText:"Install",cancelText:"Cancel",secondaryConfirmText:"Open in Browser",onConfirmSecondary:function(){return Ja(r)}})})),function(){return e.forEach(function(t){return t()})}}var Xa,qa,Ja,Za,Qa,ei,Io=c(()=>{"use strict";ye();$();Ee();Y();h();x();xe();S();ee();Xa=W(function(e){return e?.showSimpleActionSheet&&!Object.getOwnPropertyDescriptor(e,"showSimpleActionSheet")?.get}),qa=u("handleClick"),{openURL:Ja}=Ge,{getChannelId:Za}=tn,{getChannel:Qa}=u("getChannel"),{TextStyleSheet:ei}=u("TextStyleSheet")});function Gn(){let e=new Array;return e.push(bo()),e.push(Co()),function(){return e.forEach(function(t){return t()})}}var No=c(()=>{"use strict";wo();Io()});function Po(){return R("render",ti.prototype,function(e,t){var n=this;if(!this.state.error)return;let r=tt();this.state.activeTab??="message";let o=Do.find(function(s){return s.id===n.state.activeTab}),a=this.state.error[this.state.activeTab],i=[{text:"Restart Discord",onPress:this.handleReload},...p.safeMode?.enabled?[]:[{text:"Restart in Safe Mode",onPress:et}],{text:"Retry Render",color:A.RED,onPress:function(){return n.setState({info:null,error:null})}}];return React.createElement(T,null,React.createElement(Bn,{style:at.container},React.createElement(l.View,{style:at.header},t.props.Illustration&&React.createElement(t.props.Illustration,{style:{flex:1,resizeMode:"contain",maxHeight:96,paddingRight:4}}),React.createElement(l.View,{style:{flex:2,paddingLeft:4}},React.createElement(l.Text,{style:at.headerTitle},t.props.title),React.createElement(l.Text,{style:at.headerDescription},t.props.body))),React.createElement(l.View,{style:{flex:6}},React.createElement(l.View,{style:{paddingBottom:8}},React.createElement(ni,{tabs:Do,activeTab:this.state.activeTab,onTabSelected:function(s){n.setState({activeTab:s})}})),React.createElement(Se,{selectable:!0,style:{flexBasis:"auto",marginBottom:8}},[`Discord: ${r.discord.build} (${r.os.name})`,`Vendetta: ${r.vendetta.version}`].join(`
-`)),React.createElement(Se,{selectable:!0,style:{flex:1,textAlignVertical:"top"}},o?.trimWhitespace?a.split(`
-`).filter(function(s){return s.length!==0}).map(function(s){return s.trim()}).join(`
-`):a)),React.createElement(l.View,{style:at.footer},i.map(function(s){let m=i.indexOf(s)!==0?8:0;return React.createElement(te,{text:s.text,color:s.color??A.BRAND,size:s.size??"small",onPress:s.onPress,style:ne.isTablet?{flex:`0.${i.length}`,marginLeft:m}:{marginTop:m}})}))))})}var ti,ni,Ao,at,Do,Mo=c(()=>{"use strict";Ue();me();$();V();h();x();De();_e();v();ti=F("ErrorBoundary"),{BadgableTabBar:ni}=u("BadgableTabBar"),{TextStyleSheet:Ao}=u("TextStyleSheet"),at=M.createThemedStyleSheet({container:{flex:1,backgroundColor:E.BACKGROUND_PRIMARY,paddingHorizontal:16},header:{flex:1,flexDirection:"row",justifyContent:"center",alignItems:"center",marginVertical:8},headerTitle:{...Ao["heading-md/semibold"],textAlign:"center",textTransform:"uppercase",color:E.HEADER_PRIMARY},headerDescription:{...Ao["text-sm/medium"],textAlign:"center",color:E.TEXT_MUTED},footer:{flexDirection:ne.isTablet?"row":"column",justifyContent:"flex-end",marginVertical:8}}),Do=[{id:"message",title:"Message"},{id:"stack",title:"Stack Trace"},{id:"componentStack",title:"Component",trimWhitespace:!0}]});function wt(e){let{alertTitle:t,installFunction:n}=e;return React.createElement(l.TouchableOpacity,{onPress:function(){return z.getString().then(function(r){return Fn({title:t,initialValue:r.match(rt)?.[0]??"",placeholder:"https://example.com/",onConfirm:function(o){return n(o)},confirmText:"Install",cancelText:"Cancel"})})}},React.createElement(l.Image,{style:ri.icon,source:f("ic_add_24px")}))}var ri,Bo=c(()=>{"use strict";ye();h();xe();S();_e();ri=M.createThemedStyleSheet({icon:{marginRight:10,tintColor:E.HEADER_PRIMARY}})});function Un(e){let{asset:t}=e;return React.createElement(oi,{label:`${t.name} - ${t.id}`,trailing:React.createElement(l.Image,{source:t.id,style:{width:32,height:32}}),onPress:function(){z.setString(t.name),g("Copied asset name to clipboard.",f("toast_copy_link"))}})}var oi,Lo=c(()=>{"use strict";h();S();v();ee();({FormRow:oi}=y)});function Vn(){let[e,t]=React.useState("");return React.createElement(T,null,React.createElement(l.View,{style:{flex:1}},React.createElement(je,{style:{margin:10},onChangeText:function(n){return t(n)},placeholder:"Search"}),React.createElement(l.FlatList,{data:Object.values(le).filter(function(n){return n.name.includes(e)||n.id.toString()===e}),renderItem:function(n){let{item:r}=n;return React.createElement(Un,{asset:r})},ItemSeparatorComponent:ai,keyExtractor:function(n){return n.name}})))}var ai,Oo=c(()=>{"use strict";h();S();v();Lo();({FormDivider:ai}=y)});function $n(){let e=ce.useNavigation();return w(p),w(X),React.createElement(T,null,React.createElement(l.ScrollView,{style:{flex:1},contentContainerStyle:{paddingBottom:38}},React.createElement(Hn,{title:"Debug",titleStyleType:"no_border"},React.createElement(ko,{value:p.debuggerUrl,onChange:function(t){return p.debuggerUrl=t},placeholder:"127.0.0.1:9090",title:"DEBUGGER URL"}),React.createElement(it,null),React.createElement(H,{label:"Connect to debug websocket",leading:React.createElement(H.Icon,{source:f("copy")}),onPress:function(){return mn(p.debuggerUrl)}}),window.__vendetta_rdc&&React.createElement(React.Fragment,null,React.createElement(it,null),React.createElement(H,{label:"Connect to React DevTools",leading:React.createElement(H.Icon,{source:f("ic_badge_staff")}),onPress:function(){return window.__vendetta_rdc?.connectToDevTools({host:p.debuggerUrl.split(":")?.[0],resolveRNStyle:l.StyleSheet.flatten})}}))),window.__vendetta_loader?.features.loaderConfig&&React.createElement(Hn,{title:"Loader config"},React.createElement(Fo,{label:"Load from custom url",subLabel:"Load Revenge from a custom endpoint.",leading:React.createElement(H.Icon,{source:f("copy")}),value:X.customLoadUrl.enabled,onValueChange:function(t){X.customLoadUrl.enabled=t}}),React.createElement(it,null),X.customLoadUrl.enabled&&React.createElement(React.Fragment,null,React.createElement(ko,{value:X.customLoadUrl.url,onChange:function(t){return X.customLoadUrl.url=t},placeholder:"http://localhost:4040/revenge.js",title:"REVENGE URL"}),React.createElement(it,null)),window.__vendetta_loader.features.devtools&&React.createElement(Fo,{label:"Load React DevTools",subLabel:`Version: ${window.__vendetta_loader.features.devtools.version}`,leading:React.createElement(H.Icon,{source:f("ic_badge_staff")}),value:X.loadReactDevTools,onValueChange:function(t){X.loadReactDevTools=t}})),React.createElement(Hn,{title:"Other"},React.createElement(H,{label:"Asset Browser",leading:React.createElement(H.Icon,{source:f("ic_image")}),trailing:H.Arrow,onPress:function(){return e.push("VendettaCustomPage",{title:"Asset Browser",render:Vn})}}),React.createElement(it,null),React.createElement(H,{label:"ErrorBoundary Tools",leading:React.createElement(H.Icon,{source:f("ic_warning_24px")}),trailing:H.Arrow,onPress:function(){return si({key:"ErrorBoundaryTools",header:{title:"Which ErrorBoundary do you want to trip?",icon:React.createElement(H.Icon,{style:{marginRight:8},source:f("ic_warning_24px")}),onClose:function(){return ii()}},options:[{label:"Revenge",onPress:function(){return e.push("VendettaCustomPage",{render:function(){return React.createElement("undefined",null)}})}},{label:"Discord",isDestructive:!0,onPress:function(){return e.push("VendettaCustomPage",{noErrorBoundary:!0})}}]})}}))))}var Hn,H,Fo,ko,it,ii,si,Go=c(()=>{"use strict";Ue();V();j();h();x();S();v();Oo();({FormSection:Hn,FormRow:H,FormSwitchRow:Fo,FormInput:ko,FormDivider:it}=y),{hideActionSheet:ii}=u("openLazy","hideActionSheet"),{showSimpleActionSheet:si}=u("showSimpleActionSheet")});function Tt(e){let{label:t,version:n,icon:r}=e;return React.createElement(Uo,{label:t,leading:React.createElement(Uo.Icon,{source:f(r)}),trailing:React.createElement(ci,null,n),onPress:function(){z.setString(`${t} - ${n}`),g("Copied version to clipboard.",f("toast_copy_link"))}})}var Uo,ci,Vo=c(()=>{"use strict";h();S();v();ee();({FormRow:Uo,FormText:ci}=y)});function jn(){w(p);let e=[{label:"Revenge",version:L.vendetta.version,icon:"ic_progress_wrench_24px"},{label:"Discord",version:`${L.discord.version} (${L.discord.build})`,icon:"Discord"},{label:"React",version:L.react.version,icon:"ic_category_16px"},{label:"React Native",version:L.react.nativeVersion,icon:"mobile"},{label:"Bytecode",version:L.hermes.bytecodeVersion,icon:"ic_server_security_24px"}],t=[{label:"Loader",version:L.vendetta.loader,icon:"ic_download_24px"},{label:"Operating System",version:`${L.os.name} ${L.os.version}`,icon:"ic_cog_24px"},...L.os.sdk?[{label:"SDK",version:L.os.sdk,icon:"ic_profile_badge_verified_developer_color"}]:[],{label:"Manufacturer",version:L.device.manufacturer,icon:"ic_badge_staff"},{label:"Brand",version:L.device.brand,icon:"ic_settings_boost_24px"},{label:"Model",version:L.device.model,icon:"ic_phonelink_24px"},{label:l.Platform.select({android:"Codename",ios:"Machine ID"}),version:L.device.codename,icon:"ic_compose_24px"}];return React.createElement(T,null,React.createElement(l.ScrollView,{style:{flex:1},contentContainerStyle:{paddingBottom:38}},React.createElement(vt,{title:"Links",titleStyleType:"no_border"},React.createElement(B,{label:"Discord Server",leading:React.createElement(B.Icon,{source:f("Discord")}),trailing:B.Arrow,onPress:function(){return Ge.openDeeplink(yn)}}),React.createElement(Be,null),React.createElement(B,{label:"GitHub",leading:React.createElement(B.Icon,{source:f("img_account_sync_github_white")}),trailing:B.Arrow,onPress:function(){return Ge.openURL(Tn)}})),React.createElement(vt,{title:"Actions"},React.createElement(B,{label:"Reload Discord",leading:React.createElement(B.Icon,{source:f("ic_message_retry")}),onPress:function(){return re.reload()}}),React.createElement(Be,null),React.createElement(B,{label:p.safeMode?.enabled?"Return to Normal Mode":"Reload in Safe Mode",subLabel:`This will reload Discord ${p.safeMode?.enabled?"normally.":"without loading plugins."}`,leading:React.createElement(B.Icon,{source:f("ic_privacy_24px")}),onPress:et}),React.createElement(Be,null),React.createElement(li,{label:"Developer Settings",leading:React.createElement(B.Icon,{source:f("ic_progress_wrench_24px")}),value:p.developerSettings,onValueChange:function(n){p.developerSettings=n}})),React.createElement(vt,{title:"Info"},React.createElement(Ke,{label:"Versions",icon:"ic_information_filled_24px"},e.map(function(n,r){return React.createElement(React.Fragment,null,React.createElement(Tt,{label:n.label,version:n.version,icon:n.icon}),r!==e.length-1&&React.createElement(Be,null))})),React.createElement(Be,null),React.createElement(Ke,{label:"Platform",icon:"ic_mobile_device"},t.map(function(n,r){return React.createElement(React.Fragment,null,React.createElement(Tt,{label:n.label,version:n.version,icon:n.icon}),r!==t.length-1&&React.createElement(Be,null))}))),React.createElement(vt,{title:"Advanced"},React.createElement(B,{label:"Clear plugin storage",leading:React.createElement(B.Icon,{source:f("ic_message_delete")}),onPress:function(){return G({title:"Clear plugin storage?",content:"All installed plugins will be removed and the app will be reloaded. Plugin settings will still be retained. This is only neccessary if you have a corrupted storage.",confirmText:"Yes, I have a corrupted storage",cancelText:"Cancel",confirmColor:A.RED,onConfirm:function(){pt("VENDETTA_PLUGINS"),re.reload()}})}}),React.createElement(Be,null),React.createElement(B,{label:"Clear theme storage",leading:React.createElement(B.Icon,{source:f("ic_message_delete")}),onPress:function(){return G({title:"Clear theme storage?",content:"All installed themes will be removed and the app will be reloaded. This is only neccessary if you have a corrupted storage.",confirmText:"Yes, I have a corrupted storage",cancelText:"Cancel",confirmColor:A.RED,onConfirm:function(){pt("VENDETTA_THEMES"),re.reload()}})}}))))}var B,li,vt,Be,L,Ho=c(()=>{"use strict";ye();Ue();me();V();j();h();De();xe();S();v();Vo();({FormRow:B,FormSwitchRow:li,FormSection:vt,FormDivider:Be}=y),L=tt()});function st(e){let{items:t,safeModeMessage:n,safeModeExtras:r,card:o,keyGetter:a}=e;w(p),w(t);let[i,s]=React.useState("");return React.createElement(T,null,React.createElement(l.FlatList,{ListHeaderComponent:React.createElement(React.Fragment,null,p.safeMode?.enabled&&React.createElement(l.View,{style:{marginBottom:10}},React.createElement(Mn,{messageType:0},n),r),React.createElement(je,{style:{marginBottom:10},onChangeText:function(m){return s(m.toLowerCase())},placeholder:"Search"})),ListFooterComponent:React.createElement(l.View,{style:{height:48}}),style:{paddingHorizontal:10,paddingTop:10},contentContainerStyle:{paddingBottom:20},data:Object.values(t).filter(function(m){return a(m).some(function(d){return d?.toLowerCase().includes(i)})}),renderItem:function(m){let{item:d,index:_}=m;return React.createElement(o,{item:d,index:_,highlight:i})}}))}var Kn=c(()=>{"use strict";V();j();h();v()});function ct(e){let t=e.toggleValue??!1;return React.createElement(l.View,{style:[J.card,{marginTop:e.index!==0?10:0}]},React.createElement(Wn,{style:J.header,label:React.createElement(l.View,{style:J.headerChildren},React.createElement(l.Text,{style:J.headerLabel},Yn(e.headerLabel,e.highlight)),e.headerSublabel&&React.createElement(l.Text,{style:J.headerSubtitle},Yn(e.headerSublabel,e.highlight))),leading:e.headerIcon&&React.createElement(l.View,{style:J.iconContainer},React.createElement(l.Image,{source:f(e.headerIcon),style:J.smallerIcon})),trailing:e.toggleType&&(e.toggleType==="switch"?React.createElement(ui,{style:l.Platform.OS==="android"&&{marginVertical:-15},value:e.toggleValue,onValueChange:e.onToggleChange}):React.createElement(l.Pressable,{onPress:function(){t=!t,e.onToggleChange?.(t)}},React.createElement(fi,{selected:e.toggleValue})))}),React.createElement(Wn,{label:e.descriptionLabel&&Yn(e.descriptionLabel,e.highlight),trailing:React.createElement(l.View,{style:J.actions},e.overflowActions&&React.createElement(l.TouchableOpacity,{onPress:function(){return di({key:"CardOverflow",header:{title:e.overflowTitle,icon:e.headerIcon&&React.createElement(Wn.Icon,{style:{marginRight:8},source:f(e.headerIcon)}),onClose:function(){return mi()}},options:e.overflowActions?.map(function(n){return{...n,icon:f(n.icon)}})})}},React.createElement(l.Image,{style:J.icon,source:f("ic_more_24px")})),e.actions?.map(function(n){let{icon:r,onPress:o}=n;return React.createElement(l.TouchableOpacity,{onPress:o},React.createElement(l.Image,{style:J.icon,source:f(r)}))}))}))}var Wn,ui,fi,mi,di,$o,J,Yn,zn=c(()=>{"use strict";ye();h();x();S();_e();v();({FormRow:Wn,FormSwitch:ui,FormRadio:fi}=y),{hideActionSheet:mi}=u("openLazy","hideActionSheet"),{showSimpleActionSheet:di}=u("showSimpleActionSheet"),{TextStyleSheet:$o}=u("TextStyleSheet"),J=M.createThemedStyleSheet({card:{backgroundColor:E?.BACKGROUND_SECONDARY,borderRadius:12},header:{padding:0,backgroundColor:E?.BACKGROUND_TERTIARY,borderRadius:12},headerChildren:{flexDirection:"column",justifyContent:"center"},headerLabel:{color:E?.TEXT_NORMAL,...$o["text-md/semibold"]},headerSubtitle:{color:E?.TEXT_MUTED,...$o["text-sm/semibold"]},actions:{flexDirection:"row-reverse",alignItems:"center"},icon:{width:22,height:22,marginLeft:5,tintColor:E?.INTERACTIVE_NORMAL},iconContainer:{width:33,height:33,borderRadius:17,backgroundColor:E?.BACKGROUND_ACCENT,justifyContent:"center",alignItems:"center"},smallerIcon:{width:22,height:22,tintColor:E?.INTERACTIVE_NORMAL},highlight:{backgroundColor:`#F0${In.YELLOW_300.slice(1)}`}}),Yn=function(e,t){return t?e.split(new RegExp(`(${t.replace(vn,"\\$&")})`,"gi")).map(function(n,r){return r%2===1?React.createElement(l.Text,{style:J.highlight},n):n}):e}});async function jo(e,t){e.enabled&&$e(e.id,!1),t(),e.enabled&&await He(e.id)}function Xn(e){let{item:t,index:n,highlight:r}=e,o=Rn(t.id),a=ce.useNavigation(),[i,s]=React.useState(!1);if(i)return null;let m=t.manifest.authors;return React.createElement(ct,{index:n,headerLabel:t.manifest.name,headerSublabel:m?.[0]&&`by ${t.manifest.authors.map(function(d){return d.name}).join(", ")}`,headerIcon:t.manifest.vendetta?.icon||"ic_application_command_24px",toggleType:"switch",toggleValue:t.enabled,onToggleChange:function(d){try{d?He(t.id):$e(t.id)}catch(_){g(_.message,f("Small"))}},descriptionLabel:t.manifest.description,overflowTitle:t.manifest.name,overflowActions:[{icon:"ic_sync_24px",label:"Refetch",onPress:async function(){jo(t,function(){Ve(t.id).then(async function(){g("Successfully refetched plugin.",f("toast_image_saved"))}).catch(function(){g("Failed to refetch plugin!",f("Small"))})})}},{icon:"copy",label:"Copy URL",onPress:function(){z.setString(t.id),g("Copied plugin URL to clipboard.",f("toast_copy_link"))}},{icon:"ic_download_24px",label:t.update?"Disable updates":"Enable updates",onPress:function(){t.update=!t.update,g(`${t.update?"Enabled":"Disabled"} updates for ${t.manifest.name}.`,f("toast_image_saved"))}},{icon:"ic_duplicate",label:"Clear data",isDestructive:!0,onPress:function(){return G({title:"Wait!",content:`Are you sure you wish to clear the data of ${t.manifest.name}?`,confirmText:"Clear",cancelText:"Cancel",confirmColor:A.RED,onConfirm:function(){jo(t,function(){try{fe.removeItem(t.id),g(`Cleared data for ${t.manifest.name}.`,f("trash"))}catch{g(`Failed to clear data for ${t.manifest.name}!`,f("Small"))}})}})}},{icon:"ic_message_delete",label:"Delete",isDestructive:!0,onPress:function(){return G({title:"Wait!",content:`Are you sure you wish to delete ${t.manifest.name}? This will clear all of the plugin's data.`,confirmText:"Delete",cancelText:"Cancel",confirmColor:A.RED,onConfirm:function(){try{gn(t.id),s(!0)}catch(d){g(d.message,f("Small"))}}})}}],actions:[...o?[{icon:"settings",onPress:function(){return a.push("VendettaCustomPage",{title:t.manifest.name,render:o})}}]:[]],highlight:r})}var Ko=c(()=>{"use strict";me();Ee();h();De();xe();S();zn();ee()});function qn(){return w(p),React.createElement(st,{items:D,safeModeMessage:"You are in Safe Mode, so plugins cannot be loaded. Disable any misbehaving plugins, then return to Normal Mode from the General settings page.",card:Xn,keyGetter:function(e){return[e.id,e.manifest.name,e.manifest.description,e.manifest.authors?.map(function(t){return t.name})].flat()}})}var Wo=c(()=>{"use strict";Ee();V();j();Kn();Ko()});async function Yo(e,t){await Ce(e?t:"default"),re.reload()}function Jn(e){let{item:t,index:n,highlight:r}=e;w(p);let[o,a]=React.useState(!1);if(o)return null;let i=t.data.authors;return React.createElement(ct,{index:n,headerLabel:t.data.name,headerSublabel:i?.[0]&&`by ${i.map(function(s){return s.name}).join(", ")}`,descriptionLabel:t.data.description??"No description.",toggleType:p.safeMode?.enabled?void 0:"radio",toggleValue:t.selected,onToggleChange:function(s){Yo(s,t.id)},overflowTitle:t.data.name,overflowActions:[{icon:"ic_sync_24px",label:"Refetch",onPress:function(){qe(t.id,t.selected).then(function(){t.selected?G({title:"Theme refetched",content:"A reload is required to see the changes. Do you want to reload now?",confirmText:"Reload",cancelText:"Cancel",confirmColor:A.RED,onConfirm:function(){return re.reload()}}):g("Successfully refetched theme.",f("toast_image_saved"))}).catch(function(){g("Failed to refetch theme!",f("Small"))})}},{icon:"copy",label:"Copy URL",onPress:function(){z.setString(t.id),g("Copied theme URL to clipboard.",f("toast_copy_link"))}},{icon:"ic_message_delete",label:"Delete",isDestructive:!0,onPress:function(){return G({title:"Wait!",content:`Are you sure you wish to delete ${t.data.name}?`,confirmText:"Delete",cancelText:"Cancel",confirmColor:A.RED,onConfirm:function(){Jt(t.id).then(function(s){a(!0),s&&Yo(!1,t.id)}).catch(function(s){g(s.message,f("Small"))})}})}}],highlight:r})}var zo=c(()=>{"use strict";me();V();j();Y();h();De();xe();S();zn();ee()});function Zn(){return w(p),React.createElement(st,{items:k,safeModeMessage:`You are in Safe Mode, meaning themes have been temporarily disabled.${p.safeMode?.currentThemeId?" If a theme appears to be causing the issue, you can press below to disable it persistently.":""}`,safeModeExtras:p.safeMode?.currentThemeId?React.createElement(te,{text:"Disable Theme",color:A.BRAND,size:"small",onPress:function(){delete p.safeMode?.currentThemeId},style:{marginTop:8}}):void 0,card:Jn,keyGetter:function(e){return[e.id,e.data.name,e.data.description,e.data.authors?.map(function(t){return t.name})].flat()}})}var Xo=c(()=>{"use strict";V();j();Y();De();v();Kn();zo()});var pi,lt,Ct,We,ut,qo,Qn,It=c(()=>{"use strict";ye();Ee();V();Y();ge();h();xe();S();_e();An();Bo();Go();Ho();Wo();Xo();ee();pi=M.createThemedStyleSheet({container:{flex:1,backgroundColor:E.BACKGROUND_MOBILE_PRIMARY}}),lt=function(e,t){return t?_t.snakeCase(e).toUpperCase():e},Ct=function(e,t){return Object.fromEntries(e.map(function(n){return[n.key,typeof t=="function"?t(n):typeof t=="string"?n[t]:t]}))},We=function(){let e=arguments.length>0&&arguments[0]!==void 0?arguments[0]:!1;return[{key:lt("RevengeSettings",e),title:"General",icon:"settings",render:jn},{key:lt("RevengePlugins",e),title:"Plugins",icon:"debug",options:{headerRight:function(){return React.createElement(wt,{alertTitle:"Install Plugin",installFunction:async function(t){if(!(Me.filter(function(n){return t.startsWith(n)}).length>0)&&!p.developerSettings)setImmediate(function(){return G({title:"Unproxied Plugin",content:"The plugin you are trying to install has not been verified by Revenge staff. Are you sure you want to continue?",confirmText:"Install",onConfirm:function(){return Re(t).then(function(){return g("Installed plugin",f("Check"))}).catch(function(n){return g(n?.message??`${n}`,f("Small"))})},cancelText:"Cancel"})});else return await Re(t)}})}},render:qn},{key:lt("RevengeThemes",e),title:"Themes",icon:"ic_theme_24px",shouldRender:function(){return Object.prototype.hasOwnProperty.call(window.__vendetta_loader?.features,"themes")??!1},options:{headerRight:function(){return!p.safeMode?.enabled&&React.createElement(wt,{alertTitle:"Install Theme",installFunction:ve})}},render:Zn},{key:lt("RevengeDeveloper",e),title:"Developer",icon:"ic_progress_wrench_24px",shouldRender:function(){return p.developerSettings??!1},render:$n},{key:lt("VendettaCustomPage",e),title:"Revenge Page",shouldRender:function(){return!1},render:function(t){let{render:n,noErrorBoundary:r,...o}=t,a=ce.useNavigation();return a.addListener("focus",function(){return a.setOptions(K(o,"render","noErrorBoundary"))}),r?React.createElement(n,null):React.createElement(T,null,React.createElement(n,null))}}]},ut=function(){let e=arguments.length>0&&arguments[0]!==void 0?arguments[0]:!1;return We(e).filter(function(t){return t.shouldRender?.()??!0})},qo=function(){return Ct(We(),function(e){return{title:e.title,render:e.render,...e.options}})},Qn=function(){let e=We(!0);return{getLayout:function(){return{title:"Revenge",label:"Revenge",settings:ut(!0).map(function(t){return t.key})}},titleConfig:Ct(e,"title"),relationships:Ct(e,null),rendererConfigs:Ct(e,function(t){let n=React.memo(function(r){let{navigation:o,route:a}=r;return o.addListener("focus",function(){return o.setOptions(t.options)}),React.createElement(l.View,{style:pi.container},React.createElement(t.render,a.params))});return{type:"route",title:function(){return t.title},icon:t.icon?f(t.icon):null,screen:{route:_t.chain(t.key).camelCase().upperFirst().value(),getComponent:function(){return n}}}})}}});function tr(){let e=ce.useNavigation();w(p);let t=ut();return React.createElement(T,null,React.createElement(gi,{key:"Revenge",title:`Revenge${p.safeMode?.enabled?" (Safe Mode)":""}`},t.map(function(n,r){return React.createElement(React.Fragment,null,React.createElement(er,{label:n.title,leading:React.createElement(er.Icon,{source:f(n.icon)}),trailing:er.Arrow,onPress:function(){return e.push(n.key)}}),r!==t.length-1&&React.createElement(hi,null))})))}var er,gi,hi,Jo=c(()=>{"use strict";V();j();h();S();v();It();({FormRow:er,FormSection:gi,FormDivider:hi}=y)});function nr(){let e=new Array;return e.push(R("default",Ri,function(t,n){return{...n,...qo()}})),R("default",Ei,function(t,n){let r=ae(n.props.children,function(o){return o.type&&o.type.name==="UserSettingsOverview"});e.push(R("renderSupportAndAcknowledgements",r.type.prototype,function(o,a){let{props:{children:i}}=a,s=i.findIndex(function(m){return m?.type?.name==="UploadLogsButton"});s!==-1&&i.splice(s,1)})),e.push(R("render",r.type.prototype,function(o,a){let{props:{children:i}}=a,s=[Ne.Messages.BILLING_SETTINGS,Ne.Messages.PREMIUM_SETTINGS];i=ae(i,function(d){return d.children?.[1].type?.name==="FormSection"}).children;let m=i.findIndex(function(d){return s.includes(d?.props.label)});i.splice(m===-1?4:m,0,React.createElement(tr,null))}))},!0),function(){return e.forEach(function(t){return t()})}}var Ri,Ei,Zo=c(()=>{"use strict";$();ge();h();x();Jo();It();Ri=F("getScreens",!1),Ei=F("UserSettingsOverviewWrapper",!1)});function or(){let e=new Array;return _i(e)||yi(e),function(){return e.forEach(function(t){return t?.()})}}function yi(e){let t=u("useOverviewSettings"),n=u("getSettingTitleConfig"),r=u("SETTING_RELATIONSHIPS","SETTING_RENDERER_CONFIGS"),o="getSettingSearchListItems",a="getSettingListItems",i=u(o),s=!i,m=s?a:o,d=i??u(a);if(!d||!t)return;let _=We(!0),P=ut(!0),C=Qn();e.push(R("useOverviewSettings",t,function(be,Ye){return Qo(Ye,C.getLayout())})),e.push(R("getSettingTitleConfig",n,function(be,Ye){return{...Ye,...C.titleConfig}})),e.push(R(m,d,function(be,Ye){let[oa]=be;return[...P.filter(function(Z){return oa.includes(Z.key)}).map(function(Z){return{type:"setting_search_result",ancestorRendererData:C.rendererConfigs[Z.key],setting:Z.key,title:C.titleConfig[Z.key],breadcrumbs:["Revenge"],icon:C.rendererConfigs[Z.key].icon}}),...Ye.filter(function(Z){return s||!_.map(function(Nt){return Nt.key}).includes(Z.setting)})].map(function(Z,Nt,aa){return{...Z,index:Nt,total:aa.length}})}));let O=r.SETTING_RELATIONSHIPS,U=r.SETTING_RENDERER_CONFIGS;return r.SETTING_RELATIONSHIPS={...O,...C.relationships},r.SETTING_RENDERER_CONFIGS={...U,...C.rendererConfigs},e.push(function(){r.SETTING_RELATIONSHIPS=O,r.SETTING_RENDERER_CONFIGS=U}),!0}function _i(e){let t=u("SearchableSettingsList"),n=u("SETTING_RENDERER_CONFIG"),r=u("getSettingListItems");if(!r||!t||!n)return!1;let o=We(!0),a=Qn();e.push(Mt("type",t.SearchableSettingsList,function(s){let[{sections:m}]=s;return Qo(m,a.getLayout())})),e.push(R("getSettingListSearchResultItems",r,function(s,m){m.forEach(function(d){return o.some(function(_){return _.key===d.setting})&&(d.breadcrumbs=["Revenge"])})}));let i=n.SETTING_RENDERER_CONFIG;return n.SETTING_RENDERER_CONFIG={...i,...a.rendererConfigs},e.push(function(){n.SETTING_RENDERER_CONFIG=i}),!0}function Qo(e,t){if(!Array.isArray(e)||e.find(function(o){return rr(o,"Revenge")}))return;let n=e.findIndex(function(o){return rr(o,Ne.Messages.ACCOUNT_SETTINGS)});e.splice(n+1,0,t);let r=e.find(function(o){return rr(o,Ne.Messages.SUPPORT)});r&&(r.settings=r.settings.filter(function(o){return o!=="UPLOAD_DEBUG_LOGS"}))}var rr,ea=c(()=>{"use strict";h();$();x();It();rr=function(e,t){return e?.label===t||e?.title===t}});function ar(){let e=[nr(),or()];return function(){return e.forEach(function(t){return t?.()})}}var ta=c(()=>{"use strict";Zo();ea()});var na={};I(na,{default:()=>Si});async function Si(){let e=await Promise.all([dn(),ln(),an(),qt(),kr(),Po(),ar(),Gn()]);window.vendetta=await So(e),e.push(await hn()),N.log("Revenge is ready!")}var ra=c(()=>{"use strict";cn();Ue();Gr();Te();Ee();Y();xo();S();No();Mo();ta()});me();console.log("Hello from Revenge!");Object.freeze=Object;Object.seal=Object;Promise.resolve().then(()=>(ra(),na)).then(function(e){return e.default()}).catch(function(e){console.log(e?.stack??e.toString()),alert([`Failed to load Revenge!
-`,`Build Number: ${ze.Build}`,"Revenge: 42fb873",e?.stack||e.toString()].join(`
-`))});})();
-//# sourceURL=Revenge
+"use strict";
+(() => {
+  var __defProp = Object.defineProperty;
+  var __getOwnPropNames = Object.getOwnPropertyNames;
+  var __esm = (fn, res) => function __init() {
+    return fn && (res = (0, fn[__getOwnPropNames(fn)[0]])(fn = 0)), res;
+  };
+  var __export = (target, all) => {
+    for (var name in all)
+      __defProp(target, name, { get: all[name], enumerable: true });
+  };
+
+  // node_modules/@swc/helpers/esm/_async_to_generator.js
+  function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) {
+    try {
+      var info = gen[key](arg);
+      var value = info.value;
+    } catch (error) {
+      reject(error);
+      return;
+    }
+    if (info.done) resolve(value);
+    else Promise.resolve(value).then(_next, _throw);
+  }
+  function _async_to_generator(fn) {
+    return function() {
+      var self = this, args = arguments;
+      return new Promise(function(resolve, reject) {
+        var gen = fn.apply(self, args);
+        function _next(value) {
+          asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value);
+        }
+        function _throw(err) {
+          asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err);
+        }
+        _next(void 0);
+      });
+    };
+  }
+  var init_async_to_generator = __esm({
+    "node_modules/@swc/helpers/esm/_async_to_generator.js"() {
+    }
+  });
+
+  // node_modules/@marshift/strawberry/dist/index.mjs
+  function unpatch(patchedFunction, hookId, type) {
+    var patch = patchedFunctions.get(patchedFunction);
+    if (!patch || !patch[type].delete(hookId)) return false;
+    return true;
+  }
+  var hook_default, getPatchFunc, patchedFunctions, unpatchAll, before, instead, after;
+  var init_dist = __esm({
+    "node_modules/@marshift/strawberry/dist/index.mjs"() {
+      hook_default = (patchedFunc, origFunc, funcArgs, ctx, isConstruct) => {
+        var patch = patchedFunctions.get(patchedFunc);
+        if (!patch) {
+          return isConstruct ? Reflect.construct(origFunc, funcArgs, ctx) : origFunc.apply(ctx, funcArgs);
+        }
+        for (var hook of patch.b.values()) {
+          var maybefuncArgs = hook.call(ctx, funcArgs);
+          if (Array.isArray(maybefuncArgs)) funcArgs = maybefuncArgs;
+        }
+        var workingRetVal = [
+          ...patch.i.values()
+        ].reduce(
+          (prev, current) => (...args) => current.call(ctx, args, prev),
+          // This calls the original function
+          (...args) => isConstruct ? Reflect.construct(origFunc, args, ctx) : origFunc.apply(ctx, args)
+        )(...funcArgs);
+        for (var hook1 of patch.a.values()) {
+          workingRetVal = hook1.call(ctx, funcArgs, workingRetVal) ?? workingRetVal;
+        }
+        for (var cleanup of patch.c) cleanup();
+        patch.c = [];
+        return workingRetVal;
+      };
+      getPatchFunc = (patchType) => (funcParent, funcName, callback, oneTime = false) => {
+        var origFunc = funcParent[funcName];
+        if (typeof origFunc !== "function") {
+          throw new Error(`${String(funcName)} is not a function in ${funcParent.constructor.name}`);
+        }
+        var funcPatch = patchedFunctions.get(origFunc);
+        if (!funcPatch) {
+          funcPatch = {
+            b: /* @__PURE__ */ new Map(),
+            i: /* @__PURE__ */ new Map(),
+            a: /* @__PURE__ */ new Map(),
+            c: []
+          };
+          var replaceProxy = new Proxy(origFunc, {
+            apply: (_2, ctx, args) => runHook(ctx, args, false),
+            construct: (_2, args) => runHook(origFunc, args, true),
+            get: (target, prop, receiver) => prop == "toString" ? origFunc.toString.bind(origFunc) : Reflect.get(target, prop, receiver)
+          });
+          var runHook = (ctx, args, construct) => hook_default(replaceProxy, origFunc, args, ctx, construct);
+          patchedFunctions.set(replaceProxy, funcPatch);
+          if (!Reflect.defineProperty(funcParent, funcName, {
+            value: replaceProxy,
+            configurable: true,
+            writable: true
+          })) {
+            funcParent[funcName] = replaceProxy;
+          }
+        }
+        var hookId = Symbol();
+        var patchedFunc = funcParent[funcName];
+        var unpatchThisPatch = () => unpatch(patchedFunc, hookId, patchType);
+        if (oneTime) funcPatch.c.push(unpatchThisPatch);
+        funcPatch[patchType].set(hookId, callback);
+        return unpatchThisPatch;
+      };
+      unpatchAll = () => patchedFunctions = /* @__PURE__ */ new WeakMap();
+      unpatchAll();
+      before = getPatchFunc("b");
+      instead = getPatchFunc("i");
+      after = getPatchFunc("a");
+    }
+  });
+
+  // libraries/patcher/src/utils.ts
+  function createExtendedPatchFunction(fn) {
+    function patchFn(...args) {
+      if (patcherLazyModuleSymbol in args[0]) {
+        var onceModuleLoaded = args[0][patcherLazyModuleSymbol];
+        var cancel = false;
+        var unpatch2 = () => cancel = true;
+        onceModuleLoaded((target) => {
+          if (cancel) return;
+          args[0] = target;
+          unpatch2 = fn.apply(this, args);
+        });
+        return unpatch2;
+      }
+      return fn.apply(this, args);
+    }
+    function promisePatchFn(...args) {
+      var thenable = args[0];
+      if (!thenable || !("then" in thenable)) throw new Error("Cannot await a non-thenable object");
+      var cancel = false;
+      var unpatch2 = () => cancel = true;
+      thenable.then((target) => {
+        if (cancel) return;
+        args[0] = target;
+        unpatch2 = patchFn.apply(this, args);
+      });
+      return unpatch2;
+    }
+    return Object.assign(patchFn, {
+      await: promisePatchFn
+    });
+  }
+  function trapFunctionCallsRecursive(func, onBeforeCall, onReturn) {
+    return new Proxy(func, {
+      apply(target, thisArg, args) {
+        var ret = target.apply(thisArg, onBeforeCall(args));
+        return onReturn(ret);
+      },
+      get(target, prop) {
+        var maybeFunc = Reflect.get(target, prop);
+        if (typeof maybeFunc !== "function") return maybeFunc;
+        return trapFunctionCallsRecursive(maybeFunc, onBeforeCall, onReturn);
+      }
+    });
+  }
+  var init_utils = __esm({
+    "libraries/patcher/src/utils.ts"() {
+      "use strict";
+      init_src();
+    }
+  });
+
+  // libraries/patcher/src/index.ts
+  function createPatcherInstance(name) {
+    if (patcherInstances.has(name)) throw new Error(`Patcher instance with the name "${name}" already exists`);
+    var unpatches = /* @__PURE__ */ new Set();
+    var cleanups = /* @__PURE__ */ new WeakMap();
+    patcherInstances.set(name, unpatches);
+    var onBeforeCall = (_args) => {
+      var args = _args;
+      var debugKey = args[3] ?? "[NO_DEBUG_KEY]";
+      var callback = args[2];
+      args[2] = function patchedCallback(patchArgs, origOrRval) {
+        if (__DEV__) console.debug(`Patch ${name}:${debugKey} is intercepting`);
+        try {
+          return callback.apply(this, [
+            patchArgs,
+            origOrRval
+          ]);
+        } catch (e) {
+          console.error(`Patch ${name}:${debugKey} threw an error: ${e}`);
+          throw new Error(`Patch ${name}:${debugKey} threw an error: ${e}`, {
+            cause: e
+          });
+        }
+      };
+      args[3] = void 0;
+      Object.defineProperty(args[2], "name", {
+        value: `revenge.patcher.patch:${name}:${debugKey}`,
+        writable: false
+      });
+      return args;
+    };
+    var onReturn = (ret) => {
+      unpatches.add(ret);
+      return () => {
+        ret();
+        unpatches.delete(ret);
+      };
+    };
+    return {
+      after: trapFunctionCallsRecursive(_after, onBeforeCall, onReturn),
+      before: trapFunctionCallsRecursive(_before, onBeforeCall, onReturn),
+      instead: trapFunctionCallsRecursive(_instead, onBeforeCall, onReturn),
+      /**
+       * Unpatches all patches created by this instance
+       */
+      unpatchAll() {
+        for (var unpatch2 of unpatches) {
+          unpatch2();
+          var clups = cleanups.get(unpatch2);
+          if (clups) for (var cleanup of clups) cleanup();
+        }
+      },
+      /**
+       * Destroys this instance, and unreserves the name
+       */
+      destroy() {
+        this.unpatchAll();
+        if (!patcherInstances.delete(name)) console.warn(`Patcher instance with the name "${name}" was not found, and cannot be deleted`);
+      },
+      /**
+       * Whether this instance has been destroyed
+       */
+      get destroyed() {
+        return !patcherInstances.has(name);
+      },
+      /**
+       * The total number of patches created by this instance
+       */
+      get totalPatches() {
+        return unpatches.size;
+      }
+    };
+  }
+  var patcherLazyModuleSymbol, patcherInstances, _after, _before, _instead;
+  var init_src = __esm({
+    "libraries/patcher/src/index.ts"() {
+      "use strict";
+      init_dist();
+      init_utils();
+      patcherLazyModuleSymbol = Symbol.for("revenge.patcher.lazyModule");
+      patcherInstances = /* @__PURE__ */ new Map();
+      _after = createExtendedPatchFunction(after);
+      _before = createExtendedPatchFunction(before);
+      _instead = createExtendedPatchFunction(instead);
+    }
+  });
+
+  // libraries/utils/src/lazy.ts
+  function lazyValue(factory, opts = {}) {
+    var cache;
+    var HintMap = {
+      object: {},
+      // biome-ignore lint/complexity/useArrowFunction: When hint is a function, we need to hint it as a function WHICH CAN HAVE A CONSTRUCTOR
+      function: function _function() {
+      },
+      number: 0
+    };
+    var dummy = HintMap[opts.hint ?? "function"];
+    var proxyFactory = () => cache ??= factory();
+    var proxy = new Proxy(dummy, lazyHandler);
+    factories.set(proxy, proxyFactory);
+    proxyContextHolder.set(dummy, {
+      factory,
+      options: opts
+    });
+    return proxy;
+  }
+  function lazyDestructure(factory, opts = {}) {
+    var proxiedObject = lazyValue(factory);
+    return new Proxy({}, {
+      get(_2, property) {
+        if (property === Symbol.iterator) {
+          return function* () {
+            yield proxiedObject;
+            yield new Proxy({}, {
+              get: (_3, p) => lazyValue(() => proxiedObject[p], opts)
+            });
+            throw new Error("This is not a real iterator, this is likely used incorrectly");
+          };
+        }
+        return lazyValue(() => proxiedObject[property], opts);
+      }
+    });
+  }
+  function getProxyFactory(obj) {
+    return factories.get(obj);
+  }
+  var unconfigurable, isUnconfigurable, factories, proxyContextHolder, lazyHandler;
+  var init_lazy = __esm({
+    "libraries/utils/src/lazy.ts"() {
+      "use strict";
+      unconfigurable = /* @__PURE__ */ new Set([
+        "arguments",
+        "caller",
+        "prototype"
+      ]);
+      isUnconfigurable = (key) => typeof key === "string" && unconfigurable.has(key);
+      factories = /* @__PURE__ */ new WeakMap();
+      proxyContextHolder = /* @__PURE__ */ new WeakMap();
+      lazyHandler = {
+        ...Object.fromEntries(Object.getOwnPropertyNames(Reflect).map((fnName) => {
+          return [
+            fnName,
+            (target, ...args) => {
+              var contextHolder = proxyContextHolder.get(target);
+              var resolved = contextHolder?.factory();
+              if (!resolved) throw new Error(`Cannot run Reflect.${fnName} on ${typeof resolved}`);
+              return Reflect[fnName](resolved, ...args);
+            }
+          ];
+        })),
+        has(target, p) {
+          var contextHolder = proxyContextHolder.get(target);
+          if (contextHolder?.options) {
+            var { exemptedEntries: isolatedEntries } = contextHolder.options;
+            if (isolatedEntries && p in isolatedEntries) return true;
+          }
+          var resolved = contextHolder?.factory();
+          if (!resolved) throw new Error(`Cannot read keys of ${typeof resolved}`);
+          return Reflect.has(resolved, p);
+        },
+        get(target, p, receiver) {
+          var contextHolder = proxyContextHolder.get(target);
+          if (contextHolder?.options) {
+            var { exemptedEntries: isolatedEntries } = contextHolder.options;
+            if (isolatedEntries?.[p]) return isolatedEntries[p];
+          }
+          var resolved = contextHolder?.factory();
+          if (!resolved) throw new Error(`Cannot read properties of ${typeof resolved} (reading '${String(p)}')`);
+          return Reflect.get(resolved, p, receiver);
+        },
+        ownKeys: (target) => {
+          var contextHolder = proxyContextHolder.get(target);
+          var resolved = contextHolder?.factory();
+          if (!resolved) throw new Error(`Cannot get keys of ${typeof resolved}`);
+          var cacheKeys = Reflect.ownKeys(resolved);
+          for (var key of unconfigurable) {
+            if (!cacheKeys.includes(key)) cacheKeys.push(key);
+          }
+          return cacheKeys;
+        },
+        getOwnPropertyDescriptor: (target, p) => {
+          var contextHolder = proxyContextHolder.get(target);
+          var resolved = contextHolder?.factory();
+          if (!resolved) throw new Error(`Trying to getOwnPropertyDescriptor of ${typeof resolved}`);
+          if (isUnconfigurable(p)) return Reflect.getOwnPropertyDescriptor(target, p);
+          var descriptor = Reflect.getOwnPropertyDescriptor(resolved, p);
+          if (descriptor) Object.defineProperty(target, p, descriptor);
+          return descriptor;
+        }
+      };
+    }
+  });
+
+  // libraries/utils/src/library.ts
+  function createLibrary({ name, uses: features }, callback) {
+    var id = `revenge.library.${name}`;
+    var tag = `[revenge.${name}]`;
+    var cleanups = [];
+    var patcher3 = features.includes("patcher") ? createPatcherInstance(id) : void 0;
+    var logger2 = features.includes("logger") ? {
+      log: (message) => console.log(`${tag} ${message}`),
+      warn: (message) => console.warn(`${tag} ${message}`),
+      error: (message) => console.error(`${tag} ${message}`)
+    } : void 0;
+    var registered = {
+      context: {
+        patcher: patcher3,
+        logger: logger2,
+        cleanup: (cleanup) => void cleanups.push(cleanup)
+      },
+      // ^^ as works, but not satisfies
+      factory: {
+        name,
+        id,
+        new: function newLibrary() {
+          if (registered.instance) throw new Error("Library already has an instance");
+          var instance = callback(registered.context);
+          registered.instance = instance;
+          if (instance instanceof Promise) instance.then((inst) => registered.awaitedInstance = inst);
+          else registered.awaitedInstance = registered.instance;
+          return instance;
+        },
+        destroy: function destroyLibrary() {
+          for (var cleanup of cleanups) cleanup();
+          if (patcher3) patcher3.destroy();
+          registered.instance = void 0;
+          registered.awaitedInstance = void 0;
+        },
+        features
+      }
+    };
+    Object.defineProperty(registered.factory.new, "name", {
+      value: `newLibrary:${registered.factory.id}`
+    });
+    registeredLibraries.set(id, registered);
+    return registered.factory;
+  }
+  function contextForLibrary(library) {
+    if (!library) throw new Error("Cannot get the context of an uninitialized library");
+    return lazyDestructure(() => registeredLibraries.get(library.id)?.context);
+  }
+  function factoryForLibrary(library) {
+    if (!library) throw new Error("Cannot get the factory of an undefined library");
+    return lazyDestructure(() => registeredLibraries.get(library.id)?.factory);
+  }
+  function instanceForLibrary(library) {
+    if (!library) throw new Error("Cannot get an instance of an undefined library");
+    if (!registeredLibraries.has(library.id)) throw new Error("Cannot get an instance of a library that has not been created");
+    var instance = registeredLibraries.get(library.id)?.instance;
+    if (!instance) throw new Error("Cannot get an instance of a library that has not been initialized");
+    return instance;
+  }
+  function awaitedInstanceFor(library) {
+    if (!library) throw new Error("Cannot get an instance of an undefined library");
+    if (!registeredLibraries.has(library.id)) throw new Error("Cannot get an instance of a library that has not been created");
+    var instance = registeredLibraries.get(library.id)?.awaitedInstance;
+    if (!instance) throw new Error("Cannot get an instance of a library that has not been fully initialized");
+    return instance;
+  }
+  var registeredLibraries, Libraries, library_default;
+  var init_library = __esm({
+    "libraries/utils/src/library.ts"() {
+      "use strict";
+      init_src();
+      init_lazy();
+      registeredLibraries = /* @__PURE__ */ new Map();
+      Libraries = {
+        create: createLibrary,
+        contextFor: contextForLibrary,
+        factoryFor: factoryForLibrary,
+        instanceFor: instanceForLibrary,
+        awaitedInstanceFor,
+        destroyAll() {
+          for (var { factory } of registeredLibraries.values()) factory.destroy();
+        }
+      };
+      library_default = Libraries;
+    }
+  });
+
+  // libraries/utils/src/enums.ts
+  function createBitFlagEnum(...flags) {
+    var _enum = {};
+    for (var i = 0; i < flags.length; i++) {
+      var flag = flags[i];
+      _enum[flag] = 1 << i;
+    }
+    return _enum;
+  }
+  var init_enums = __esm({
+    "libraries/utils/src/enums.ts"() {
+      "use strict";
+    }
+  });
+
+  // libraries/modules/src/constants.ts
+  var constants_exports = {};
+  __export(constants_exports, {
+    IndexMetroModuleId: () => IndexMetroModuleId,
+    MetroModuleFlags: () => MetroModuleFlags,
+    MetroModuleLookupFlags: () => MetroModuleLookupFlags
+  });
+  var MetroModuleFlags, MetroModuleLookupFlags, IndexMetroModuleId;
+  var init_constants = __esm({
+    "libraries/modules/src/constants.ts"() {
+      "use strict";
+      init_enums();
+      MetroModuleFlags = createBitFlagEnum("Exists", "Blacklisted");
+      MetroModuleLookupFlags = createBitFlagEnum("NotFound");
+      IndexMetroModuleId = 0;
+    }
+  });
+
+  // libraries/debug/src/index.ts
+  function deltaTimeOf(time) {
+    return timestampTimeOf(time) - PerformanceTimes.Native_RequiredIndex;
+  }
+  function timestampTimeOf(time) {
+    var timestamp = PerformanceTimes[time];
+    if (timestamp === -1) return Number.NaN;
+    return timestamp;
+  }
+  function recordTime(time) {
+    return PerformanceTimes[time] = performance.now();
+  }
+  var PerformanceTimes;
+  var init_src2 = __esm({
+    "libraries/debug/src/index.ts"() {
+      "use strict";
+      PerformanceTimes = {
+        Native_RequiredIndex: -1,
+        Init_Initialize: -1,
+        Modules_TriedRestoreCache: -1,
+        Modules_HookedFactories: -1,
+        Modules_IndexRequired: -1,
+        Init_PromiseResolved: -1,
+        Modules_RequiredAssets: -1,
+        Storage_Initialized: -1,
+        Plugins_CoreImported: -1,
+        Plugins_CoreStarted: -1,
+        App_CreateElementCalled: -1,
+        App_BeforeRunCallbacks: -1,
+        App_AfterRunCallbacks: -1
+      };
+    }
+  });
+
+  // libraries/modules/src/shared.ts
+  var patcher, logger;
+  var init_shared = __esm({
+    "libraries/modules/src/shared.ts"() {
+      "use strict";
+      init_lazy();
+      init_library();
+      init_src3();
+      ({ patcher, logger } = lazyDestructure(() => library_default.contextFor(ModulesLibrary)));
+    }
+  });
+
+  // libraries/utils/src/functions.ts
+  function noop() {
+  }
+  var objectSeal;
+  var init_functions = __esm({
+    "libraries/utils/src/functions.ts"() {
+      "use strict";
+      objectSeal = Object.seal;
+    }
+  });
+
+  // libraries/modules/src/utils/lazy.ts
+  function* getIndexedModuleIdsForFilter(filter) {
+    var modulesMap = metroCache.lookupFlags[filter.key];
+    if (!modulesMap) return void 0;
+    for (var k in modulesMap) {
+      if (k !== "flags") yield Number(k);
+    }
+  }
+  function subscribeModuleLazy(proxy, callback) {
+    var info = getLazyContext(proxy);
+    if (!info) throw new Error("No lazy module attached to this proxy");
+    var moduleId = info?.getModuleId();
+    if (!moduleId) throw new Error(`Lazy module has no module ID attached, check if your filter matches any modules: ${info.filter.key}`);
+    return subscribeModule(moduleId, () => callback(find(info.filter)));
+  }
+  function getLazyContext(proxy) {
+    return lazyContexts.get(proxy);
+  }
+  function createLazyModule(filter) {
+    var moduleIds = getIndexedModuleIdsForFilter(filter);
+    var moduleId;
+    var cache;
+    var context = {
+      filter,
+      getModuleId: () => moduleId,
+      getExports(cb) {
+        for (var id of moduleIds) {
+          moduleId = id;
+          if (getMetroModules()[moduleId]?.isInitialized) {
+            if (!cache && !this.forceLoad()) {
+              delete metroCache.lookupFlags[filter.key]?.[moduleId];
+              continue;
+            }
+            cb(cache);
+            return noop;
+          }
+          return this.subscribe(cb);
+        }
+        if (cache || this.forceLoad()) {
+          cb(cache);
+          return noop;
+        }
+        moduleId = void 0;
+        return noop;
+      },
+      subscribe(cb) {
+        return subscribeModuleLazy(proxy, cb);
+      },
+      get cache() {
+        return cache;
+      },
+      forceLoad() {
+        cache ??= find(filter);
+        return cache;
+      }
+    };
+    var proxy = lazyValue(() => context.forceLoad(), {
+      exemptedEntries: {
+        [lazyContextSymbol]: context,
+        [patcherLazyModuleSymbol]: (cb) => context.getExports(cb)
+      }
+    });
+    lazyContexts.set(proxy, context);
+    return proxy;
+  }
+  var lazyContextSymbol, lazyContexts;
+  var init_lazy2 = __esm({
+    "libraries/modules/src/utils/lazy.ts"() {
+      "use strict";
+      init_src();
+      init_functions();
+      init_lazy();
+      init_finders();
+      init_metro();
+      init_caches();
+      lazyContextSymbol = Symbol.for("revenge.modules.lazyContext");
+      lazyContexts = /* @__PURE__ */ new WeakMap();
+    }
+  });
+
+  // libraries/modules/src/finders.ts
+  var finders_exports = {};
+  __export(finders_exports, {
+    find: () => find,
+    findByDisplayName: () => findByDisplayName,
+    findByFilePath: () => findByFilePath,
+    findByName: () => findByName,
+    findByProps: () => findByProps,
+    findByQuery: () => findByQuery,
+    findBySingleProp: () => findBySingleProp,
+    findByStoreName: () => findByStoreName,
+    findByTypeName: () => findByTypeName,
+    findId: () => findId,
+    findProp: () => findProp
+  });
+  function filterExports(moduleExports, moduleId, filter) {
+    if (moduleExports.default && moduleExports.__esModule && filter(moduleExports.default, moduleId, true)) {
+      return {
+        exports: filter.raw ? moduleExports : moduleExports.default,
+        isDefaultExport: !filter.raw
+      };
+    }
+    if (!filter.raw && filter(moduleExports, moduleId, false)) {
+      return {
+        exports: moduleExports,
+        isDefaultExport: false
+      };
+    }
+    return {};
+  }
+  var findId, find, findByProps, findByName, findByDisplayName, findByTypeName, findByStoreName, findByFilePath, findProp, findBySingleProp, findByQuery;
+  var init_finders = __esm({
+    "libraries/modules/src/finders.ts"() {
+      "use strict";
+      init_lazy();
+      init_filters2();
+      init_metro();
+      init_lazy2();
+      findId = Object.assign(function findModuleId(filter) {
+        var { cache, finish } = cacherFor(filter.key);
+        for (var [id, moduleExports] of modulesForFinder(filter.key)) {
+          var { exports, isDefaultExport } = filterExports(moduleExports, id, filter);
+          if (typeof exports !== "undefined") {
+            cache(id, exports);
+            finish(false);
+            return [
+              id,
+              isDefaultExport
+            ];
+          }
+        }
+        finish(true);
+        return [];
+      }, {
+        /**
+             * Yields all modules where filter returns a truthy value.
+             * @param filter The filter to match
+             * @returns A generator that yields an array containing the module ID and whether the export is the default export
+             */
+        all: function* findModuleIdAll(filter) {
+          var { cache, finish } = cacherFor(filter.key);
+          var found = false;
+          for (var [id, moduleExports] of modulesForFinder(filter.key)) {
+            var { exports, isDefaultExport } = filterExports(moduleExports, id, filter);
+            if (typeof exports !== "undefined") {
+              cache(id, exports);
+              found = true;
+              yield [
+                id,
+                isDefaultExport
+              ];
+            }
+          }
+          finish(found);
+        }
+      });
+      find = Object.assign(function findModule(filter) {
+        var [id, defaultExport] = findId(filter);
+        if (typeof id !== "number") return;
+        return defaultExport ? requireModule(id).default : requireModule(id);
+      }, {
+        /**
+             * Returns all exports where filter returns a truthy value.
+             * @param filter The filter to match
+             * @returns An array of exports
+             */
+        all: function* findModuleAll(filter) {
+          for (var [id, isDefaultExport] of findId.all(filter)) {
+            if (typeof id !== "number") return;
+            yield isDefaultExport ? requireModule(id).default : requireModule(id);
+          }
+        }
+      });
+      findByProps = Object.assign((prop, ...props) => find(byProps(prop, ...props)), {
+        lazy: (prop, ...props) => createLazyModule(byProps(prop, ...props)),
+        async(prop, ...propsAndOrTimeout) {
+          var cloned = [
+            ...propsAndOrTimeout
+          ];
+          var timeout = typeof cloned[cloned.length - 1] === "number" ? cloned.pop() : 1e3;
+          return new Promise((resolve) => {
+            var id = setTimeout(resolve, timeout);
+            this.lazy(prop, ...propsAndOrTimeout)[lazyContextSymbol].getExports((exp) => {
+              clearTimeout(id);
+              resolve(exp);
+            });
+          });
+        },
+        all: (prop, ...props) => find.all(byProps(prop, ...props))
+      });
+      findByName = Object.assign((name, returnDefaultExport = true) => find(returnDefaultExport ? byName(name) : byName.raw(name)), {
+        lazy: (name, returnDefaultExport = true) => createLazyModule(returnDefaultExport ? byName(name) : byName.raw(name)),
+        async(name, returnDefaultExport = true, timeout = 1e3) {
+          return new Promise((resolve) => {
+            var id = setTimeout(resolve, timeout);
+            this.lazy(name, returnDefaultExport)[lazyContextSymbol].getExports((exp) => {
+              clearTimeout(id);
+              resolve(exp);
+            });
+          });
+        },
+        all: (name, returnDefaultExport = true) => find.all(returnDefaultExport ? byName(name) : byName.raw(name))
+      });
+      findByDisplayName = Object.assign((name, returnDefaultExport = true) => find(returnDefaultExport ? byDisplayName(name) : byDisplayName.raw(name)), {
+        lazy: (name, returnDefaultExport = true) => createLazyModule(returnDefaultExport ? byDisplayName(name) : byDisplayName.raw(name)),
+        async(name, returnDefaultExport = true, timeout = 1e3) {
+          return new Promise((resolve) => {
+            var id = setTimeout(resolve, timeout);
+            this.lazy(name, returnDefaultExport)[lazyContextSymbol].getExports((exp) => {
+              clearTimeout(id);
+              resolve(exp);
+            });
+          });
+        },
+        all: (name, returnDefaultExport = true) => find.all(returnDefaultExport ? byDisplayName(name) : byDisplayName.raw(name))
+      });
+      findByTypeName = Object.assign((name, returnDefaultExport = true) => find(returnDefaultExport ? byTypeName(name) : byTypeName.raw(name)), {
+        lazy: (name, returnDefaultExport = true) => createLazyModule(returnDefaultExport ? byTypeName(name) : byTypeName.raw(name)),
+        async(name, returnDefaultExport = true, timeout = 1e3) {
+          return new Promise((resolve) => {
+            var id = setTimeout(resolve, timeout);
+            this.lazy(name, returnDefaultExport)[lazyContextSymbol].getExports((exp) => {
+              clearTimeout(id);
+              resolve(exp);
+            });
+          });
+        },
+        all: (name, returnDefaultExport = true) => find.all(returnDefaultExport ? byTypeName(name) : byTypeName.raw(name))
+      });
+      findByStoreName = Object.assign((name) => find(byStoreName(name)), {
+        lazy: (name) => createLazyModule(byStoreName(name)),
+        async(name, timeout = 5e3) {
+          return new Promise((resolve) => {
+            var id = setTimeout(resolve, timeout);
+            this.lazy(name)[lazyContextSymbol].getExports((exp) => {
+              clearTimeout(id);
+              resolve(exp);
+            });
+          });
+        }
+      });
+      findByFilePath = Object.assign((path, returnDefaultExport = false) => find(byFilePath(path, returnDefaultExport)), {
+        lazy: (path, returnDefaultExport = false) => createLazyModule(byFilePath(path, returnDefaultExport)),
+        async(path, returnDefaultExport = false, timeout = 1e3) {
+          return new Promise((resolve) => {
+            var id = setTimeout(resolve, timeout);
+            this.lazy(path, returnDefaultExport)[lazyContextSymbol].getExports((exp) => {
+              clearTimeout(id);
+              resolve(exp);
+            });
+          });
+        }
+      });
+      findProp = Object.assign((prop, ...filterProps) => findByProps(prop, ...filterProps)[prop], {
+        lazy: (prop, ...filterProps) => lazyValue(() => findByProps(prop, ...filterProps)[prop]),
+        async: (prop, ...filterPropsAndOrTimeout) => findByProps.async(prop, ...filterPropsAndOrTimeout).then((exports) => exports[prop])
+      });
+      findBySingleProp = Object.assign((name, returnDefaultExport = true) => find(returnDefaultExport ? bySingleProp(name) : bySingleProp.raw(name)), {
+        lazy: (name, returnDefaultExport = true) => createLazyModule(returnDefaultExport ? bySingleProp(name) : bySingleProp.raw(name)),
+        async(name, returnDefaultExport = true, timeout = 1e3) {
+          return new Promise((resolve) => {
+            var id = setTimeout(resolve, timeout);
+            this.lazy(name, returnDefaultExport)[lazyContextSymbol].getExports((exp) => {
+              clearTimeout(id);
+              resolve(exp);
+            });
+          });
+        },
+        all: (name, returnDefaultExport = true) => find.all(returnDefaultExport ? bySingleProp(name) : bySingleProp.raw(name))
+      });
+      findByQuery = Object.assign((query, caseSensitive = false) => find(byQuery(query, caseSensitive)), {
+        /**
+             * Finds all modules by a query string **(very expensive, only use for debugging)**
+             * @param query The query string to search for
+             * @param caseSensitive Whether the search should be case-sensitive
+             * @returns All module exports
+             */
+        all: (query, caseSensitive = false) => find.all(byQuery(query, caseSensitive))
+      });
+    }
+  });
+
+  // libraries/modules/src/native/modules.ts
+  var nmp, CacheModule, FileModule, ClientInfoModule, DeviceModule, BundleUpdaterManager, ThemeModule;
+  var init_modules = __esm({
+    "libraries/modules/src/native/modules.ts"() {
+      "use strict";
+      init_lazy();
+      nmp = nativeModuleProxy;
+      CacheModule = lazyValue(() => nmp.NativeCacheModule ?? nmp.MMKVManager);
+      FileModule = lazyValue(() => nmp.NativeFileModule ?? nmp.RTNFileManager ?? nmp.DCDFileManager);
+      ClientInfoModule = lazyValue(() => nmp.NativeClientInfoModule ?? nmp.RTNClientInfoManager ?? nmp.InfoDictionaryManager);
+      DeviceModule = lazyValue(() => nmp.NativeDeviceModule ?? nmp.RTNDeviceManager ?? nmp.DCDDeviceManager);
+      BundleUpdaterManager = lazyValue(() => nmp.BundleUpdaterManager);
+      ThemeModule = lazyValue(() => nmp.NativeThemeModule ?? nmp.RTNThemeManager ?? nmp.DCDThemeManager);
+    }
+  });
+
+  // libraries/modules/src/native/index.ts
+  var native_exports = {};
+  __export(native_exports, {
+    BundleUpdaterManager: () => BundleUpdaterManager,
+    CacheModule: () => CacheModule,
+    ClientInfoModule: () => ClientInfoModule,
+    DeviceModule: () => DeviceModule,
+    FileModule: () => FileModule,
+    ThemeModule: () => ThemeModule
+  });
+  var init_native = __esm({
+    "libraries/modules/src/native/index.ts"() {
+      "use strict";
+      init_modules();
+    }
+  });
+
+  // libraries/modules/src/metro/caches.ts
+  function restoreCache() {
+    return _restoreCache.apply(this, arguments);
+  }
+  function _restoreCache() {
+    _restoreCache = _async_to_generator(function* () {
+      logger.log("Attempting to restore cache...");
+      resolveModuleDependencies(getMetroModules(), IndexMetroModuleId);
+      var savedCache = yield CacheModule.getItem(mmkvKey);
+      if (!savedCache) return false;
+      var storedCache = JSON.parse(savedCache);
+      logger.log(`Cache found, validating... (compare: ${storedCache.v} === ${version}, ${storedCache.b} === ${ClientInfoModule.Build}, ${storedCache.t} === ${metroDependencies.size})`);
+      if (storedCache.v !== version || storedCache.b !== ClientInfoModule.Build || storedCache.t !== metroDependencies.size) return false;
+      logger.log(`Restoring cache of ${metroDependencies.size} modules`);
+      metroCache.totalModules = storedCache.t;
+      metroCache.exportsFlags = storedCache.e;
+      metroCache.lookupFlags = storedCache.l;
+      metroCache.assetModules = storedCache.a;
+      return true;
+    });
+    return _restoreCache.apply(this, arguments);
+  }
+  function createCache() {
+    setTimeout(() => {
+      metroCache.totalModules = metroDependencies.size;
+      logger.log(`This is a cold start, importing ${metroCache.totalModules} dependencies...`);
+      for (var id of metroDependencies) requireModule(id);
+      saveCache();
+    });
+  }
+  function requireAssetModules() {
+    var [assetsRegistryModuleId] = findId(byProps("registerAsset"));
+    if (!assetsRegistryModuleId) return void logger.warn("Unable to create asset cache, cannot find assets-registry module ID, some assets may not load");
+    var assetsRegistryExporterModuleId = 0;
+    for (var id of metroDependencies) {
+      var module = modules[id];
+      if (!module?.dependencyMap) continue;
+      if (module.dependencyMap.length === 1 && module.dependencyMap[0] === assetsRegistryModuleId) assetsRegistryExporterModuleId = id;
+    }
+    if (!assetsRegistryExporterModuleId) return void logger.warn("Unable to create asset cache, cannot find assets-registry exporter module ID, some assets may not load");
+    logger.log("Importing all assets modules...");
+    for (var id1 of metroDependencies) {
+      var module1 = modules[id1];
+      if (!module1?.dependencyMap) continue;
+      if (module1.dependencyMap.length === 1 && module1.dependencyMap[0] === assetsRegistryExporterModuleId) requireModule(id1);
+    }
+  }
+  function saveCache() {
+    if (saveCacheDebounceTimeoutId) clearTimeout(saveCacheDebounceTimeoutId);
+    saveCacheDebounceTimeoutId = setTimeout(() => {
+      CacheModule.setItem(mmkvKey, JSON.stringify({
+        v: version,
+        b: ClientInfoModule.Build,
+        t: metroCache.totalModules,
+        e: metroCache.exportsFlags,
+        l: metroCache.lookupFlags,
+        a: metroCache.assetModules
+      }));
+      logger.log(`Cache saved (${metroCache.totalModules} modules)`);
+    }, 1e3);
+  }
+  function invalidateCache() {
+    CacheModule.removeItem(mmkvKey);
+    logger.warn("Cache invalidated");
+  }
+  function cacherFor(key) {
+    var registry = metroCache.lookupFlags[key] ??= {};
+    return {
+      cache: (id, exports) => {
+        registry[id] ??= MetroModuleFlags.Exists;
+        if (typeof exports === "undefined" || exports === null) {
+          blacklistModule(id);
+          registry[id] |= MetroModuleFlags.Blacklisted;
+        }
+      },
+      finish: (notFound) => {
+        var prevRegistryFlags = registry.flags;
+        registry.flags ??= 0;
+        if (notFound) registry.flags |= MetroModuleLookupFlags.NotFound;
+        if (prevRegistryFlags !== registry.flags) saveCache();
+      }
+    };
+  }
+  function cacheModule(id) {
+    metroCache.exportsFlags[id] ??= MetroModuleFlags.Exists;
+  }
+  function cacheModuleAsBlacklisted(id) {
+    cacheModule(id);
+    metroCache.exportsFlags[id] |= MetroModuleFlags.Blacklisted;
+  }
+  function cacheAsset(name, index, moduleId) {
+    metroCache.assets[name] = index;
+    metroCache.assetModules[name] = moduleId;
+    saveCache();
+  }
+  var version, mmkvKey, metroCache, saveCacheDebounceTimeoutId;
+  var init_caches = __esm({
+    "libraries/modules/src/metro/caches.ts"() {
+      "use strict";
+      init_async_to_generator();
+      init_constants();
+      init_filters2();
+      init_finders();
+      init_native();
+      init_shared();
+      init_metro();
+      version = 1;
+      mmkvKey = "revenge-metro-cache";
+      metroCache = {
+        /**
+         * Flags for each module's exports
+         * @see {@link MetroModuleFlags}
+         */
+        exportsFlags: {},
+        /**
+         * Lookup registry for each filters, the key being the filter key, and the value being the registry
+         * @see {@link MetroCacheRegistry}
+         * @see {@link MetroModuleLookupFlags}
+         */
+        lookupFlags: {},
+        /**
+         * Registry for assets, the key being the name, and the value being the asset index
+         * #### This is in-memory.
+         */
+        assets: {},
+        /**
+         * Registry for assets modules, the key being the name, and the value being the module ID of the module that registers the asset
+         */
+        assetModules: {},
+        /**
+         * The total modules count
+         */
+        totalModules: 0
+      };
+    }
+  });
+
+  // libraries/modules/src/metro/patcher.ts
+  function getPatchStatus(patch) {
+    return status & MetroPatcherPatches[patch];
+  }
+  function patchModuleOnLoad(exports, id) {
+    exports.initSentry &&= () => void (status |= MetroPatcherPatches.DisableSentry);
+    if (exports.default?.track && exports.default.trackMaker) exports.default.track = () => Promise.resolve(void (status |= MetroPatcherPatches.DisableTracking));
+    exports.startTracking &&= () => void (status |= MetroPatcherPatches.DisableJankStatsTracking);
+    if (!getPatchStatus("FixNativeComponentRegistryDuplicateRegister") && [
+      "customBubblingEventTypes",
+      "customDirectEventTypes",
+      "register",
+      "get"
+    ].every((x2) => exports[x2])) {
+      patcher.instead(exports, "register", (args, origFunc) => {
+        try {
+          return origFunc(...args);
+        } catch (e) {
+        }
+      }, "fixNativeComponentRegistryDuplicateRegister");
+      status |= MetroPatcherPatches.FixNativeComponentRegistryDuplicateRegister;
+    }
+    if (exports?.default?.constructor?.displayName === "DeveloperExperimentStore") {
+      exports.default = new Proxy(exports.default, {
+        get(target, property, receiver) {
+          if (property === "isDeveloper") {
+            return true;
+          }
+          return Reflect.get(target, property, receiver);
+        }
+      });
+    }
+    if (!getPatchStatus("TrackFilePath") && exports.fileFinishedImporting) {
+      patcher.before(exports, "fileFinishedImporting", ([filePath]) => {
+        var importingModuleId2 = getImportingModuleId();
+        if (importingModuleId2 === -1 || !filePath) return;
+        getMetroModules()[importingModuleId2][metroModuleFilePathKey] = filePath;
+      }, "trackFilePath");
+      status |= MetroPatcherPatches.TrackFilePath;
+    }
+    if (!getPatchStatus("BlacklistedFreezingModule") && exports.default?.reactProfilingEnabled) {
+      var problematicModule = getMetroModules()[id + 1];
+      if (!problematicModule?.publicModule.exports.default) {
+        if (!isModuleBlacklisted(id + 1)) {
+          blacklistModule(id + 1);
+          status |= MetroPatcherPatches.BlacklistedFreezingModule;
+          logger.log(`Blacklisted module ${id + 1} as it causes freeze when initialized`);
+        }
+      }
+    }
+    if (exports.isMoment) {
+      var origLocale;
+      patcher.after(exports, "defineLocale", (ret) => {
+        origLocale ??= exports.locale();
+        status |= MetroPatcherPatches.FixMomentLocale;
+        exports.locale(origLocale);
+        return ret;
+      });
+    }
+  }
+  var status, getStatus, metroModuleFilePathKey, MetroPatcherPatches;
+  var init_patcher = __esm({
+    "libraries/modules/src/metro/patcher.ts"() {
+      "use strict";
+      init_enums();
+      init_shared();
+      init_metro();
+      status = 0;
+      getStatus = () => status;
+      metroModuleFilePathKey = "__moduleFilePath";
+      MetroPatcherPatches = createBitFlagEnum("DisableSentry", "DisableJankStatsTracking", "DisableTracking", "FixNativeComponentRegistryDuplicateRegister", "TrackFilePath", "FixMomentLocale", "BlacklistedFreezingModule");
+    }
+  });
+
+  // libraries/modules/src/metro/index.ts
+  var metro_exports = {};
+  __export(metro_exports, {
+    MetroPatcherPatches: () => MetroPatcherPatches,
+    blacklistModule: () => blacklistModule,
+    cacheAsset: () => cacheAsset,
+    cacheModule: () => cacheModule,
+    cacheModuleAsBlacklisted: () => cacheModuleAsBlacklisted,
+    cacherFor: () => cacherFor,
+    createCache: () => createCache,
+    getImportingModuleId: () => getImportingModuleId,
+    getMetroModules: () => getMetroModules,
+    getPatchStatus: () => getPatchStatus,
+    getStatus: () => getStatus,
+    initializeModules: () => initializeModules,
+    invalidateCache: () => invalidateCache,
+    isModuleBlacklisted: () => isModuleBlacklisted,
+    metroCache: () => metroCache,
+    metroDependencies: () => metroDependencies,
+    metroModuleFilePathKey: () => metroModuleFilePathKey,
+    moduleHasBadExports: () => moduleHasBadExports,
+    modulesForFinder: () => modulesForFinder,
+    patchModuleOnLoad: () => patchModuleOnLoad,
+    requireAssetModules: () => requireAssetModules,
+    requireModule: () => requireModule,
+    resolveModuleDependencies: () => resolveModuleDependencies,
+    restoreCache: () => restoreCache,
+    saveCache: () => saveCache,
+    subscribeModule: () => subscribeModule
+  });
+  function getMetroModules() {
+    return modules;
+  }
+  function getImportingModuleId() {
+    return importingModuleId;
+  }
+  function resolveModuleDependencies(modules1, id) {
+    var metroModule = modules1[id];
+    if (!metroModule) return void metroDependencies.delete(id);
+    if (!metroModule.dependencyMap || resolvedModules.has(id)) return;
+    resolvedModules.add(id);
+    for (var depId of metroModule.dependencyMap) {
+      metroDependencies.add(depId);
+      resolveModuleDependencies(modules1, depId);
+    }
+  }
+  function initializeModules() {
+    return _initializeModules.apply(this, arguments);
+  }
+  function _initializeModules() {
+    _initializeModules = _async_to_generator(function* () {
+      var _loop = function(key2) {
+        var id = Number(key2);
+        var metroModule = metroModules[id];
+        if (isModuleBlacklisted(id)) return "continue";
+        if (metroModule.factory) {
+          var unpatch3 = patcher.instead(metroModule, "factory", (args, origFunc) => {
+            var originalImportingId = importingModuleId;
+            importingModuleId = id;
+            var { 1: metroRequire, 4: moduleObject } = args;
+            args[2] = (id2) => {
+              var exps = metroRequire(id2);
+              return exps?.__esModule ? exps.default : exps;
+            };
+            args[3] = (id2) => {
+              var exps = metroRequire(id2);
+              if (exps?.__esModule) return exps;
+              return {
+                default: exps,
+                ...exps
+              };
+            };
+            cacheModule(id);
+            try {
+              origFunc(...args);
+            } catch (error) {
+              logger.log(`Blacklisted module ${id} because it could not be initialized: ${error}`);
+              unpatch3();
+              blacklistModule(id);
+            }
+            if (moduleHasBadExports(moduleObject.exports)) blacklistModule(id);
+            else {
+              var subs = subscriptions.get(id);
+              if (subs) for (var sub of subs) sub();
+              patchModuleOnLoad(moduleObject.exports, id);
+            }
+            importingModuleId = originalImportingId;
+          }, "moduleFactory");
+        }
+      };
+      var metroModules = getMetroModules();
+      if (metroModules[IndexMetroModuleId]?.isInitialized) throw new Error("Metro modules has already been initialized");
+      var cacheRestored = yield restoreCache();
+      recordTime("Modules_TriedRestoreCache");
+      for (var key in metroModules) _loop(key);
+      recordTime("Modules_HookedFactories");
+      logger.log("Importing index module...");
+      __r(IndexMetroModuleId);
+      recordTime("Modules_IndexRequired");
+      metroCache.totalModules = metroDependencies.size;
+      saveCache();
+      if (!cacheRestored) {
+        var unpatch2 = patcher.before(ReactNative.AppRegistry, "runApplication", () => {
+          unpatch2();
+          requireAssetModules();
+          recordTime("Modules_RequiredAssets");
+        }, "createAssetCache");
+      }
+    });
+    return _initializeModules.apply(this, arguments);
+  }
+  function blacklistModule(id) {
+    Object.defineProperty(getMetroModules(), id, {
+      enumerable: false
+    });
+    cacheModuleAsBlacklisted(id);
+    saveCache();
+  }
+  function requireModule(id) {
+    var metroModules = getMetroModules();
+    if (isModuleBlacklisted(id)) return false;
+    var metroModule = metroModules[id];
+    if (metroModule?.isInitialized && !metroModule.hasError) return __r(id);
+    var ogHandler = ErrorUtils.getGlobalHandler();
+    ErrorUtils.setGlobalHandler((err, isFatal) => {
+      logger.error(`Blacklisting module ${id} because it could not be imported (fatal = ${isFatal}): ${err} `);
+      blacklistModule(id);
+    });
+    var moduleExports;
+    try {
+      moduleExports = __r(id);
+    } catch (error) {
+      logger.error(`Blacklisting module ${id} because it could not be imported: ${error}`);
+      blacklistModule(id);
+    }
+    ErrorUtils.setGlobalHandler(ogHandler);
+    return moduleExports;
+  }
+  function isModuleBlacklisted(id) {
+    if (!(id in metroCache.exportsFlags)) return 0;
+    return metroCache.exportsFlags[id] & MetroModuleFlags.Blacklisted;
+  }
+  function* modulesForFinder(key) {
+    var lookupCache = metroCache.lookupFlags[key];
+    if (lookupCache?.flags) {
+      if (!(lookupCache.flags & MetroModuleLookupFlags.NotFound)) for (var id in lookupCache) {
+        if (id === "flags") continue;
+        if (isModuleBlacklisted(id)) continue;
+        var exports = requireModule(Number(id));
+        if (moduleHasBadExports(exports)) {
+          blacklistModule(id);
+          continue;
+        }
+        yield [
+          id,
+          exports
+        ];
+      }
+    } else {
+      for (var id1 of metroDependencies) {
+        var mid = Number(id1);
+        if (isModuleBlacklisted(mid)) continue;
+        var exports1 = requireModule(mid);
+        if (moduleHasBadExports(exports1)) {
+          blacklistModule(id1);
+          continue;
+        }
+        yield [
+          mid,
+          exports1
+        ];
+      }
+    }
+  }
+  function moduleHasBadExports(exports) {
+    return !exports || exports === globalThis || exports[""] === null || exports.__proto__ === Object.prototype && Reflect.ownKeys(exports).length === 0;
+  }
+  var importingModuleId, subscriptions, metroDependencies, resolvedModules, subscribeModule;
+  var init_metro = __esm({
+    "libraries/modules/src/metro/index.ts"() {
+      "use strict";
+      init_async_to_generator();
+      init_src2();
+      init_constants();
+      init_shared();
+      init_caches();
+      init_patcher();
+      init_caches();
+      init_patcher();
+      importingModuleId = -1;
+      subscriptions = /* @__PURE__ */ new Map();
+      metroDependencies = /* @__PURE__ */ new Set();
+      resolvedModules = /* @__PURE__ */ new Set();
+      subscribeModule = Object.assign(function subscribeModule2(id, callback) {
+        if (!subscriptions.has(id)) subscriptions.set(id, /* @__PURE__ */ new Set());
+        var set = subscriptions.get(id);
+        set.add(callback);
+        return () => set.delete(callback);
+      }, {
+        /**
+             * Subscribes to a module once, calling the callback when the module is required
+             * @param id The module ID
+             * @param callback The callback to call when the module is required
+             * @returns A function to unsubscribe
+             */
+        once: function subscribeModuleOnce(id, callback) {
+          var unsub = subscribeModule(id, () => {
+            unsub();
+            callback();
+          });
+          return unsub;
+        }
+      });
+    }
+  });
+
+  // libraries/modules/src/utils/filters.ts
+  function createFilter(predicate, keyFor) {
+    var createHolder = (func, args, raw) => {
+      return Object.assign(func, {
+        filter: predicate,
+        raw,
+        key: `${raw ? "raw:" : ""}${keyFor(args)}`
+      });
+    };
+    var curry = (raw) => (...args) => {
+      return createHolder((m2, id, raw2) => predicate(args, m2, id, raw2), args, raw);
+    };
+    return Object.assign(curry(false), {
+      raw: curry(true),
+      keyFor
+    });
+  }
+  function createSimpleFilter(predicate, key) {
+    return createFilter((_2, m2) => predicate(m2), () => `dyn:${key}`)();
+  }
+  var init_filters = __esm({
+    "libraries/modules/src/utils/filters.ts"() {
+      "use strict";
+    }
+  });
+
+  // libraries/modules/src/filters.ts
+  var filters_exports = {};
+  __export(filters_exports, {
+    byDisplayName: () => byDisplayName,
+    byFilePath: () => byFilePath,
+    byMutableProp: () => byMutableProp,
+    byName: () => byName,
+    byProps: () => byProps,
+    byQuery: () => byQuery,
+    bySingleProp: () => bySingleProp,
+    byStoreName: () => byStoreName,
+    byTypeName: () => byTypeName,
+    createFilter: () => createFilter,
+    createSimpleFilter: () => createSimpleFilter
+  });
+  var byProps, byMutableProp, byName, byDisplayName, byTypeName, byStoreName, byFilePath, bySingleProp, byQuery;
+  var init_filters2 = __esm({
+    "libraries/modules/src/filters.ts"() {
+      "use strict";
+      init_metro();
+      init_patcher();
+      init_filters();
+      init_filters();
+      byProps = createFilter((props, m2) => props.length === 0 ? m2[props[0]] : props.every((p) => m2[p]), (props) => `revenge.props(${props.join(",")})`);
+      byMutableProp = createFilter(([prop], m2) => m2?.[prop] && !Object.getOwnPropertyDescriptor(m2, prop)?.get, (prop) => `revenge.mutableProp(${prop})`);
+      byName = createFilter(([name], m2) => m2.name === name, (name) => `revenge.name(${name})`);
+      byDisplayName = createFilter(([displayName], m2) => m2.displayName === displayName, (name) => `revenge.displayName(${name})`);
+      byTypeName = createFilter(([typeName], m2) => m2.type?.name === typeName, (name) => `revenge.typeName(${name})`);
+      byStoreName = createFilter(([name], m2) => m2.getName?.length === 0 && m2.getName() === name, (name) => `revenge.storeName(${name})`);
+      byFilePath = createFilter(([path, returnDefaultExport], _2, id, isDefaultExport) => {
+        return returnDefaultExport === isDefaultExport && getMetroModules()[id]?.[metroModuleFilePathKey] === path;
+      }, ([path, returnDefaultExport]) => `revenge.filePath(${path},${returnDefaultExport})`);
+      bySingleProp = createFilter(([prop], m2) => m2[prop] && Object.keys(m2).length === 1, (prop) => `revenge.singleProp(${prop})`);
+      byQuery = createFilter(([query, caseSensitive], m2) => {
+        var applyStringTransformation = (str) => caseSensitive ? str : str.toLowerCase();
+        var transformedQuery = applyStringTransformation(query);
+        try {
+          return m2.name?.toLowerCase()?.includes(transformedQuery) || m2.displayName?.toLowerCase()?.includes(transformedQuery) || m2.type?.name?.toLowerCase()?.includes(transformedQuery) || m2.getName?.length === 0 && m2.getName?.()?.toLowerCase()?.includes(transformedQuery) || getMetroModules()[m2.id]?.[metroModuleFilePathKey]?.toLowerCase()?.includes(transformedQuery) || Object.keys(m2).some((k) => k.toLowerCase().includes(transformedQuery)) || Object.values(m2).some((v2) => String(v2).toLowerCase().includes(transformedQuery));
+        } catch (e) {
+          return false;
+        }
+      }, ([query, caseSensitive]) => `revenge.query(${caseSensitive ? query : query.toLowerCase()})`);
+    }
+  });
+
+  // libraries/modules/src/common/components.ts
+  var components_exports = {};
+  __export(components_exports, {
+    ActionSheet: () => ActionSheet,
+    ActionSheetRow: () => ActionSheetRow,
+    AlertActionButton: () => AlertActionButton,
+    AlertModal: () => AlertModal,
+    BottomSheetTitleHeader: () => BottomSheetTitleHeader,
+    Button: () => Button,
+    Card: () => Card,
+    FlashList: () => FlashList,
+    FloatingActionButton: () => FloatingActionButton,
+    FormCheckbox: () => FormCheckbox,
+    FormRadio: () => FormRadio,
+    FormSwitch: () => FormSwitch,
+    HelpMessage: () => HelpMessage,
+    IconButton: () => IconButton,
+    PressableScale: () => PressableScale,
+    RedesignCompat: () => RedesignCompat,
+    RowButton: () => RowButton,
+    SafeAreaProvider: () => SafeAreaProvider,
+    SafeAreaView: () => SafeAreaView,
+    SegmentedControl: () => SegmentedControl,
+    SegmentedControlPages: () => SegmentedControlPages,
+    Stack: () => Stack,
+    TableCheckbox: () => TableCheckbox,
+    TableRadio: () => TableRadio,
+    TableRow: () => TableRow,
+    TableRowGroup: () => TableRowGroup,
+    TableRowIcon: () => TableRowIcon,
+    TableRowTrailingText: () => TableRowTrailingText,
+    TableSwitch: () => TableSwitch,
+    TableSwitchRow: () => TableSwitchRow,
+    Text: () => Text,
+    TextArea: () => TextArea,
+    TextInput: () => TextInput,
+    TwinButtons: () => TwinButtons,
+    useSegmentedControlState: () => useSegmentedControlState
+  });
+  var HelpMessage, SafeAreaProvider, SafeAreaView, AlertModal, AlertActionButton, ActionSheetRow, Button, TwinButtons, IconButton, RowButton, PressableScale, TableRow, TableRowIcon, TableRowTrailingText, TableRowGroup, TableSwitchRow, TableSwitch, TableRadio, TableCheckbox, FormSwitch, FormRadio, FormCheckbox, Card, RedesignCompat, Stack, TextInput, TextArea, SegmentedControl, SegmentedControlPages, useSegmentedControlState, FloatingActionButton, ActionSheet, BottomSheetTitleHeader, Text, FlashList;
+  var init_components = __esm({
+    "libraries/modules/src/common/components.ts"() {
+      "use strict";
+      init_lazy();
+      init_finders();
+      HelpMessage = findByName.lazy("HelpMessage");
+      ({ SafeAreaProvider, SafeAreaView } = lazyDestructure(() => findByProps("useSafeAreaInsets")));
+      ({ AlertModal, AlertActionButton } = lazyDestructure(() => findByProps("AlertModal", "AlertActions")));
+      ActionSheetRow = findProp.lazy("ActionSheetRow");
+      Button = findBySingleProp.lazy("Button");
+      TwinButtons = findProp.lazy("TwinButtons");
+      IconButton = findBySingleProp.lazy("IconButton");
+      RowButton = findProp.lazy("RowButton");
+      PressableScale = findProp.lazy("PressableScale");
+      TableRow = findProp.lazy("TableRow");
+      TableRowIcon = findProp.lazy("TableRowIcon");
+      TableRowTrailingText = findProp.lazy("TableRowTrailingText");
+      TableRowGroup = findProp.lazy("TableRowGroup");
+      TableSwitchRow = findProp.lazy("TableSwitchRow");
+      TableSwitch = findBySingleProp.lazy("FormSwitch");
+      TableRadio = findBySingleProp.lazy("FormRadio");
+      TableCheckbox = findBySingleProp.lazy("FormCheckbox");
+      FormSwitch = findBySingleProp.lazy("FormSwitch");
+      FormRadio = findBySingleProp.lazy("FormRadio");
+      FormCheckbox = findBySingleProp.lazy("FormCheckbox");
+      Card = findProp.lazy("Card");
+      RedesignCompat = findProp.lazy("RedesignCompat");
+      Stack = findProp.lazy("Stack");
+      ({ TextInput, TextArea } = lazyDestructure(() => findByProps("TextInput", "ContextMenu")));
+      SegmentedControl = findProp.lazy("SegmentedControl");
+      SegmentedControlPages = findProp.lazy("SegmentedControlPages");
+      useSegmentedControlState = findBySingleProp.lazy("useSegmentedControlState");
+      FloatingActionButton = findProp.lazy("FloatingActionButton");
+      ActionSheet = findProp.lazy("ActionSheet");
+      BottomSheetTitleHeader = findProp.lazy("BottomSheetTitleHeader");
+      Text = findProp.lazy("Text", "LegacyText");
+      FlashList = findProp.lazy("FlashList");
+    }
+  });
+
+  // shims/events.ts
+  var EventEmitter;
+  var init_events = __esm({
+    "shims/events.ts"() {
+      "use strict";
+      init_finders();
+      EventEmitter = findProp.lazy("EventEmitter");
+    }
+  });
+
+  // libraries/modules/src/common/index.ts
+  var common_exports = {};
+  __export(common_exports, {
+    EventEmitter: () => EventEmitter,
+    Flux: () => Flux,
+    FluxDispatcher: () => FluxDispatcher,
+    Logger: () => Logger,
+    NavigationNative: () => NavigationNative,
+    NavigationStack: () => NavigationStack,
+    React: () => React2,
+    ReactNative: () => ReactNative2,
+    alerts: () => alerts,
+    assetsRegistry: () => assetsRegistry,
+    channels: () => channels,
+    clipboard: () => clipboard,
+    commands: () => commands,
+    components: () => components_exports,
+    constants: () => constants,
+    discordIntl: () => discordIntl,
+    intlModule: () => intlModule,
+    invites: () => invites,
+    legacy_alerts: () => legacy_alerts,
+    legacy_i18n: () => legacy_i18n,
+    links: () => links,
+    messages: () => messages,
+    nobleHashesUtils: () => nobleHashesUtils,
+    semver: () => semver,
+    toasts: () => toasts,
+    tokens: () => tokens,
+    xxhash64: () => xxhash64
+  });
+  var constants, intlModule, discordIntl, tokens, Logger, legacy_i18n, legacy_alerts, alerts, channels, links, clipboard, invites, commands, toasts, messages, NavigationStack, NavigationNative, semver, Flux, FluxDispatcher, assetsRegistry, React2, ReactNative2, xxhash64, nobleHashesUtils;
+  var init_common = __esm({
+    "libraries/modules/src/common/index.ts"() {
+      "use strict";
+      init_finders();
+      init_components();
+      init_events();
+      constants = findByProps.lazy("Fonts");
+      intlModule = findByProps.lazy("intl");
+      discordIntl = findByProps.lazy("runtimeHashMessageKey");
+      tokens = findByProps.lazy("unsafe_rawColors");
+      Logger = findByName.lazy("Logger");
+      legacy_i18n = findByProps.lazy("Messages");
+      legacy_alerts = findByProps.lazy("openLazy", "close");
+      alerts = findByProps.lazy("openAlert", "dismissAlert");
+      channels = findByProps.lazy("getVoiceChannelId");
+      links = findByProps.lazy("openDeeplink");
+      clipboard = findByProps.lazy("getImagePNG");
+      invites = findByProps.lazy("createInvite");
+      commands = findByProps.lazy("getBuiltInCommands");
+      toasts = findByFilePath.lazy("modules/toast/native/ToastActionCreators.tsx", true);
+      messages = findByProps.lazy("sendBotMessage");
+      NavigationStack = findByProps.lazy("createStackNavigator");
+      NavigationNative = findByProps.lazy("NavigationContainer");
+      semver = findByProps.lazy("SEMVER_SPEC_VERSION");
+      Flux = findByProps.lazy("connectStores");
+      FluxDispatcher = findByProps.lazy("_interceptors");
+      assetsRegistry = findByProps.lazy("registerAsset");
+      React2 = globalThis.React = findByProps.lazy("createElement");
+      ReactNative2 = globalThis.ReactNative = findByProps.lazy("AppRegistry");
+      xxhash64 = findByProps.lazy("XXH64");
+      nobleHashesUtils = findByProps.lazy("randomBytes");
+    }
+  });
+
+  // libraries/modules/src/index.ts
+  var ModulesLibrary;
+  var init_src3 = __esm({
+    "libraries/modules/src/index.ts"() {
+      "use strict";
+      init_async_to_generator();
+      init_library();
+      init_constants();
+      init_filters2();
+      init_finders();
+      init_metro();
+      ModulesLibrary = library_default.create({
+        name: "modules",
+        uses: [
+          "logger",
+          "patcher"
+        ]
+      }, /* @__PURE__ */ _async_to_generator(function* () {
+        yield initializeModules();
+        var common = yield Promise.resolve().then(() => (init_common(), common_exports));
+        var native = yield Promise.resolve().then(() => (init_native(), native_exports));
+        return {
+          constants: constants_exports,
+          common,
+          filters: filters_exports,
+          native,
+          metro: metro_exports,
+          ...finders_exports
+        };
+      }));
+    }
+  });
+
+  // shims/react~jsx-runtime.ts
+  function unproxyFirstArg(args) {
+    if (!args[0]) {
+      throw new Error("The passed component is falsy. Ensure that you are passing a valid component.");
+    }
+    var factory = getProxyFactory(args[0]);
+    if (factory) args[0] = factory();
+    return args;
+  }
+  var jsxRuntime, Fragment, jsx, jsxs;
+  var init_react_jsx_runtime = __esm({
+    "shims/react~jsx-runtime.ts"() {
+      "use strict";
+      init_src3();
+      init_finders();
+      init_lazy();
+      jsxRuntime = findByProps.lazy("jsx", "jsxs", "Fragment");
+      Fragment = Symbol.for("react.fragment");
+      jsx = (...args) => jsxRuntime.jsx(...unproxyFirstArg(args));
+      jsxs = (...args) => jsxRuntime.jsxs(...unproxyFirstArg(args));
+    }
+  });
+
+  // shims/react.ts
+  var React3, react_default;
+  var init_react = __esm({
+    "shims/react.ts"() {
+      "use strict";
+      init_finders();
+      React3 = findByProps.lazy("useEffect");
+      react_default = React3;
+    }
+  });
+
+  // libraries/app/src/index.tsx
+  var initCbs, isInitialized, AppLibrary, patcher2;
+  var init_src4 = __esm({
+    "libraries/app/src/index.tsx"() {
+      "use strict";
+      init_src2();
+      init_src3();
+      init_native();
+      init_library();
+      init_react();
+      initCbs = /* @__PURE__ */ new Set();
+      isInitialized = false;
+      AppLibrary = library_default.create({
+        name: "app",
+        uses: [
+          "patcher"
+        ]
+      }, ({ patcher: patcher3 }) => {
+        var afterInitialized = (callback) => {
+          if (isInitialized) throw new Error("Cannot attach a callback after the app has already been initialized");
+          initCbs.add(callback);
+        };
+        afterInitialized(() => isInitialized = true);
+        var unpatchBefore = patcher3.before(react_default, "createElement", () => {
+          unpatchBefore();
+          recordTime("App_CreateElementCalled");
+          setTimeout(() => {
+            recordTime("App_BeforeRunCallbacks");
+            for (var callback of initCbs) callback();
+            recordTime("App_AfterRunCallbacks");
+          });
+        });
+        library_default.instanceFor(ModulesLibrary).then((modules2) => {
+          afterInitialized(function patchErrorBoundary() {
+            patcher3.after.await(modules2.findByName.async("ErrorBoundary").then((it) => it.prototype), "render", function() {
+              alert(this.state.error.stack);
+              if (this.state.error ?? true) return null;
+            }, "patchErrorBoundary");
+          });
+        });
+        return {
+          /**
+               * Whether the app has finished initializing
+               */
+          get initialized() {
+            return isInitialized;
+          },
+          /**
+               * Attaches a callback to be called when the app has been initialized
+               * @param callback The callback to be called
+               */
+          afterInitialized,
+          /**
+               * Reloads the app
+               */
+          reload: () => BundleUpdaterManager.reload()
+        };
+      });
+      ({ patcher: patcher2 } = library_default.contextFor(AppLibrary));
+    }
+  });
+
+  // node_modules/@swc/helpers/esm/_get_prototype_of.js
+  function _get_prototype_of(o) {
+    _get_prototype_of = Object.setPrototypeOf ? Object.getPrototypeOf : function getPrototypeOf(o2) {
+      return o2.__proto__ || Object.getPrototypeOf(o2);
+    };
+    return _get_prototype_of(o);
+  }
+  var init_get_prototype_of = __esm({
+    "node_modules/@swc/helpers/esm/_get_prototype_of.js"() {
+    }
+  });
+
+  // node_modules/@swc/helpers/esm/_is_native_reflect_construct.js
+  function _is_native_reflect_construct() {
+    try {
+      var result = !Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function() {
+      }));
+    } catch (_2) {
+    }
+    return (_is_native_reflect_construct = function _is_native_reflect_construct2() {
+      return !!result;
+    })();
+  }
+  var init_is_native_reflect_construct = __esm({
+    "node_modules/@swc/helpers/esm/_is_native_reflect_construct.js"() {
+    }
+  });
+
+  // node_modules/@swc/helpers/esm/_assert_this_initialized.js
+  function _assert_this_initialized(self) {
+    if (self === void 0) throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
+    return self;
+  }
+  var init_assert_this_initialized = __esm({
+    "node_modules/@swc/helpers/esm/_assert_this_initialized.js"() {
+    }
+  });
+
+  // node_modules/@swc/helpers/esm/_type_of.js
+  function _type_of(obj) {
+    "@swc/helpers - typeof";
+    return obj && typeof Symbol !== "undefined" && obj.constructor === Symbol ? "symbol" : typeof obj;
+  }
+  var init_type_of = __esm({
+    "node_modules/@swc/helpers/esm/_type_of.js"() {
+    }
+  });
+
+  // node_modules/@swc/helpers/esm/_possible_constructor_return.js
+  function _possible_constructor_return(self, call) {
+    if (call && (_type_of(call) === "object" || typeof call === "function")) return call;
+    return _assert_this_initialized(self);
+  }
+  var init_possible_constructor_return = __esm({
+    "node_modules/@swc/helpers/esm/_possible_constructor_return.js"() {
+      init_assert_this_initialized();
+      init_type_of();
+    }
+  });
+
+  // node_modules/@swc/helpers/esm/_call_super.js
+  function _call_super(_this, derived, args) {
+    derived = _get_prototype_of(derived);
+    return _possible_constructor_return(_this, _is_native_reflect_construct() ? Reflect.construct(derived, args || [], _get_prototype_of(_this).constructor) : derived.apply(_this, args));
+  }
+  var init_call_super = __esm({
+    "node_modules/@swc/helpers/esm/_call_super.js"() {
+      init_get_prototype_of();
+      init_is_native_reflect_construct();
+      init_possible_constructor_return();
+    }
+  });
+
+  // node_modules/@swc/helpers/esm/_class_call_check.js
+  function _class_call_check(instance, Constructor) {
+    if (!(instance instanceof Constructor)) throw new TypeError("Cannot call a class as a function");
+  }
+  var init_class_call_check = __esm({
+    "node_modules/@swc/helpers/esm/_class_call_check.js"() {
+    }
+  });
+
+  // node_modules/@swc/helpers/esm/_create_class.js
+  function _defineProperties(target, props) {
+    for (var i = 0; i < props.length; i++) {
+      var descriptor = props[i];
+      descriptor.enumerable = descriptor.enumerable || false;
+      descriptor.configurable = true;
+      if ("value" in descriptor) descriptor.writable = true;
+      Object.defineProperty(target, descriptor.key, descriptor);
+    }
+  }
+  function _create_class(Constructor, protoProps, staticProps) {
+    if (protoProps) _defineProperties(Constructor.prototype, protoProps);
+    if (staticProps) _defineProperties(Constructor, staticProps);
+    return Constructor;
+  }
+  var init_create_class = __esm({
+    "node_modules/@swc/helpers/esm/_create_class.js"() {
+    }
+  });
+
+  // node_modules/@swc/helpers/esm/_set_prototype_of.js
+  function _set_prototype_of(o, p) {
+    _set_prototype_of = Object.setPrototypeOf || function setPrototypeOf(o2, p2) {
+      o2.__proto__ = p2;
+      return o2;
+    };
+    return _set_prototype_of(o, p);
+  }
+  var init_set_prototype_of = __esm({
+    "node_modules/@swc/helpers/esm/_set_prototype_of.js"() {
+    }
+  });
+
+  // node_modules/@swc/helpers/esm/_inherits.js
+  function _inherits(subClass, superClass) {
+    if (typeof superClass !== "function" && superClass !== null) {
+      throw new TypeError("Super expression must either be null or a function");
+    }
+    subClass.prototype = Object.create(superClass && superClass.prototype, {
+      constructor: {
+        value: subClass,
+        writable: true,
+        configurable: true
+      }
+    });
+    if (superClass) _set_prototype_of(subClass, superClass);
+  }
+  var init_inherits = __esm({
+    "node_modules/@swc/helpers/esm/_inherits.js"() {
+      init_set_prototype_of();
+    }
+  });
+
+  // node_modules/@gullerya/object-observer/dist/object-observer.min.js
+  var m, x, E, T, K, c, $, N, Y, I, B, D, R, z, y, g, q, H, G, J, F, P, L, C, Q, X, Z, _, b, S, V, U, W, v;
+  var init_object_observer_min = __esm({
+    "node_modules/@gullerya/object-observer/dist/object-observer.min.js"() {
+      init_call_super();
+      init_class_call_check();
+      init_create_class();
+      init_inherits();
+      m = "insert";
+      x = "update";
+      E = "delete";
+      T = "reverse";
+      K = "shuffle";
+      c = Symbol.for("object-observer-meta-key-0");
+      $ = {
+        async: 1
+      };
+      N = (o) => {
+        if (!o || typeof o != "object") return null;
+        var t = {}, e = [];
+        for (var [r, n] of Object.entries(o)) if (r === "path") {
+          if (typeof n != "string" || n === "") throw new Error('"path" option, if/when provided, MUST be a non-empty string');
+          t[r] = n;
+        } else if (r === "pathsOf") {
+          if (o.path) throw new Error('"pathsOf" option MAY NOT be specified together with "path" option');
+          if (typeof n != "string") throw new Error('"pathsOf" option, if/when provided, MUST be a string (MAY be empty)');
+          t[r] = o.pathsOf.split(".").filter(Boolean);
+        } else if (r === "pathsFrom") {
+          if (o.path || o.pathsOf) throw new Error('"pathsFrom" option MAY NOT be specified together with "path"/"pathsOf" option/s');
+          if (typeof n != "string" || n === "") throw new Error('"pathsFrom" option, if/when provided, MUST be a non-empty string');
+          t[r] = n;
+        } else e.push(r);
+        if (e.length) throw new Error(`'${e.join(", ")}' is/are not a valid observer option/s`);
+        return t;
+      };
+      Y = (o, t, e) => {
+        var r = {};
+        r[c] = t;
+        for (var n in o) r[n] = g(o[n], n, t, e);
+        return r;
+      };
+      I = (o, t, e) => {
+        var r = o.length;
+        var n = new Array(r);
+        n[c] = t;
+        for (var i = 0; i < r; i++) n[i] = g(o[i], i, t, e);
+        return n;
+      };
+      B = (o, t) => (o[c] = t, o);
+      D = (o, t) => {
+        if (o === null) return t;
+        var e = t;
+        if (o.path) {
+          var r = o.path;
+          e = t.filter((n2) => n2.path.join(".") === r);
+        } else if (o.pathsOf) {
+          var r1 = o.pathsOf, n = r1.join(".");
+          e = t.filter((i) => (i.path.length === r1.length + 1 || i.path.length === r1.length && (i.type === T || i.type === K)) && i.path.join(".").startsWith(n));
+        } else if (o.pathsFrom) {
+          var r2 = o.pathsFrom;
+          e = t.filter((n2) => n2.path.join(".").startsWith(r2));
+        }
+        return e;
+      };
+      R = (o, t) => {
+        try {
+          o(t);
+        } catch (e) {
+          console.error(`failed to notify listener ${o} with ${t}`, e);
+        }
+      };
+      z = function z2() {
+        var t = this.batches;
+        this.batches = [];
+        for (var [e, r] of t) R(e, r);
+      };
+      y = (o, t) => {
+        var e = o, r, n, i, l, h, s;
+        var u = t.length;
+        do {
+          for (r = e.options.async, n = e.observers, s = n.length; s--; ) if ([i, l] = n[s], h = D(l, t), h.length) if (r) {
+            e.batches.length === 0 && queueMicrotask(z.bind(e));
+            var a = void 0;
+            for (var p of e.batches) if (p[0] === i) {
+              a = p;
+              break;
+            }
+            a || (a = [
+              i,
+              []
+            ], e.batches.push(a)), Array.prototype.push.apply(a[1], h);
+          } else R(i, h);
+          var f = e.parent;
+          if (f) {
+            for (var a1 = 0; a1 < u; a1++) {
+              var p1 = t[a1];
+              t[a1] = new b(p1.type, [
+                e.ownKey,
+                ...p1.path
+              ], p1.value, p1.oldValue, p1.object);
+            }
+            e = f;
+          } else e = null;
+        } while (e);
+      };
+      g = (o, t, e, r) => r !== void 0 && r.has(o) ? null : typeof o != "object" || o === null ? o : Array.isArray(o) ? new U({
+        target: o,
+        ownKey: t,
+        parent: e,
+        visited: r
+      }).proxy : ArrayBuffer.isView(o) ? new W({
+        target: o,
+        ownKey: t,
+        parent: e
+      }).proxy : o instanceof Date ? o : new V({
+        target: o,
+        ownKey: t,
+        parent: e,
+        visited: r
+      }).proxy;
+      q = function q2() {
+        var t = this[c], e = t.target, r = e.length - 1;
+        var n = e.pop();
+        if (n && typeof n == "object") {
+          var l = n[c];
+          l && (n = l.detach());
+        }
+        var i = [
+          new b(E, [
+            r
+          ], void 0, n, this)
+        ];
+        return y(t, i), n;
+      };
+      H = function H2() {
+        var t = this[c], e = t.target, r = arguments.length, n = new Array(r), i = e.length;
+        for (var s = 0; s < r; s++) n[s] = g(arguments[s], i + s, t);
+        var l = Reflect.apply(e.push, e, n), h = [];
+        for (var s1 = i, u = e.length; s1 < u; s1++) h[s1 - i] = new b(m, [
+          s1
+        ], e[s1], void 0, this);
+        return y(t, h), l;
+      };
+      G = function G2() {
+        var t = this[c], e = t.target;
+        var r, n, i, l, h;
+        for (r = e.shift(), r && typeof r == "object" && (h = r[c], h && (r = h.detach())), n = 0, i = e.length; n < i; n++) l = e[n], l && typeof l == "object" && (h = l[c], h && (h.ownKey = n));
+        var s = [
+          new b(E, [
+            0
+          ], void 0, r, this)
+        ];
+        return y(t, s), r;
+      };
+      J = function J2() {
+        var t = this[c], e = t.target, r = arguments.length, n = new Array(r);
+        for (var s = 0; s < r; s++) n[s] = g(arguments[s], s, t);
+        var i = Reflect.apply(e.unshift, e, n);
+        for (var s1 = 0, u = e.length, f; s1 < u; s1++) if (f = e[s1], f && typeof f == "object") {
+          var a = f[c];
+          a && (a.ownKey = s1);
+        }
+        var l = n.length, h = new Array(l);
+        for (var s2 = 0; s2 < l; s2++) h[s2] = new b(m, [
+          s2
+        ], e[s2], void 0, this);
+        return y(t, h), i;
+      };
+      F = function F2() {
+        var t = this[c], e = t.target;
+        var r, n, i;
+        for (e.reverse(), r = 0, n = e.length; r < n; r++) if (i = e[r], i && typeof i == "object") {
+          var h = i[c];
+          h && (h.ownKey = r);
+        }
+        var l = [
+          new b(T, [], void 0, void 0, this)
+        ];
+        return y(t, l), this;
+      };
+      P = function P2(t) {
+        var e = this[c], r = e.target;
+        var n, i, l;
+        for (r.sort(t), n = 0, i = r.length; n < i; n++) if (l = r[n], l && typeof l == "object") {
+          var s = l[c];
+          s && (s.ownKey = n);
+        }
+        var h = [
+          new b(K, [], void 0, void 0, this)
+        ];
+        return y(e, h), this;
+      };
+      L = function L2(t, e, r) {
+        var n = this[c], i = n.target, l = [], h = i.length, s = i.slice(0);
+        if (e = e === void 0 ? 0 : e < 0 ? Math.max(h + e, 0) : Math.min(e, h), r = r === void 0 ? h : r < 0 ? Math.max(h + r, 0) : Math.min(r, h), e < h && r > e) {
+          i.fill(t, e, r);
+          var u;
+          for (var f = e, a, p; f < r; f++) a = i[f], i[f] = g(a, f, n), f in s ? (p = s[f], p && typeof p == "object" && (u = p[c], u && (p = u.detach())), l.push(new b(x, [
+            f
+          ], i[f], p, this))) : l.push(new b(m, [
+            f
+          ], i[f], void 0, this));
+          y(n, l);
+        }
+        return this;
+      };
+      C = function C2(t, e, r) {
+        var n = this[c], i = n.target, l = i.length;
+        t = t < 0 ? Math.max(l + t, 0) : t, e = e === void 0 ? 0 : e < 0 ? Math.max(l + e, 0) : Math.min(e, l), r = r === void 0 ? l : r < 0 ? Math.max(l + r, 0) : Math.min(r, l);
+        var h = Math.min(r - e, l - t);
+        if (t < l && t !== e && h > 0) {
+          var s = i.slice(0), u = [];
+          i.copyWithin(t, e, r);
+          for (var f = t, a, p, O; f < t + h; f++) a = i[f], a && typeof a == "object" && (a = g(a, f, n), i[f] = a), p = s[f], p && typeof p == "object" && (O = p[c], O && (p = O.detach())), !(typeof a != "object" && a === p) && u.push(new b(x, [
+            f
+          ], a, p, this));
+          y(n, u);
+        }
+        return this;
+      };
+      Q = function Q2() {
+        var t = this[c], e = t.target, r = arguments.length, n = new Array(r), i = e.length;
+        for (var w = 0; w < r; w++) n[w] = g(arguments[w], w, t);
+        var l = r === 0 ? 0 : n[0] < 0 ? i + n[0] : n[0], h = r < 2 ? i - l : n[1], s = Math.max(r - 2, 0), u = Reflect.apply(e.splice, e, n), f = e.length;
+        var a;
+        for (var w1 = 0, A; w1 < f; w1++) A = e[w1], A && typeof A == "object" && (a = A[c], a && (a.ownKey = w1));
+        var p, O, j;
+        for (p = 0, O = u.length; p < O; p++) j = u[p], j && typeof j == "object" && (a = j[c], a && (u[p] = a.detach()));
+        var M = [];
+        var d;
+        for (d = 0; d < h; d++) d < s ? M.push(new b(x, [
+          l + d
+        ], e[l + d], u[d], this)) : M.push(new b(E, [
+          l + d
+        ], void 0, u[d], this));
+        for (; d < s; d++) M.push(new b(m, [
+          l + d
+        ], e[l + d], void 0, this));
+        return y(t, M), u;
+      };
+      X = function X2(t, e) {
+        var r = this[c], n = r.target, i = t.length, l = n.slice(0);
+        e = e || 0, n.set(t, e);
+        var h = new Array(i);
+        for (var s = e; s < i + e; s++) h[s - e] = new b(x, [
+          s
+        ], n[s], l[s], this);
+        y(r, h);
+      };
+      Z = {
+        pop: q,
+        push: H,
+        shift: G,
+        unshift: J,
+        reverse: F,
+        sort: P,
+        fill: L,
+        copyWithin: C,
+        splice: Q
+      };
+      _ = {
+        reverse: F,
+        sort: P,
+        fill: L,
+        copyWithin: C,
+        set: X
+      };
+      b = function b2(t, e, r, n, i) {
+        "use strict";
+        _class_call_check(this, b2);
+        this.type = t, this.path = e, this.value = r, this.oldValue = n, this.object = i;
+      };
+      S = /* @__PURE__ */ function() {
+        "use strict";
+        function S2(t, e) {
+          _class_call_check(this, S2);
+          var { target: r, parent: n, ownKey: i, visited: l = /* @__PURE__ */ new Set() } = t;
+          n && i !== void 0 ? (this.parent = n, this.ownKey = i) : (this.parent = null, this.ownKey = null), l.add(r);
+          var h = e(r, this, l);
+          l.delete(r), this.observers = [], this.revocable = Proxy.revocable(h, this), this.proxy = this.revocable.proxy, this.target = h, this.options = this.processOptions(t.options), this.options.async && (this.batches = []);
+        }
+        _create_class(S2, [
+          {
+            key: "processOptions",
+            value: function processOptions(t) {
+              if (t) {
+                if (typeof t != "object") throw new Error(`Observable options if/when provided, MAY only be an object, got '${t}'`);
+                var e = Object.keys(t).filter((r) => !(r in $));
+                if (e.length) throw new Error(`'${e.join(", ")}' is/are not a valid Observable option/s`);
+                return Object.assign({}, t);
+              } else return {};
+            }
+          },
+          {
+            key: "detach",
+            value: function detach() {
+              return this.parent = null, this.target;
+            }
+          },
+          {
+            key: "set",
+            value: function set(t, e, r) {
+              var n = t[e];
+              if (r !== n) {
+                var i = g(r, e, this);
+                if (t[e] = i, n && typeof n == "object") {
+                  var h = n[c];
+                  h && (n = h.detach());
+                }
+                var l = n === void 0 ? [
+                  new b(m, [
+                    e
+                  ], i, void 0, this.proxy)
+                ] : [
+                  new b(x, [
+                    e
+                  ], i, n, this.proxy)
+                ];
+                y(this, l);
+              }
+              return true;
+            }
+          },
+          {
+            key: "deleteProperty",
+            value: function deleteProperty(t, e) {
+              var r = t[e];
+              if (delete t[e], r && typeof r == "object") {
+                var i = r[c];
+                i && (r = i.detach());
+              }
+              var n = [
+                new b(E, [
+                  e
+                ], void 0, r, this.proxy)
+              ];
+              return y(this, n), true;
+            }
+          }
+        ]);
+        return S2;
+      }();
+      V = /* @__PURE__ */ function(S2) {
+        "use strict";
+        _inherits(V2, S2);
+        function V2(t) {
+          _class_call_check(this, V2);
+          return _call_super(this, V2, [
+            t,
+            Y
+          ]);
+        }
+        return V2;
+      }(S);
+      U = /* @__PURE__ */ function(S2) {
+        "use strict";
+        _inherits(U2, S2);
+        function U2(t) {
+          _class_call_check(this, U2);
+          return _call_super(this, U2, [
+            t,
+            I
+          ]);
+        }
+        _create_class(U2, [
+          {
+            key: "get",
+            value: function get(t, e) {
+              return Z[e] || t[e];
+            }
+          }
+        ]);
+        return U2;
+      }(S);
+      W = /* @__PURE__ */ function(S2) {
+        "use strict";
+        _inherits(W2, S2);
+        function W2(t) {
+          _class_call_check(this, W2);
+          return _call_super(this, W2, [
+            t,
+            B
+          ]);
+        }
+        _create_class(W2, [
+          {
+            key: "get",
+            value: function get(t, e) {
+              return _[e] || t[e];
+            }
+          }
+        ]);
+        return W2;
+      }(S);
+      v = Object.freeze({
+        from: (o, t) => {
+          if (!o || typeof o != "object") throw new Error("observable MAY ONLY be created from a non-null object");
+          if (o[c]) return o;
+          if (Array.isArray(o)) return new U({
+            target: o,
+            ownKey: null,
+            parent: null,
+            options: t
+          }).proxy;
+          if (ArrayBuffer.isView(o)) return new W({
+            target: o,
+            ownKey: null,
+            parent: null,
+            options: t
+          }).proxy;
+          if (o instanceof Date) throw new Error(`${o} found to be one of a non-observable types`);
+          return new V({
+            target: o,
+            ownKey: null,
+            parent: null,
+            options: t
+          }).proxy;
+        },
+        isObservable: (o) => !!(o && o[c]),
+        observe: (o, t, e) => {
+          if (!v.isObservable(o)) throw new Error("invalid observable parameter");
+          if (typeof t != "function") throw new Error(`observer MUST be a function, got '${t}'`);
+          var r = o[c].observers;
+          r.some((n) => n[0] === t) ? console.warn("observer may be bound to an observable only once; will NOT rebind") : r.push([
+            t,
+            N(e)
+          ]);
+        },
+        unobserve: (o, ...t) => {
+          if (!v.isObservable(o)) throw new Error("invalid observable parameter");
+          var e = o[c].observers;
+          var r = e.length;
+          if (r) {
+            if (!t.length) {
+              e.splice(0);
+              return;
+            }
+            for (; r; ) t.indexOf(e[--r][0]) >= 0 && e.splice(r, 1);
+          }
+        }
+      });
+    }
+  });
+
+  // libraries/storage/src/index.ts
+  function createJSONFile(path) {
+    var actualPath = `${FileModule.getConstants().DocumentsDirPath}/${path}`;
+    var file = {
+      read: /* @__PURE__ */ _async_to_generator(function* () {
+        try {
+          return JSON.parse(yield FileModule.readFile(actualPath, "utf8"));
+        } catch (e) {
+          throw new Error(`Failed to parse storage from: ${actualPath}`, {
+            cause: e
+          });
+        }
+      }),
+      write: (data) => {
+        if (!data || typeof data !== "object") {
+          throw new Error("Data to write needs to be an object");
+        }
+        return FileModule.writeFile("documents", path, JSON.stringify(data), "utf8");
+      },
+      exists: () => FileModule.fileExists(actualPath)
+    };
+    return file;
+  }
+  function useObservable(observables, opts) {
+    if (observables.some((o) => o?.[storageContextSymbol]?.error)) throw new Error("An error occured while initializing the storage");
+    if (observables.some((o) => !v.isObservable(o))) {
+      throw new Error("Argument passed isn't an Observable");
+    }
+    var [, forceUpdate] = React.useReducer((n) => ~n, 0);
+    React.useEffect(() => {
+      var listener = () => forceUpdate();
+      for (var o of observables) v.observe(o, listener, opts);
+      return () => {
+        for (var o2 of observables) v.unobserve(o2, listener);
+      };
+    }, []);
+  }
+  function createStorage(path, { initial = {} } = {}) {
+    var readyPromise = new Promise((r) => resolve = r);
+    var resolve;
+    var proxy;
+    var context = {
+      emitter: new EventEmitter(),
+      ready: false,
+      readyPromise
+    };
+    var callback = (data) => {
+      var observable = v.from(data);
+      v.observe(observable, (changes) => {
+        for (var change of changes) {
+          context.emitter.emit(change.type !== "delete" ? "set" : "delete", {
+            path: change.path,
+            value: change.value
+          });
+        }
+        backend.write(observable);
+      });
+      var _proxy = new Proxy(observable, {
+        get(target, prop, receiver) {
+          if (prop === storageContextSymbol) return context;
+          return Reflect.get(target, prop, receiver);
+        }
+      });
+      context.ready = true;
+      resolve();
+      return proxy = _proxy;
+    };
+    var backend = createJSONFile(path);
+    if (loadedStorages[path]) {
+      callback(loadedStorages[path]);
+    } else {
+      backend.exists().then(/* @__PURE__ */ function() {
+        var _ref = _async_to_generator(function* (exists) {
+          if (!exists) {
+            loadedStorages[path] = initial;
+            yield backend.write(initial);
+            callback(initial);
+          } else {
+            callback(loadedStorages[path] = yield backend.read());
+          }
+        });
+        return function(exists) {
+          return _ref.apply(this, arguments);
+        };
+      }());
+    }
+    var check = () => {
+      if (proxy) return true;
+      throw new Error(`Storage has not been initialized: ${path}`);
+    };
+    return new Proxy({}, {
+      ...Object.fromEntries(Object.getOwnPropertyNames(Reflect).map((k) => [
+        k,
+        (_2, ...args) => {
+          return check() && Reflect[k](proxy, ...args);
+        }
+      ])),
+      get(_2, prop, recv) {
+        if (prop === storageContextSymbol) return context;
+        return check() && Reflect.get(proxy, prop, recv);
+      }
+    });
+  }
+  function awaitStorage(...storages) {
+    return Promise.all(storages.map((proxy) => proxy[storageContextSymbol].readyPromise));
+  }
+  var storageContextSymbol, loadedStorages;
+  var init_src5 = __esm({
+    "libraries/storage/src/index.ts"() {
+      "use strict";
+      init_async_to_generator();
+      init_object_observer_min();
+      init_common();
+      init_native();
+      storageContextSymbol = Symbol.for("revenge.storage.context");
+      loadedStorages = {};
+    }
+  });
+
+  // libraries/plugins/src/shared.ts
+  var app;
+  var init_shared2 = __esm({
+    "libraries/plugins/src/shared.ts"() {
+      "use strict";
+      init_src4();
+      init_lazy();
+      init_library();
+      app = lazyValue(() => library_default.instanceFor(AppLibrary));
+    }
+  });
+
+  // libraries/plugins/src/internals.ts
+  function registerPlugin(definition, core = false, predicate) {
+    var cleanups = /* @__PURE__ */ new Set();
+    if (plugins.has(definition.id)) throw new Error(`Plugin "${definition.id}" already exists`);
+    if (!PluginIdRegex.test(definition.id)) throw new Error(`Cannot register plugin "${definition.id}", invalid ID format`);
+    var internalPlugin = objectSeal({
+      ...definition,
+      // Enabled by default if it is a core plugin, otherwise its enabled state will be modified after core plugins have started
+      enabled: predicate?.() ?? core,
+      core,
+      status: PluginStatus.Stopped,
+      getSettingsComponent: definition.settings,
+      patcher: createPatcherInstance(`revenge.plugins.plugin#${definition.id}`),
+      errors: [],
+      get stopped() {
+        return this.status === PluginStatus.Stopped;
+      },
+      disable() {
+        if (this.core) throw new Error(`Cannot disable core plugin "${this.id}"`);
+        if (!this.stopped) this.stop();
+        this.enabled = false;
+      },
+      enable() {
+        this.enabled = true;
+        return !!this.beforeAppRender;
+      },
+      start() {
+        return _async_to_generator(function* () {
+          if (!this.enabled) throw new Error(`Plugin "${this.id}" must be enabled before starting`);
+          if (!this.stopped) throw new Error(`Plugin "${this.id}" is already started`);
+          this.status = PluginStatus.Starting;
+          var handleError = (e, stage) => {
+            this.errors.push(e);
+            this.stop();
+            throw new Error(`Plugin "${this.id}" failed to start at "${stage}"`, {
+              cause: e
+            });
+          };
+          if (app.initialized && this.beforeAppRender) handleError(new Error(`Plugin "${this.id}" requires running before app is initialized`), "beforeAppRender");
+          try {
+            instance.context.beforeAppRender = yield this.beforeAppRender?.(instance);
+          } catch (e) {
+            handleError(e, "onAppLaunched");
+          }
+          var _this = this;
+          if (this.afterAppRender) appInitCallbacks.add(/* @__PURE__ */ _async_to_generator(function* () {
+            try {
+              instance.context.afterAppRender = yield _this.afterAppRender(instance);
+              _this.status = PluginStatus.Started;
+            } catch (e) {
+              handleError(e, "onAppInitialized");
+            }
+          }));
+          else this.status = PluginStatus.Started;
+        }).apply(this);
+      },
+      stop() {
+        if (this.stopped) return;
+        try {
+          this.onStop?.(instance);
+        } catch (e) {
+          this.errors.push(new Error(`Plugin "${this.id}" failed to stop`, {
+            cause: e
+          }));
+        } finally {
+          for (var cleanup of cleanups) cleanup();
+          if (!this.patcher.destroyed) this.patcher.destroy();
+        }
+      }
+    });
+    var proxy = new Proxy(internalPlugin, {
+      get(target, prop) {
+        if (WhitelistedPluginObjectKeys.includes(prop)) return target[prop];
+        return void 0;
+      },
+      has(target, p) {
+        return WhitelistedPluginObjectKeys.includes(p) && p in target;
+      },
+      defineProperty() {
+        throw new Error("Cannot define plugin instance properties");
+      },
+      ownKeys(target) {
+        return Object.keys(target).filter((key) => WhitelistedPluginObjectKeys.includes(key));
+      },
+      set() {
+        throw new Error("Cannot set plugin instance properties");
+      }
+    });
+    var instance = {
+      context: {
+        beforeAppRender: null,
+        afterAppRender: null
+      },
+      plugin: proxy,
+      patcher: internalPlugin.patcher,
+      storage: createStorage(`revenge/plugins/${definition.id}/storage.json`, {
+        initial: definition.initializeStorage?.() ?? {}
+      }),
+      revenge: lazyValue(() => revenge),
+      cleanup: (...funcs) => {
+        for (var cleanup of funcs) cleanups.add(cleanup);
+      }
+    };
+    if (internalPlugin.core) corePluginIds.add(internalPlugin.id);
+    plugins.set(internalPlugin.id, internalPlugin);
+    if (internalPlugin.beforeAppRender) highPriorityPluginIds.add(internalPlugin.id);
+    return proxy;
+  }
+  var PluginIdRegex, appInitCallbacks, corePluginIds, highPriorityPluginIds, plugins, WhitelistedPluginObjectKeys, PluginStatus;
+  var init_internals = __esm({
+    "libraries/plugins/src/internals.ts"() {
+      "use strict";
+      init_async_to_generator();
+      init_src();
+      init_src5();
+      init_functions();
+      init_lazy();
+      init_shared2();
+      PluginIdRegex = /^[a-z0-9-_\.]{1,128}$/;
+      appInitCallbacks = /* @__PURE__ */ new Set();
+      corePluginIds = /* @__PURE__ */ new Set();
+      highPriorityPluginIds = /* @__PURE__ */ new Set();
+      plugins = /* @__PURE__ */ new Map();
+      WhitelistedPluginObjectKeys = [
+        "description",
+        "disable",
+        "icon",
+        "id",
+        "name",
+        "version",
+        "stop",
+        "author",
+        "errors"
+      ];
+      PluginStatus = {
+        Stopped: 1,
+        Fetching: 2,
+        Starting: 3,
+        Started: 4
+      };
+    }
+  });
+
+  // libraries/ui/src/settings.ts
+  function createSettingsSection(section) {
+    if (section.name in customData.sections) throw new Error(`The settings section with the name "${section.name}" already exists`);
+    customData.sections[section.name] = section;
+    return () => delete customData.sections[section.name];
+  }
+  function createSettingsRoute(key, route) {
+    customData.rows[key] = route;
+    return () => delete customData.rows[key];
+  }
+  function addSettingsRowsToSection(name, rows2) {
+    if (!(name in customData.sections)) throw new Error(`No setting section exists with the name "${name}"`);
+    var section = customData.sections[name];
+    Object.assign(section.settings, rows2);
+    return () => {
+      for (var key in rows2) delete section.settings[key];
+    };
+  }
+  var customData, SettingsUILibrary;
+  var init_settings = __esm({
+    "libraries/ui/src/settings.ts"() {
+      "use strict";
+      init_library();
+      customData = {
+        sections: {},
+        rows: {}
+      };
+      SettingsUILibrary = library_default.create({
+        name: "ui.settings",
+        uses: []
+      }, () => {
+        return {
+          addRowsToSection: addSettingsRowsToSection,
+          createSection: createSettingsSection,
+          createRoute: createSettingsRoute
+        };
+      });
+    }
+  });
+
+  // libraries/preferences/src/index.ts
+  var src_exports = {};
+  __export(src_exports, {
+    settings: () => settings
+  });
+  var settings;
+  var init_src6 = __esm({
+    "libraries/preferences/src/index.ts"() {
+      "use strict";
+      init_src5();
+      settings = createStorage("revenge/settings.json", {
+        initial: {
+          safeMode: {
+            enabled: false,
+            enabledNextLaunch: false
+          },
+          developerSettingsEnabled: false,
+          willBeMoved_staffSettingsEnabled: false
+        }
+      });
+    }
+  });
+
+  // src/plugins/warnings/index.ts
+  var MinimumSupportedBuildNumber;
+  var init_warnings = __esm({
+    "src/plugins/warnings/index.ts"() {
+      "use strict";
+      init_async_to_generator();
+      init_common();
+      init_native();
+      init_internals();
+      MinimumSupportedBuildNumber = ReactNative2.Platform.select({
+        android: 25e4,
+        ios: 65235
+      });
+      registerPlugin(
+        {
+          name: "Warnings",
+          author: "The Revenge Team",
+          description: "Startup warnings for users that are not using the recommended defaults for Revenge",
+          id: "revenge.warnings",
+          version: "1.0.0",
+          icon: "WarningIcon",
+          afterAppRender({ revenge: { assets: assets3, modules: modules2 }, storage }) {
+            return _async_to_generator(function* () {
+              var { legacy_alerts: legacy_alerts2, toasts: toasts2 } = modules2.common;
+              if ((storage.supportWarningDismissedAt ?? Date.now()) + 6048e5 > Date.now()) {
+                legacy_alerts2.show({
+                  title: "Support Warning",
+                  body: (
+                    // biome-ignore lint/style/useTemplate: I can't see the whole message when not doing concatenation
+                    `Revenge does not officially support this build of Discord. Please update to a newer version as some features may not work as expected.
+
+Supported Builds: 250.0 (${MinimumSupportedBuildNumber}) or after
+Your Build: ${ClientInfoModule.Version} (${ClientInfoModule.Build})`
+                  ),
+                  confirmText: "Remind me in 7 days",
+                  onConfirm: () => {
+                    storage.supportWarningDismissedAt = Date.now();
+                    toasts2.open({
+                      key: "revenge.toasts.support-warning.dismissed",
+                      content: "You will see this warning again in 7 days",
+                      icon: assets3.getIndexByName("ic_warning_24px")
+                    });
+                  }
+                });
+              }
+            })();
+          }
+        },
+        true,
+        // We do !> instead of < in case the value of the left is NaN
+        () => !(Number(ClientInfoModule.Build) > MinimumSupportedBuildNumber)
+      );
+    }
+  });
+
+  // libraries/utils/src/trees.ts
+  function treeSearch(tree, filter, opts, depth) {
+    if (depth > opts.maxDepth || !tree) return;
+    if (filter(tree)) return tree;
+    var isArray = Array.isArray(tree);
+    var keys = isArray ? tree : Object.keys(tree);
+    for (var key of keys) {
+      var item = isArray ? key : tree[key];
+      if (typeof item !== "object" || item === null) continue;
+      if (!isArray && opts.walkable.length && !opts.walkable.includes(key)) continue;
+      if (!isArray && opts.ignore.includes(key)) continue;
+      var found = treeSearch(item, filter, opts, depth + 1);
+      if (found) return found;
+    }
+  }
+  function findInTree(tree, filter, { walkable = [], ignore = [], maxDepth = 100 } = {}) {
+    return treeSearch(tree, filter, {
+      walkable,
+      ignore,
+      maxDepth
+    }, 0);
+  }
+  var init_trees = __esm({
+    "libraries/utils/src/trees.ts"() {
+      "use strict";
+    }
+  });
+
+  // libraries/utils/src/react.ts
+  function findInReactTree(tree, filter) {
+    return findInTree(tree, filter, {
+      walkable: [
+        "props",
+        "children",
+        "child",
+        "sibling"
+      ]
+    });
+  }
+  var init_react2 = __esm({
+    "libraries/utils/src/react.ts"() {
+      "use strict";
+      init_trees();
+    }
+  });
+
+  // src/assets/revenge.webp
+  var revenge_default;
+  var init_revenge = __esm({
+    "src/assets/revenge.webp"() {
+      revenge_default = "data:image/webp;base64,UklGRkgGAABXRUJQVlA4WAoAAAAQAAAAXwAAXgAAQUxQSMoFAAAB8ERtu2nbtm19Of+5tmHbtm3btm3btm3btm3bZjdaG73V/Of/CxS2WktozkhETAD+X9Q5H0IQ10wuBEGhSAN5AJCpltp6n51WnQIQ1zQeE+x63qOfDWN26H3LA9IsDuN/wlyNaiRvGAvSKAHXc0zUZMxaTPxoMvgGCdiAyvL9fE/gGsNjoj+YKrCfF0IGyjmREHwnCG5hZFWjzQtfm/MSgke+HzDXg02YWD3yIoQanJcgDrl+2qW2O+Ps2SD1OS9BHDDx37UkfilwVXxA7tizrLznBY9/OZwkh82JUM15CUGQP/4Cr1FZo3HMrPDlnABjzbvuwVe/8GMvc03jGH43AXwJ5yWIR/4UC29+7C1v/EYm1pq4JqSUB+a+5LvE3KRRk5Fkm88AHs55CeKQ2zPdcjueef/Hg5ifWG/kQQhlPHB6Ipli1GQs2+blcIL88eZYY79Ln/56FPM1Rk3G2q6FlPAY+3kyJmONyiMBTLrQxkfd+NovbeaaRk3GgVW+Al/kgGfZb6zXyDfue3+QMTfFqMnYicZBk8AVCE5mP2u3xKzGqMnYwcozIHkes/bT6iM1JjN2vLE9O3xOwDmMbN7IkxFy4L5gaiDlM/B5s42hNVDi5x4uZ3EaG9g4dKqCmXppjcRF4XN6fmBqICo3g2Q8nqM2UeTRCJmAKxmb6Yaig6hNpHwZLiNYh6mJEn8cGw6Ax1yR1kDGvpnhAThM+DtTA9G4AgQAHN6i1mEpqnWKqZpVU+6MkBHcylhHrsZkA2UajVmrFHlGXsDxdSjvWua8t3pJMmqqzVJMJPnnI/ut8AetivJeSEawBbWSkQsCmGnra780khbVqqWoJDni5ZNWmhDAyYzV3gMcAI9FWV35LkJwAGSBfe77lSRVyylJtj+6dONpAUB6sDBpFYx/TZTjMMVgWpXIqxEALwIA4y9/3PNDSSthJH+4bZe5AMAFcXAY71emSjoPfI77hKnayRkAzgcBgKnXuotWYBx9zGJjA0AQh6yD+6gSE9eBAIDgIWq1UwuyToIHVmQqSPwZgASPYgf/cbXIAxAyAecwVrsJUiLbwr6MBcbeWeFR2mHCP2nVLoXk7UKtkviZR8WAW0owcUNIOcEyNFZVPgmfEaxIq0LjCpBSDpMNohUp70Qo18LFjJUSvwxwADxm6KVVUT4FcWV6cAoji41cBKGMYKZeWiXjsKlzHMb6lqkKlfuh5QpcD5YyWgkqPwBCUQCepbLOxeEBwOM5aiUjtwWCOOd8cFhwMBNLRz4GBPHOeQnAbVTWqNwSkgm4grESE3n2uCjcrY/KisoPF0Ph3C9TWWfksQh5B9VBM/5y0tJTTzD5gvt9QCorR/LeTWadaKKZ1rslMrKmmyAZwTpMNZCR5NA/BhmpxhqVZN9ff40mqaxX+SpcxmPuSKuDKRpJxsR6TZUkUzTWnPjzeHAAHCb4oyaSZmYcQDMz1m/smwUeuW9S6+pu48qQjOA2xiZS7oaQCTi+mSLPzhNsSm0i5QOQjMeMo2kNlPgh8j0epzaQ8d9J8gRrNlSaLw8e97PdPDQuVmKyP9huHOOY2QogmGcI29YwiV/4IgTM+iEZNVluM7R5EkIRAvxxg1jSksZcVdWULNtpkb9PBFcCAky250PfDu/t+69fWa8ltQ5SckUISrsAoGeqGWeebc4Fll5lva12P/i4sy676b6nX33v8x//HNanzFrHKLk2Aqq6IKg3jDPhlDPNs+gK665xMVOHKLkuWqjTOZ8VkZAv3qHsB52i5HpooWNd1nvfg4sY2ZGJ3BAtdLzDVMNpHZHIjdBC5wvWY2InJnJTtNAVm3ZGIjdDC93osQg7MZFbooWudHCfUQcskdughS4N2IntgUrktgjoWocH2T8widwRAd3r0fMyVa02a5M7IaCbPeR6khrrVTJuhYDu9sDqz0fWrQ/PDUG3OwHm2vbQw2o89LCd5gYCGlA86vcezehD3R7/iw1WUDggWAAAAPAGAJ0BKmAAXwA//f7/f7+7NrIuKAPwP4lpAABtkf3xmcYIEERHlib342OFAOaBJke9Cv7QJQApzTcmzxGs0vAA/ua1avUACK+DwABBcZhHeKGCV8ggAAA=";
+    }
+  });
+
+  // src/assets/react.webp
+  var react_default2;
+  var init_react3 = __esm({
+    "src/assets/react.webp"() {
+      react_default2 = "data:image/webp;base64,UklGRmQCAABXRUJQVlA4WAoAAAAQAAAAKwAAKwAAQUxQSBQCAAABoFVte9VMeyTEwbwS6qA4+HBAHFAH1EHGQcYBEl4JSHglvBLuA0I382+OI2IC9N9Yyjv2heqALxdl9YRj+dATSCCW0yOBBJ4fqeRaVKpDmDn4UqSaPD4RLBrWIJK4a1jJD0yELi0gii6D6b2NdvUEeF411vc6y8UDtg2Wi0r/wg02aYPpL7Cgm5n9Ie07VtuevBjeZvvMxhEMM4aMI9jeKc8Ecm9gupxg3xOIxV56JJB3Kdj04kZIN4B4XJmD35NfehJ6tQSbjLw7hA0siLvUWS35GZidNJGlsks1CDsFR5FU8U6XpDkgZklyNmeRZAdRpEoUSSoJmKSJ4STJSCiSVIJNOvjR0KFLko9ckjp0DSdCAo1nsBOXpwnuowJSUkYVplOO8lRhHRkpOdvoAD+1UT8F+OiJSxN5OxmRzJIsTmGSKpH8Ot1gkdTIRdJKr0SRZM2PrUhSsDQ2SXPSdG7QTc6PDja9/CQ047IOXeMN6FA0kfaKwY8KdMhV19aB7FPp+CtOL1MD6KaXzTkHtHmabjZN9Tck573o3UZvzvvpW6fp7c4i6fazQ/gRfkBfbpIq/VOSnKNIJTg0/E4JjlIOwr7QWEey4DgI03ilvbfSL2QBYbrcWd4zslzMCbFcWGLvyWkDc/Adug1+4/rgLfF5Xh1ylR4Jvk7VSfuE5uCcrUiSdYZ512et7t7Xokurzfta9H8TVlA4ICoAAAAwAwCdASosACwAP/3+/3+/uzayI4gD8D+JaQAAG4G9Pg4AAP7mtQAAAAA=";
+    }
+  });
+
+  // src/assets/hermes.webp
+  var hermes_default;
+  var init_hermes = __esm({
+    "src/assets/hermes.webp"() {
+      hermes_default = "data:image/webp;base64,UklGRiYIAABXRUJQVlA4WAoAAAAQAAAAXwAAXwAAQUxQSOgFAAABoEXbtilJOu/el2gbZbvSbdu2bdtluyoVKtu2bdu2XZnxsMd4kRH33Bef/RMRDiRJCppd8OLdxkIiyJEf0P9elMLQoZCmaQrDz5swpUhEU/rYXJ8cwmC15OuFc+fxOXf6yNA/bzRMjzmkDzCJHus2eeaMmWU4Y+a0wvu9D/CDe4Z9XI5ISP1aax6U7GXQcdh6tCwbHs8Nuo9I8zKSci/BslRtxiCaD0f/4HgNBKbmEuk4Dbr6IEqhomvhrZawfQm6lgN0McjU8bVhVHj6BXfAN1ou1lalFL5N3c36AVycooWe8YtRnMtjF0FZYPI8vQULPpaSHG7QpPd43eNgA9EqHw0snCpPgomuvO6x0VfSvXBdPz8uIIN5Mhc2D9+QSY0QhZ/lNzJ5Vz0CZufcEbvnAX66XJwvR4Jjc3nVxYFrKNbPg+H4adpxjEmfcCOzyk4pacfhwvXNHLyCDAYCPFjoTGXLnJjLdfxx2HiZJMO9CDYP78TddnO4p44DiEm1v2ohRKa6XneC2+0ZcY9FHnCm54SNJ6IAoNuDDlZx5uy74LJ/wriyAFjcoTDYd/ikBRsPlwBwXY3AyRuUAZO+5ipnkIi78Zdg2wMD4UBRQX5+ce/xa84ALh9uXRJK9OAq25MZb2YCh4pDkXA4EgkHCvPDU49Bw9xOUuleDod3eDMRatvA1oJgJBRjOBIqCCzTwF0qGHTTGbis9qE+iQRd+y5s7IwURMKhMoyEu8zjB7NIqJQP8KyD3WlkUILyt1fOjM4vCntfCscE+Tu5T2NJFRVM+pGrnJC4fyU1ggVsHlKUX1gcCHofi8bz4GDfFSRFQqZSX66yZeIBKui6C3BcuAcWjxvUp0coECiMXGIVG3NIzTVwfJlg5Mb4ycUuOX/i6JGDu0qZytNPVqlftywbZGRkZNb6ivv4WTVIKH6+XsCIARf9mFkRdeKot5rCNjN+/CcY3Fhd/bE/h67ad+pCiQvm0OZNKcxZzMYY9fBJ2wP8Wr1+rYw7Hnrqudc+/aqHxtyRgHrzbyPl/GvSX8Du22+/87bc7MyMBg3L/QwbSaSNZxjTS/peYEiNO2/Lu+22226/q07QR2gMT6V5EVG0rXbHbXke76g9PqlwsFmw3q/dUIoONXPujJXc7XCSCAtDSXLWNzTGK6PvqZV7x52Zz0fhJhV/sBZQgmiUFzzc6M6aDar/6tmknjxGknilHTzu7/31HQOSrLxQgQQ3OXx0I2I8fQnJtWv5GZBJxherkXRa6KeRBEnPf3eLGYeSjZ/IJB2nxz9hJffkQdJLdGUajUyy8uwtZGjBoNRdcJJql2tWEtQw2ZGeZOruAnwIK7n4Rh/h5MLF3Z5Sk6uYEdtS0WHXE9eToRmpeJG56OK0hPtOW6yrlPQsbF5d2G/I4MH9+pZl7x6BJcxiIagfacmK2FjGaOAeODx8qgtBM2AzF/rpUkoznikifTcPLvIST9r+5dE23lJ1h6BMrvLoNQq3X4mWC7eeekX9Lne7YB7HMlbi7IW+L9sdFrrqRiQNYSrHkeRsd/DwviYMklvhsJrblEy/tjuyNE8E1XGYymeVC326jZ0PX6mpNOkd2D4lTJ9xE6bp+spCpnIjqZVBnXxY072UOaoHMxbKS7jXektbeetZuCz8olbeeEojH9a86hPcPPchtfIebuK5J01b2RgWqzvO3KyOfMdVTiKpO6lOgs1eKqjQm6tspR254iAzEmE0d5VGPqwZyYMLFr5UK8udZyrtmmqlP7tILm5TKx/hPn47UrRfCv2YyiPXqJW/wuLnw5ruBbCZ2xGCVCjiKpvov5NnsRBFazKV6MA9PKx7MKkToqy9gvqMw+uIsuwa0l/yZsJ1lLUEHdW9YVDKTkQZNW520RQ2AqKJ/yCKAmM4vSHpYSBqKQh8Wrbqiv+BiqXNiQSrAx49ABU3Pe5VH2BQ7RZjp0yO45RBP1cqU1nl8g9DgxKwf/tnyKt+kLUzz31UJKslPlGYUkgpPHo6aQqdFNGUiWhKg/5vIwFWUDggGAIAAHATAJ0BKmAAYAA/HYS4Vi0oP6Oh2A5b8COJZizAA32RUQAeXH0ROeF00mnZi3Cs34GHeFMPKVzGYcunK+QUT/C3NINLqvx79scX8ZMM7nOMDHyzSHWtGsvMgTH7nb0+pIN6uZQBvFRXKtc6LLi9ZQKhZpYr8rT0UB1kEjG/CKiGYURHo/GSlciC95/OLqBxBVWF+EQXIuk2N2BdeHYlyj7za59gAP7vgj/+vssoBn+g2iClDvdcp/UtniO+2jSbvjLQJxMg+nshgrmEVmN5CP6WuBcxLLvg24IZX8A5YrLtP8an7/Nkd7QLEI9z46atnISBbVv//+ZHCBt/l34WG4y4SHlW7MycwvHYrwidZNaeubFL6mpQ+pUihICneYd/qB8BdKG9awX0x2uOOKkKGQPK9x7fSPuQZNW+Lmu2Y+jUeZwN1yrkwbehnXsMqt/NLjq0HiFO3YWnXcIRYgINP0JEdn0mOP6J8W/OWcBIXtXOXrLg5PxJ/sY/8xlftuZq1JTekn9p/weYF8plztTMvyJMCH7HPkLYJGxKH8LZxEvVCkZtiibWOHorFyg6N/gAWb3s/RTaJN9KxgaQfmFrEC/k86QuhQ7BT2Ub4KeT6VuvrrqOAN0/rl6JEd1/9VX5gcRVP1B8p+b3VlLEgEDMiUGD19rJh5c1Jd7Slyrx+xMMSdIypKOQZRgInALFaymeFI5w/pgEQfAA";
+    }
+  });
+
+  // src/plugins/settings/pages/About.tsx
+  function AboutSettingsPage() {
+    var hermesProps = HermesInternal.getRuntimeProperties();
+    return /* @__PURE__ */ jsxs(Stack, {
+      style: {
+        paddingHorizontal: 16,
+        paddingVertical: 24
+      },
+      spacing: 16,
+      direction: "vertical",
+      children: [
+        /* @__PURE__ */ jsx(TableRowGroup, {
+          title: "App",
+          children: [
+            {
+              label: "Revenge",
+              icon: {
+                uri: revenge_default
+              },
+              trailing: "local"
+            },
+            {
+              label: "Discord",
+              icon: assets2.getIndexByName("Discord"),
+              trailing: `${ClientInfoModule.Version} (${ClientInfoModule.Build})`
+            }
+          ].map((props) => (
+            // biome-ignore lint/correctness/useJsxKeyInIterable: This page never gets updated
+            /* @__PURE__ */ jsx(VersionRow, {
+              ...props
+            })
+          ))
+        }),
+        /* @__PURE__ */ jsx(TableRowGroup, {
+          title: "React",
+          children: [
+            {
+              label: "React",
+              icon: {
+                uri: react_default2
+              },
+              trailing: React.version
+            },
+            {
+              label: "React Native",
+              icon: {
+                uri: react_default2
+              },
+              trailing: hermesProps["OSS Release Version"].slice(7)
+            },
+            {
+              label: "Hermes Bytecode",
+              icon: {
+                uri: hermes_default
+              },
+              trailing: `${hermesProps["Bytecode Version"]} (${hermesProps.Build})`
+            }
+          ].map((props) => (
+            // biome-ignore lint/correctness/useJsxKeyInIterable: This page never gets updated
+            /* @__PURE__ */ jsx(VersionRow, {
+              ...props
+            })
+          ))
+        })
+      ]
+    });
+  }
+  function VersionRow(props) {
+    return /* @__PURE__ */ jsx(TableRow, {
+      label: props.label,
+      icon: /* @__PURE__ */ jsx(TableRowIcon, {
+        source: props.icon
+      }),
+      trailing: /* @__PURE__ */ jsx(TableRowTrailingText, {
+        text: props.trailing
+      }),
+      onPress: () => {
+        clipboard.setString(`${props.label} - ${props.trailing}`);
+        toasts.open({
+          key: `revenge.toasts.settings.about.copied:${props.label}`,
+          content: "Copied to clipboard",
+          icon: assets2.getIndexByName("CopyIcon")
+        });
+      }
+    });
+  }
+  var assets2;
+  var init_About = __esm({
+    "src/plugins/settings/pages/About.tsx"() {
+      "use strict";
+      init_react_jsx_runtime();
+      init_common();
+      init_components();
+      init_native();
+      init_revenge();
+      init_react3();
+      init_hermes();
+      ({ assets: assets2 } = revenge);
+    }
+  });
+
+  // src/plugins/settings/pages/CustomPageRenderer.tsx
+  function CustomPageRenderer() {
+    var navigation = NavigationNative.useNavigation();
+    var route = NavigationNative.useRoute();
+    var { render: PageComponent, ...args } = route.params;
+    React.useEffect(() => void navigation.setOptions({
+      ...args
+    }), []);
+    return /* @__PURE__ */ jsx(PageComponent, {});
+  }
+  var init_CustomPageRenderer = __esm({
+    "src/plugins/settings/pages/CustomPageRenderer.tsx"() {
+      "use strict";
+      init_react_jsx_runtime();
+      init_common();
+    }
+  });
+
+  // src/plugins/settings/pages/DebugPerformanceTimes.tsx
+  function DebugPerformanceTimesSettingsPage() {
+    var previousTimestamp;
+    return /* @__PURE__ */ jsxs(Fragment, {
+      children: [
+        /* @__PURE__ */ jsx(Text, {
+          color: "text-danger",
+          children: "Some delta times may be inaccurate as some steps run concurrently to each other. Only look at delta times when necessary. Steps that are marked in red were not skipped/not recorded."
+        }),
+        PerformanceTimesKeys.map((key) => {
+          var deltaNumber = deltaTimeOf(key);
+          previousTimestamp ??= timestampTimeOf(key);
+          var delta = deltaNumber.toFixed(4);
+          var deltaLastStep = (timestampTimeOf(key) - previousTimestamp).toFixed(4);
+          if (!Number.isNaN(deltaNumber)) previousTimestamp = timestampTimeOf(key);
+          return (
+            // biome-ignore lint/correctness/useJsxKeyInIterable: This never gets rerendered
+            /* @__PURE__ */ jsx(TableRow, {
+              variant: Number.isNaN(deltaNumber) ? "danger" : "default",
+              label: key,
+              subLabel: `${delta}ms (\u0394: ${deltaLastStep}ms)`
+            })
+          );
+        })
+      ]
+    });
+  }
+  var PerformanceTimesKeys;
+  var init_DebugPerformanceTimes = __esm({
+    "src/plugins/settings/pages/DebugPerformanceTimes.tsx"() {
+      "use strict";
+      init_react_jsx_runtime();
+      init_src2();
+      init_components();
+      PerformanceTimesKeys = Object.keys(PerformanceTimes).sort((a, b3) => deltaTimeOf(a) - deltaTimeOf(b3));
+    }
+  });
+
+  // src/plugins/settings/pages/Developer.tsx
+  function DeveloperSettingsPage() {
+    var { assets: assets3, modules: modules2 } = revenge;
+    var navigation = NavigationNative.useNavigation();
+    var inputRef = React.useRef("");
+    return /* @__PURE__ */ jsxs(Stack, {
+      style: {
+        paddingHorizontal: 16,
+        paddingVertical: 24
+      },
+      spacing: 16,
+      direction: "vertical",
+      children: [
+        /* @__PURE__ */ jsx(TableRowGroup, {
+          title: "Tools",
+          children: /* @__PURE__ */ jsx(TableRow, {
+            label: "Evaluate JavaScript",
+            icon: /* @__PURE__ */ jsx(TableRowIcon, {
+              source: assets3.getIndexByName("PaperIcon")
+            }),
+            onPress: () => {
+              alerts.openAlert("revenge.plugins.settings.developer.evaluate", /* @__PURE__ */ jsx(AlertModal, {
+                title: "Evaluate JavaScript",
+                extraContent: /* @__PURE__ */ jsx(TextArea, {
+                  autoFocus: true,
+                  label: "Code",
+                  size: "md",
+                  placeholder: "ReactNative.NativeModules.BundleUpdaterManager.reload()",
+                  onChange: (v2) => inputRef.current = v2
+                }),
+                actions: /* @__PURE__ */ jsxs(Stack, {
+                  children: [
+                    /* @__PURE__ */ jsx(AlertActionButton, {
+                      text: "Evaluate",
+                      variant: "primary",
+                      onPress: () => (
+                        // biome-ignore lint/security/noGlobalEval: This is intentional
+                        alert(modules2.findProp.lazy("inspect")(globalThis.eval(inputRef.current)))
+                      )
+                    }),
+                    /* @__PURE__ */ jsx(AlertActionButton, {
+                      text: "Cancel",
+                      variant: "secondary"
+                    })
+                  ]
+                })
+              }));
+            }
+          })
+        }),
+        /* @__PURE__ */ jsx(TableRowGroup, {
+          title: "Navigation",
+          children: /* @__PURE__ */ jsx(TableRow, {
+            label: "Test CustomPageRenderer",
+            icon: /* @__PURE__ */ jsx(TableRowIcon, {
+              source: assets3.getIndexByName("ScreenArrowIcon")
+            }),
+            onPress: () => navigation.navigate("RevengeCustomPage", {
+              title: "Custom Page Test",
+              render: () => null
+            })
+          })
+        }),
+        /* @__PURE__ */ jsx(TableRowGroup, {
+          title: "Performance",
+          children: /* @__PURE__ */ jsx(TableRow, {
+            label: "Show Debug Performance Times",
+            icon: /* @__PURE__ */ jsx(TableRowIcon, {
+              source: assets3.getIndexByName("TimerIcon")
+            }),
+            onPress: () => navigation.navigate("RevengeDebugPerformanceTimes")
+          })
+        }),
+        /* @__PURE__ */ jsx(TableRowGroup, {
+          title: "Caches",
+          children: /* @__PURE__ */ jsx(TableRow, {
+            variant: "danger",
+            label: "Recreate Metro Cache",
+            subLabel: "Module blacklists, lookup flags, asset index maps, asset module ID maps. This will reload the app.",
+            icon: /* @__PURE__ */ jsx(TableRowIcon, {
+              variant: "danger",
+              source: assets3.getIndexByName("TrashIcon")
+            }),
+            onPress: () => {
+              modules2.metro.invalidateCache();
+              BundleUpdaterManager.reload();
+            }
+          })
+        })
+      ]
+    });
+  }
+  var init_Developer = __esm({
+    "src/plugins/settings/pages/Developer.tsx"() {
+      "use strict";
+      init_react_jsx_runtime();
+      init_common();
+      init_components();
+      init_native();
+    }
+  });
+
+  // src/plugins/settings/pages/Revenge.tsx
+  function RevengeSettingsPage() {
+    var { assets: assets3 } = revenge;
+    var navigation = NavigationNative.useNavigation();
+    useObservable([
+      settings
+    ]);
+    return /* @__PURE__ */ jsxs(Stack, {
+      style: {
+        paddingHorizontal: 16,
+        paddingVertical: 24
+      },
+      spacing: 16,
+      direction: "vertical",
+      children: [
+        /* @__PURE__ */ jsx(TableRowGroup, {
+          title: "Info",
+          children: /* @__PURE__ */ jsx(TableRow, {
+            label: "About",
+            icon: /* @__PURE__ */ jsx(TableRowIcon, {
+              source: assets3.getIndexByName("CircleInformationIcon")
+            }),
+            trailing: /* @__PURE__ */ jsx(TableRow.Arrow, {}),
+            onPress: () => navigation.push("RevengeAbout")
+          })
+        }),
+        /* @__PURE__ */ jsx(TableRowGroup, {
+          title: "Actions",
+          children: /* @__PURE__ */ jsx(TableRow, {
+            label: "Reload Discord",
+            icon: /* @__PURE__ */ jsx(TableRowIcon, {
+              source: assets3.getIndexByName("RetryIcon")
+            }),
+            // Passing BundleUpdaterManager.reload directly just explodes for some reason. Maybe onPress had args?
+            onPress: () => BundleUpdaterManager.reload()
+          })
+        }),
+        /* @__PURE__ */ jsxs(TableRowGroup, {
+          title: "Advanced",
+          children: [
+            /* @__PURE__ */ jsx(TableSwitchRow, {
+              label: "Show Developer Options",
+              icon: /* @__PURE__ */ jsx(TableRowIcon, {
+                source: assets3.getIndexByName("WrenchIcon")
+              }),
+              value: settings.developerSettingsEnabled,
+              onValueChange: (v2) => settings.developerSettingsEnabled = v2
+            }),
+            ...rows.map((Row, index) => /* @__PURE__ */ jsx(Row, {}, index.toString()))
+          ]
+        })
+      ]
+    });
+  }
+  var rows;
+  var init_Revenge = __esm({
+    "src/plugins/settings/pages/Revenge.tsx"() {
+      "use strict";
+      init_react_jsx_runtime();
+      init_common();
+      init_components();
+      init_native();
+      init_src6();
+      init_src5();
+      rows = [];
+    }
+  });
+
+  // src/plugins/settings/index.tsx
+  var getCustomRows, transformRowToRawRow;
+  var init_settings2 = __esm({
+    "src/plugins/settings/index.tsx"() {
+      "use strict";
+      init_react2();
+      init_internals();
+      init_components();
+      init_settings();
+      init_src6();
+      init_revenge();
+      init_About();
+      init_CustomPageRenderer();
+      init_DebugPerformanceTimes();
+      init_Developer();
+      init_Revenge();
+      registerPlugin({
+        name: "Settings",
+        author: "The Revenge Team",
+        description: "Settings menus for Revenge",
+        id: "revenge.settings",
+        version: "1.0.0",
+        icon: "SettingsIcon",
+        afterAppRender({ patcher: patcher3, cleanup, revenge: { assets: assets3, modules: modules2, ui: { settings: sui } } }) {
+          var SettingsConstants = modules2.findByProps.lazy("SETTING_RENDERER_CONFIG");
+          var SettingsOverviewScreen = modules2.findByName.lazy("SettingsOverviewScreen", false);
+          var originalRendererConfig = SettingsConstants.SETTING_RENDERER_CONFIG;
+          var rendererConfig = originalRendererConfig;
+          Object.defineProperty(SettingsConstants, "SETTING_RENDERER_CONFIG", {
+            enumerable: true,
+            configurable: true,
+            get: () => ({
+              ...getCustomRows(),
+              ...rendererConfig
+            }),
+            set: (v2) => rendererConfig = v2
+          });
+          cleanup(() => {
+            Object.defineProperty(SettingsConstants, "SETTING_RENDERER_CONFIG", {
+              value: originalRendererConfig,
+              writable: true,
+              get: void 0,
+              set: void 0
+            });
+          });
+          patcher3.after(SettingsOverviewScreen, "default", (_2, children) => {
+            var registeredCustomRows = new Set(Object.values(customData.sections).flatMap(({ settings: settings2 }) => Object.keys(settings2)));
+            var { sections } = findInReactTree(children, (i) => i.props?.sections).props;
+            if (sections.findIndex((section2) => section2.settings.some((setting) => registeredCustomRows.has(setting))) !== -1) return;
+            var index = -~sections.findIndex((section2) => section2.settings.includes("ACCOUNT")) || 1;
+            for (var key in customData.sections) {
+              var section = customData.sections[key];
+              sections.splice(index++, 0, {
+                label: section.name,
+                settings: Object.keys(section.settings)
+              });
+            }
+          }, "addNewSettingsSections");
+          cleanup(sui.createSection({
+            name: "Revenge",
+            settings: {
+              Revenge: {
+                type: "route",
+                label: "Revenge",
+                icon: {
+                  uri: revenge_default
+                },
+                component: RevengeSettingsPage
+              },
+              RevengeDeveloper: {
+                type: "route",
+                label: "Developer",
+                icon: assets3.getIndexByName("WrenchIcon"),
+                component: DeveloperSettingsPage,
+                predicate: () => settings.developerSettingsEnabled
+              }
+            }
+          }), sui.createRoute("RevengeAbout", {
+            type: "route",
+            label: "About",
+            component: AboutSettingsPage,
+            icon: assets3.getIndexByName("CircleInformationIcon")
+          }), sui.createRoute("RevengeDebugPerformanceTimes", {
+            type: "route",
+            label: "Debug Performance Times",
+            component: DebugPerformanceTimesSettingsPage,
+            icon: assets3.getIndexByName("TImerIcon")
+          }), sui.createRoute("RevengeCustomPage", {
+            type: "route",
+            label: "Revenge Page",
+            unsearchable: true,
+            component: CustomPageRenderer,
+            predicate: () => false
+          }));
+        }
+      }, true);
+      getCustomRows = () => {
+        return [
+          ...Object.values(customData.sections),
+          {
+            name: "(unbound)",
+            settings: customData.rows
+          }
+        ].map((section) => Object.entries(section.settings).reduce((rows2, [key, row]) => {
+          rows2[key] = transformRowToRawRow(key, row);
+          return rows2;
+        }, {})).reduce((rows2, newRows) => Object.assign(rows2, newRows), {});
+      };
+      transformRowToRawRow = (key, row) => {
+        return {
+          title: () => row.label,
+          parent: row.parent ?? null,
+          icon: row.icon,
+          IconComponent: () => TableRowIcon({
+            source: row.icon
+          }),
+          unsearchable: row.unsearchable,
+          screen: row.type === "route" ? {
+            route: key,
+            getComponent: () => row.component
+          } : void 0,
+          onPress: row.onPress,
+          useDescription: row.description ? () => row.description : void 0,
+          useTrailing: row.trailing ? () => row.trailing : void 0,
+          useIsDisabled: typeof row.disabled === "boolean" ? () => row.disabled : void 0,
+          usePredicate: row.predicate,
+          onValueChange: row.onValueChange,
+          useValue: () => row.value,
+          type: row.type
+        };
+      };
+    }
+  });
+
+  // src/plugins/index.ts
+  var plugins_exports = {};
+  var init_plugins = __esm({
+    "src/plugins/index.ts"() {
+      "use strict";
+      init_warnings();
+      init_settings2();
+    }
+  });
+
+  // src/index.tsx
+  init_async_to_generator();
+  init_react_jsx_runtime();
+  init_functions();
+  init_src2();
+  init_src4();
+
+  // libraries/assets/src/index.ts
+  init_src3();
+  init_common();
+  init_metro();
+  init_library();
+  var AssetsLibrary = library_default.create({
+    name: "assets",
+    uses: [
+      "patcher"
+    ]
+  }, ({ patcher: patcher3 }) => {
+    library_default.instanceFor(ModulesLibrary).then(({ metro }) => {
+      patcher3.after(assetsRegistry, "registerAsset", ([asset], index) => {
+        var moduleId = getImportingModuleId();
+        metro.cacheAsset(asset.name, index, moduleId);
+      }, "patchRegisterAsset");
+    });
+    return {
+      assets,
+      getByName: getAssetByName,
+      getIndexByName: getAssetIndexByName,
+      getByIndex: getAssetByIndex
+    };
+  });
+  var assets = new Proxy(Object.fromEntries(Object.entries(metroCache.assets).map(([key, index]) => [
+    key,
+    assetsRegistry.getAssetByID(index)
+  ])), {
+    get(cache, prop) {
+      if (cache[prop]) return cache[prop];
+      return assetsRegistry.getAssetByID(Number(prop));
+    }
+  });
+  function getAssetByName(name) {
+    return getAssetByIndex(metroCache.assets[name]);
+  }
+  function getAssetByIndex(index) {
+    return assets[index];
+  }
+  function getAssetIndexByName(name) {
+    var cachedId = metroCache.assets[name];
+    if (cachedId) return cachedId;
+    var moduleId = metroCache.assetModules[name];
+    if (!moduleId) return;
+    return metroCache.assets[name] = requireModule(moduleId);
+  }
+
+  // src/index.tsx
+  init_src3();
+  init_constants();
+  init_native();
+
+  // libraries/plugins/src/index.ts
+  init_async_to_generator();
+
+  // libraries/shared/src/symbols.ts
+  var internalSymbol = Symbol.for("revenge.shared.interal");
+
+  // libraries/plugins/src/index.ts
+  init_library();
+  init_internals();
+  init_shared2();
+  var PluginsLibrary = library_default.create({
+    name: "plugins",
+    uses: []
+  }, () => {
+    app.afterInitialized(() => {
+      for (var cb of appInitCallbacks) cb();
+    });
+    return {
+      definePlugin,
+      [internalSymbol]: {
+        plugins,
+        startCorePlugins() {
+          return _async_to_generator(function* () {
+            for (var id of corePluginIds) {
+              try {
+                var plugin = plugins.get(id);
+                if (plugin.enabled) yield plugin.start();
+              } catch (e) {
+                throw new Error(`Core plugin "${id}" had an error while starting`, {
+                  cause: e
+                });
+              }
+            }
+          })();
+        }
+      }
+    };
+  });
+  function definePlugin(definition) {
+    return registerPlugin(definition);
+  }
+
+  // src/index.tsx
+  init_src5();
+  init_settings();
+
+  // libraries/utils/src/errors.ts
+  function getErrorStack(e) {
+    return e?.stack || String(e);
+  }
+
+  // src/index.tsx
+  init_library();
+  function initialize() {
+    recordTime("Init_Initialize");
+    Object.freeze = Object.seal = (o) => o;
+    try {
+      var promise = ModulesLibrary.new().then((modules2) => {
+        var promise2 = Promise.resolve().then(() => (init_src6(), src_exports));
+        var app2 = AppLibrary.new();
+        var plugins2 = PluginsLibrary.new();
+        globalThis.revenge = {
+          app: app2,
+          assets: assets3,
+          modules: modules2,
+          plugins: plugins2,
+          ui
+        };
+        promise2.then(/* @__PURE__ */ function() {
+          var _ref = _async_to_generator(function* ({ settings: settings2 }) {
+            yield awaitStorage(settings2);
+            recordTime("Storage_Initialized");
+            Promise.resolve().then(() => (init_plugins(), plugins_exports)).then(() => {
+              recordTime("Plugins_CoreImported");
+              revenge.plugins[internalSymbol].startCorePlugins();
+              recordTime("Plugins_CoreStarted");
+            });
+          });
+          return function(_2) {
+            return _ref.apply(this, arguments);
+          };
+        }());
+      });
+      var assets3 = AssetsLibrary.new();
+      var ui = {
+        settings: SettingsUILibrary.new()
+      };
+      return promise;
+    } catch (e) {
+      onError(e);
+    }
+  }
+  function onError(e) {
+    library_default.destroyAll();
+    console.error(`Failed to load Revenge: ${getErrorStack(e)}`);
+    if (ReactNative && !ReactNative.AppRegistry.getAppKeys().includes("Discord")) {
+      var styles = ReactNative.StyleSheet.create({
+        view: {
+          flex: 1,
+          backgroundColor: "#000b",
+          padding: 16
+        },
+        head: {
+          fontSize: 24,
+          fontWeight: "bold",
+          color: "white"
+        },
+        desc: {
+          fontSize: 16,
+          color: "white"
+        },
+        stack: {
+          fontSize: 16,
+          fontFamily: "monospace",
+          color: "white"
+        }
+      });
+      ReactNative.AppRegistry.registerComponent("Discord", () => () => /* @__PURE__ */ jsxs(ReactNative.View, {
+        style: styles.view,
+        children: [
+          /* @__PURE__ */ jsx(ReactNative.Text, {
+            style: styles.head,
+            children: "Failed to load Revenge, and Discord!"
+          }),
+          /* @__PURE__ */ jsx(ReactNative.Text, {
+            style: [
+              styles.desc,
+              {
+                marginBottom: 16
+              }
+            ],
+            children: "The app is unable to start at this stage, as the index module (module 0) could not be imported in time. This will result in a native crash if not caught by Revenge!"
+          }),
+          /* @__PURE__ */ jsx(ReactNative.Text, {
+            style: styles.desc,
+            children: "Stack trace (scrollable):"
+          }),
+          /* @__PURE__ */ jsx(ReactNative.ScrollView, {
+            style: {
+              flex: 1
+            },
+            children: /* @__PURE__ */ jsx(ReactNative.Text, {
+              style: styles.stack,
+              children: getErrorStack(e)
+            })
+          })
+        ]
+      }));
+    } else alert([
+      "Failed to load Revenge\n",
+      `Build Number: ${ClientInfoModule.Build}`,
+      getErrorStack(e)
+    ].join("\n"));
+  }
+  library_default.create({
+    name: "init",
+    uses: [
+      "patcher"
+    ]
+  }, ({ patcher: patcher3, cleanup }) => {
+    cleanup(() => {
+      if ("revenge" in globalThis) delete globalThis.revenge;
+    });
+    if (typeof __r !== "undefined") return initialize();
+    function onceIndexRequired() {
+      recordTime("Native_RequiredIndex");
+      var batchedBridge = __fbBatchedBridge;
+      var callQueue = [];
+      var unpatch2 = patcher3.instead(batchedBridge, "callFunctionReturnFlushedQueue", (args, orig) => {
+        if (args[0] === "AppRegistry" || !batchedBridge.getCallableModule(args[0])) {
+          callQueue.push(args);
+          return batchedBridge.flushedQueue();
+        }
+        return orig.apply(batchedBridge, args);
+      }, "holdNativeCalls");
+      initialize()?.then(() => {
+        recordTime("Init_PromiseResolved");
+        unpatch2();
+        for (var queue of callQueue) batchedBridge.getCallableModule(queue[0]) && batchedBridge.__callFunction(...queue);
+      })?.catch(onError);
+    }
+    var requireFunc;
+    var initialized = false;
+    Object.defineProperties(globalThis, {
+      __r: {
+        configurable: true,
+        get: () => requireFunc,
+        set(metroRequire) {
+          requireFunc = function patchedRequire(id) {
+            if (id === IndexMetroModuleId) {
+              if (initialized) return;
+              initialized = true;
+              onceIndexRequired();
+              requireFunc = metroRequire;
+            } else return metroRequire(id);
+          };
+        }
+      },
+      __d: {
+        configurable: true,
+        get() {
+          globalThis.modules ??= __c?.();
+          return this.value;
+        },
+        set(v2) {
+          this.value = v2;
+        }
+      }
+    });
+  }).new();
+})();
+//# sourceURL=revenge
