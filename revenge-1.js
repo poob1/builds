@@ -42,6 +42,266 @@
     }
   });
 
+  // libraries/utils/src/functions.ts
+  function noop() {
+  }
+  function noopPromise() {
+    return _noopPromise.apply(this, arguments);
+  }
+  function _noopPromise() {
+    _noopPromise = _async_to_generator(function* () {
+    });
+    return _noopPromise.apply(this, arguments);
+  }
+  var objectSeal;
+  var init_functions = __esm({
+    "libraries/utils/src/functions.ts"() {
+      "use strict";
+      init_async_to_generator();
+      objectSeal = Object.seal;
+    }
+  });
+
+  // libraries/utils/src/library.ts
+  function createLogger(name) {
+    var tag = `[revenge.${name}]`;
+    return {
+      log: (message) => console.log(`${tag} ${message}`),
+      warn: (message) => console.warn(`${tag} ${message}`),
+      error: (message) => console.error(`${tag} ${message}`)
+    };
+  }
+  var init_library = __esm({
+    "libraries/utils/src/library.ts"() {
+      "use strict";
+    }
+  });
+
+  // libraries/debug/src/index.ts
+  function timeOf(time) {
+    return timestampOf(time) - PerformanceTimes.Native_RequiredIndex;
+  }
+  function timestampOf(time) {
+    var timestamp = PerformanceTimes[time];
+    if (timestamp === -1) return Number.NaN;
+    return timestamp;
+  }
+  function recordTimestamp(time) {
+    return PerformanceTimes[time] = nativePerformanceNow();
+  }
+  var PerformanceTimes;
+  var init_src = __esm({
+    "libraries/debug/src/index.ts"() {
+      "use strict";
+      PerformanceTimes = {
+        Native_RequiredIndex: -1,
+        Init_Initialize: -1,
+        Modules_TriedRestoreCache: -1,
+        Modules_HookedFactories: -1,
+        Modules_IndexRequired: -1,
+        Init_PromiseResolved: -1,
+        Modules_RequiredAssets: -1,
+        Plugins_CoreImported: -1,
+        Storage_Initialized: -1,
+        Plugins_CoreStarted: -1,
+        App_RunApplicationCalled: -1,
+        App_CreateElementCalled: -1,
+        App_AfterRunCallbacks: -1
+      };
+    }
+  });
+
+  // libraries/utils/src/enums.ts
+  function createBitFlagEnum(...flags) {
+    var _enum = {};
+    for (var i = 0; i < flags.length; i++) {
+      var flag = flags[i];
+      _enum[flag] = 1 << i;
+    }
+    return _enum;
+  }
+  var init_enums = __esm({
+    "libraries/utils/src/enums.ts"() {
+      "use strict";
+    }
+  });
+
+  // libraries/modules/src/constants.ts
+  var constants_exports = {};
+  __export(constants_exports, {
+    IndexMetroModuleId: () => IndexMetroModuleId,
+    MetroCacheKey: () => MetroCacheKey,
+    MetroCacheVersion: () => MetroCacheVersion,
+    MetroModuleFilePathKey: () => MetroModuleFilePathKey,
+    MetroModuleFlags: () => MetroModuleFlags,
+    MetroModuleLookupFlags: () => MetroModuleLookupFlags,
+    SafeModuleHookAmountBeforeDefer: () => SafeModuleHookAmountBeforeDefer
+  });
+  var MetroModuleFlags, MetroModuleLookupFlags, IndexMetroModuleId, SafeModuleHookAmountBeforeDefer, MetroCacheVersion, MetroCacheKey, MetroModuleFilePathKey;
+  var init_constants = __esm({
+    "libraries/modules/src/constants.ts"() {
+      "use strict";
+      init_enums();
+      MetroModuleFlags = createBitFlagEnum("Blacklisted");
+      MetroModuleLookupFlags = createBitFlagEnum("NotFound", "FullLookup");
+      IndexMetroModuleId = 0;
+      SafeModuleHookAmountBeforeDefer = 1500;
+      MetroCacheVersion = 1;
+      MetroCacheKey = "RevengeMetroCache";
+      MetroModuleFilePathKey = "__moduleFilePath";
+    }
+  });
+
+  // libraries/utils/src/lazy.ts
+  function lazyValue(factory, opts = {}) {
+    var cache2;
+    var HintMap = {
+      object: {},
+      // biome-ignore lint/complexity/useArrowFunction: When hint is a function, we need to hint it as a function WHICH CAN HAVE A CONSTRUCTOR
+      function: function _function() {
+      },
+      number: 0
+    };
+    var dummy = HintMap[opts.hint ?? "function"];
+    var proxyFactory = () => cache2 ??= factory();
+    var proxy = new Proxy(dummy, lazyHandler);
+    factories.set(proxy, proxyFactory);
+    proxyContextHolder.set(dummy, {
+      factory,
+      options: opts
+    });
+    return proxy;
+  }
+  function lazyDestructure(factory, opts = {}) {
+    var proxiedObject = lazyValue(factory);
+    return new Proxy({}, {
+      get(_2, property) {
+        if (property === Symbol.iterator) {
+          return function* () {
+            yield proxiedObject;
+            yield new Proxy({}, {
+              get: (_3, p) => lazyValue(() => proxiedObject[p], opts)
+            });
+            throw new Error("This is not a real iterator, this is likely used incorrectly");
+          };
+        }
+        return lazyValue(() => proxiedObject[property], opts);
+      }
+    });
+  }
+  function getProxyFactory(obj) {
+    return factories.get(obj);
+  }
+  var unconfigurable, isUnconfigurable, factories, proxyContextHolder, lazyHandler;
+  var init_lazy = __esm({
+    "libraries/utils/src/lazy.ts"() {
+      "use strict";
+      unconfigurable = /* @__PURE__ */ new Set([
+        "arguments",
+        "caller",
+        "prototype"
+      ]);
+      isUnconfigurable = (key) => typeof key === "string" && unconfigurable.has(key);
+      factories = /* @__PURE__ */ new WeakMap();
+      proxyContextHolder = /* @__PURE__ */ new WeakMap();
+      lazyHandler = {
+        ...Object.fromEntries(Object.getOwnPropertyNames(Reflect).map((fnName) => {
+          return [
+            fnName,
+            (target, ...args) => {
+              var contextHolder = proxyContextHolder.get(target);
+              var resolved = contextHolder?.factory();
+              if (!resolved) throw new Error(`Cannot run Reflect.${fnName} on ${typeof resolved}`);
+              return Reflect[fnName](resolved, ...args);
+            }
+          ];
+        })),
+        has(target, p) {
+          var contextHolder = proxyContextHolder.get(target);
+          if (contextHolder?.options) {
+            var { exemptedEntries: isolatedEntries } = contextHolder.options;
+            if (isolatedEntries && p in isolatedEntries) return true;
+          }
+          var resolved = contextHolder?.factory();
+          if (!resolved) throw new Error(`Cannot read keys of ${typeof resolved}`);
+          return Reflect.has(resolved, p);
+        },
+        get(target, p, receiver) {
+          var contextHolder = proxyContextHolder.get(target);
+          if (contextHolder?.options) {
+            var { exemptedEntries: isolatedEntries } = contextHolder.options;
+            if (isolatedEntries?.[p]) return isolatedEntries[p];
+          }
+          var resolved = contextHolder?.factory();
+          if (!resolved) throw new Error(`Cannot read properties of ${typeof resolved} (reading '${String(p)}')`);
+          return Reflect.get(resolved, p, receiver);
+        },
+        ownKeys: (target) => {
+          var contextHolder = proxyContextHolder.get(target);
+          var resolved = contextHolder?.factory();
+          if (!resolved) throw new Error(`Cannot get keys of ${typeof resolved}`);
+          var cacheKeys = Reflect.ownKeys(resolved);
+          for (var key of unconfigurable) {
+            if (!cacheKeys.includes(key)) cacheKeys.push(key);
+          }
+          return cacheKeys;
+        },
+        getOwnPropertyDescriptor: (target, p) => {
+          var contextHolder = proxyContextHolder.get(target);
+          var resolved = contextHolder?.factory();
+          if (!resolved) throw new Error(`Trying to getOwnPropertyDescriptor of ${typeof resolved}`);
+          if (isUnconfigurable(p)) return Reflect.getOwnPropertyDescriptor(target, p);
+          var descriptor = Reflect.getOwnPropertyDescriptor(resolved, p);
+          if (descriptor) Object.defineProperty(target, p, descriptor);
+          return descriptor;
+        }
+      };
+    }
+  });
+
+  // libraries/modules/src/native/modules.ts
+  var nmp, CacheModule, FileModule, ClientInfoModule, DeviceModule, BundleUpdaterManager, ThemeModule;
+  var init_modules = __esm({
+    "libraries/modules/src/native/modules.ts"() {
+      "use strict";
+      init_lazy();
+      nmp = nativeModuleProxy;
+      CacheModule = lazyValue(() => nmp.NativeCacheModule ?? nmp.MMKVManager);
+      FileModule = lazyValue(() => nmp.NativeFileModule ?? nmp.RTNFileManager ?? nmp.DCDFileManager);
+      ClientInfoModule = lazyValue(() => nmp.NativeClientInfoModule ?? nmp.RTNClientInfoManager ?? nmp.InfoDictionaryManager);
+      DeviceModule = lazyValue(() => nmp.NativeDeviceModule ?? nmp.RTNDeviceManager ?? nmp.DCDDeviceManager);
+      BundleUpdaterManager = lazyValue(() => nmp.BundleUpdaterManager);
+      ThemeModule = lazyValue(() => nmp.NativeThemeModule ?? nmp.RTNThemeManager ?? nmp.DCDThemeManager);
+    }
+  });
+
+  // libraries/modules/src/native/index.ts
+  var native_exports = {};
+  __export(native_exports, {
+    BundleUpdaterManager: () => BundleUpdaterManager,
+    CacheModule: () => CacheModule,
+    ClientInfoModule: () => ClientInfoModule,
+    DeviceModule: () => DeviceModule,
+    FileModule: () => FileModule,
+    ThemeModule: () => ThemeModule
+  });
+  var init_native = __esm({
+    "libraries/modules/src/native/index.ts"() {
+      "use strict";
+      init_modules();
+    }
+  });
+
+  // libraries/utils/src/errors.ts
+  function getErrorStack(e) {
+    return e?.stack || String(e);
+  }
+  var init_errors = __esm({
+    "libraries/utils/src/errors.ts"() {
+      "use strict";
+    }
+  });
+
   // node_modules/@marshift/strawberry/dist/index.mjs
   function unpatch(patchedFunction, hookId, type) {
     var patch = patchedFunctions.get(patchedFunction);
@@ -165,7 +425,7 @@
   var init_utils = __esm({
     "libraries/patcher/src/utils.ts"() {
       "use strict";
-      init_src();
+      init_src2();
     }
   });
 
@@ -243,7 +503,7 @@
     };
   }
   var patcherLazyModuleSymbol, patcherInstances, _after, _before, _instead;
-  var init_src = __esm({
+  var init_src2 = __esm({
     "libraries/patcher/src/index.ts"() {
       "use strict";
       init_dist();
@@ -256,293 +516,15 @@
     }
   });
 
-  // libraries/utils/src/lazy.ts
-  function lazyValue(factory, opts = {}) {
-    var cache;
-    var HintMap = {
-      object: {},
-      // biome-ignore lint/complexity/useArrowFunction: When hint is a function, we need to hint it as a function WHICH CAN HAVE A CONSTRUCTOR
-      function: function _function() {
-      },
-      number: 0
-    };
-    var dummy = HintMap[opts.hint ?? "function"];
-    var proxyFactory = () => cache ??= factory();
-    var proxy = new Proxy(dummy, lazyHandler);
-    factories.set(proxy, proxyFactory);
-    proxyContextHolder.set(dummy, {
-      factory,
-      options: opts
-    });
-    return proxy;
-  }
-  function lazyDestructure(factory, opts = {}) {
-    var proxiedObject = lazyValue(factory);
-    return new Proxy({}, {
-      get(_2, property) {
-        if (property === Symbol.iterator) {
-          return function* () {
-            yield proxiedObject;
-            yield new Proxy({}, {
-              get: (_3, p) => lazyValue(() => proxiedObject[p], opts)
-            });
-            throw new Error("This is not a real iterator, this is likely used incorrectly");
-          };
-        }
-        return lazyValue(() => proxiedObject[property], opts);
-      }
-    });
-  }
-  function getProxyFactory(obj) {
-    return factories.get(obj);
-  }
-  var unconfigurable, isUnconfigurable, factories, proxyContextHolder, lazyHandler;
-  var init_lazy = __esm({
-    "libraries/utils/src/lazy.ts"() {
-      "use strict";
-      unconfigurable = /* @__PURE__ */ new Set([
-        "arguments",
-        "caller",
-        "prototype"
-      ]);
-      isUnconfigurable = (key) => typeof key === "string" && unconfigurable.has(key);
-      factories = /* @__PURE__ */ new WeakMap();
-      proxyContextHolder = /* @__PURE__ */ new WeakMap();
-      lazyHandler = {
-        ...Object.fromEntries(Object.getOwnPropertyNames(Reflect).map((fnName) => {
-          return [
-            fnName,
-            (target, ...args) => {
-              var contextHolder = proxyContextHolder.get(target);
-              var resolved = contextHolder?.factory();
-              if (!resolved) throw new Error(`Cannot run Reflect.${fnName} on ${typeof resolved}`);
-              return Reflect[fnName](resolved, ...args);
-            }
-          ];
-        })),
-        has(target, p) {
-          var contextHolder = proxyContextHolder.get(target);
-          if (contextHolder?.options) {
-            var { exemptedEntries: isolatedEntries } = contextHolder.options;
-            if (isolatedEntries && p in isolatedEntries) return true;
-          }
-          var resolved = contextHolder?.factory();
-          if (!resolved) throw new Error(`Cannot read keys of ${typeof resolved}`);
-          return Reflect.has(resolved, p);
-        },
-        get(target, p, receiver) {
-          var contextHolder = proxyContextHolder.get(target);
-          if (contextHolder?.options) {
-            var { exemptedEntries: isolatedEntries } = contextHolder.options;
-            if (isolatedEntries?.[p]) return isolatedEntries[p];
-          }
-          var resolved = contextHolder?.factory();
-          if (!resolved) throw new Error(`Cannot read properties of ${typeof resolved} (reading '${String(p)}')`);
-          return Reflect.get(resolved, p, receiver);
-        },
-        ownKeys: (target) => {
-          var contextHolder = proxyContextHolder.get(target);
-          var resolved = contextHolder?.factory();
-          if (!resolved) throw new Error(`Cannot get keys of ${typeof resolved}`);
-          var cacheKeys = Reflect.ownKeys(resolved);
-          for (var key of unconfigurable) {
-            if (!cacheKeys.includes(key)) cacheKeys.push(key);
-          }
-          return cacheKeys;
-        },
-        getOwnPropertyDescriptor: (target, p) => {
-          var contextHolder = proxyContextHolder.get(target);
-          var resolved = contextHolder?.factory();
-          if (!resolved) throw new Error(`Trying to getOwnPropertyDescriptor of ${typeof resolved}`);
-          if (isUnconfigurable(p)) return Reflect.getOwnPropertyDescriptor(target, p);
-          var descriptor = Reflect.getOwnPropertyDescriptor(resolved, p);
-          if (descriptor) Object.defineProperty(target, p, descriptor);
-          return descriptor;
-        }
-      };
-    }
-  });
-
-  // libraries/utils/src/library.ts
-  function createLibrary({ name, uses: features }, callback) {
-    var id = `revenge.library.${name}`;
-    var tag = `[revenge.${name}]`;
-    var cleanups = [];
-    var patcher3 = features.includes("patcher") ? createPatcherInstance(id) : void 0;
-    var logger2 = features.includes("logger") ? {
-      log: (message) => console.log(`${tag} ${message}`),
-      warn: (message) => console.warn(`${tag} ${message}`),
-      error: (message) => console.error(`${tag} ${message}`)
-    } : void 0;
-    var registered = {
-      context: {
-        patcher: patcher3,
-        logger: logger2,
-        cleanup: (cleanup) => void cleanups.push(cleanup)
-      },
-      // ^^ as works, but not satisfies
-      factory: {
-        name,
-        id,
-        new: function newLibrary() {
-          if (registered.instance) throw new Error("Library already has an instance");
-          var instance = callback(registered.context);
-          registered.instance = instance;
-          if (instance instanceof Promise) instance.then((inst) => registered.awaitedInstance = inst);
-          else registered.awaitedInstance = registered.instance;
-          return instance;
-        },
-        destroy: function destroyLibrary() {
-          for (var cleanup of cleanups) cleanup();
-          if (patcher3) patcher3.destroy();
-          registered.instance = void 0;
-          registered.awaitedInstance = void 0;
-        },
-        features
-      }
-    };
-    Object.defineProperty(registered.factory.new, "name", {
-      value: `newLibrary:${registered.factory.id}`
-    });
-    registeredLibraries.set(id, registered);
-    return registered.factory;
-  }
-  function contextForLibrary(library) {
-    if (!library) throw new Error("Cannot get the context of an uninitialized library");
-    return lazyDestructure(() => registeredLibraries.get(library.id)?.context);
-  }
-  function factoryForLibrary(library) {
-    if (!library) throw new Error("Cannot get the factory of an undefined library");
-    return lazyDestructure(() => registeredLibraries.get(library.id)?.factory);
-  }
-  function instanceForLibrary(library) {
-    if (!library) throw new Error("Cannot get an instance of an undefined library");
-    if (!registeredLibraries.has(library.id)) throw new Error("Cannot get an instance of a library that has not been created");
-    var instance = registeredLibraries.get(library.id)?.instance;
-    if (!instance) throw new Error("Cannot get an instance of a library that has not been initialized");
-    return instance;
-  }
-  function awaitedInstanceFor(library) {
-    if (!library) throw new Error("Cannot get an instance of an undefined library");
-    if (!registeredLibraries.has(library.id)) throw new Error("Cannot get an instance of a library that has not been created");
-    var instance = registeredLibraries.get(library.id)?.awaitedInstance;
-    if (!instance) throw new Error("Cannot get an instance of a library that has not been fully initialized");
-    return instance;
-  }
-  var registeredLibraries, Libraries, library_default;
-  var init_library = __esm({
-    "libraries/utils/src/library.ts"() {
-      "use strict";
-      init_src();
-      init_lazy();
-      registeredLibraries = /* @__PURE__ */ new Map();
-      Libraries = {
-        create: createLibrary,
-        contextFor: contextForLibrary,
-        factoryFor: factoryForLibrary,
-        instanceFor: instanceForLibrary,
-        awaitedInstanceFor,
-        destroyAll() {
-          for (var { factory } of registeredLibraries.values()) factory.destroy();
-        }
-      };
-      library_default = Libraries;
-    }
-  });
-
-  // libraries/utils/src/enums.ts
-  function createBitFlagEnum(...flags) {
-    var _enum = {};
-    for (var i = 0; i < flags.length; i++) {
-      var flag = flags[i];
-      _enum[flag] = 1 << i;
-    }
-    return _enum;
-  }
-  var init_enums = __esm({
-    "libraries/utils/src/enums.ts"() {
-      "use strict";
-    }
-  });
-
-  // libraries/modules/src/constants.ts
-  var constants_exports = {};
-  __export(constants_exports, {
-    IndexMetroModuleId: () => IndexMetroModuleId,
-    MetroCacheKey: () => MetroCacheKey,
-    MetroCacheVersion: () => MetroCacheVersion,
-    MetroModuleFlags: () => MetroModuleFlags,
-    MetroModuleLookupFlags: () => MetroModuleLookupFlags,
-    SafeModuleHookAmountBeforeDefer: () => SafeModuleHookAmountBeforeDefer
-  });
-  var MetroModuleFlags, MetroModuleLookupFlags, IndexMetroModuleId, SafeModuleHookAmountBeforeDefer, MetroCacheVersion, MetroCacheKey;
-  var init_constants = __esm({
-    "libraries/modules/src/constants.ts"() {
-      "use strict";
-      init_enums();
-      MetroModuleFlags = createBitFlagEnum("Blacklisted");
-      MetroModuleLookupFlags = createBitFlagEnum("NotFound");
-      IndexMetroModuleId = 0;
-      SafeModuleHookAmountBeforeDefer = 1500;
-      MetroCacheVersion = 1;
-      MetroCacheKey = "RevengeMetroCache";
-    }
-  });
-
-  // libraries/debug/src/index.ts
-  function timeOf(time) {
-    return timestampOf(time) - PerformanceTimes.Native_RequiredIndex;
-  }
-  function timestampOf(time) {
-    var timestamp = PerformanceTimes[time];
-    if (timestamp === -1) return Number.NaN;
-    return timestamp;
-  }
-  function recordTimestamp(time) {
-    return PerformanceTimes[time] = nativePerformanceNow();
-  }
-  var PerformanceTimes;
-  var init_src2 = __esm({
-    "libraries/debug/src/index.ts"() {
-      "use strict";
-      PerformanceTimes = {
-        Native_RequiredIndex: -1,
-        Init_Initialize: -1,
-        Modules_TriedRestoreCache: -1,
-        Modules_HookedFactories: -1,
-        Modules_IndexRequired: -1,
-        Init_PromiseResolved: -1,
-        Modules_RequiredAssets: -1,
-        Plugins_CoreImported: -1,
-        Storage_Initialized: -1,
-        Plugins_CoreStarted: -1,
-        App_CreateElementCalled: -1,
-        App_BeforeRunCallbacks: -1,
-        App_AfterRunCallbacks: -1
-      };
-    }
-  });
-
   // libraries/modules/src/shared.ts
   var patcher, logger;
   var init_shared = __esm({
     "libraries/modules/src/shared.ts"() {
       "use strict";
-      init_lazy();
+      init_src2();
       init_library();
-      init_src3();
-      ({ patcher, logger } = lazyDestructure(() => library_default.contextFor(ModulesLibrary)));
-    }
-  });
-
-  // libraries/utils/src/functions.ts
-  function noop() {
-  }
-  var objectSeal;
-  var init_functions = __esm({
-    "libraries/utils/src/functions.ts"() {
-      "use strict";
-      objectSeal = Object.seal;
+      patcher = createPatcherInstance("revenge.library.modules");
+      logger = createLogger("modules");
     }
   });
 
@@ -560,7 +542,7 @@
   function createLazyModule(filter) {
     var moduleIds = indexedModuleIdsForLookup(filter.key);
     var moduleId;
-    var cache;
+    var cachedValue;
     var context = {
       filter,
       getModuleId: () => moduleId,
@@ -568,17 +550,17 @@
         for (var id of moduleIds) {
           moduleId = id;
           if (getMetroModules()[moduleId]?.isInitialized) {
-            if (!cache && !this.forceLoad()) {
-              delete metroCache.lookupFlags[filter.key]?.[moduleId];
+            if (!cachedValue && !this.forceLoad()) {
+              delete cache.lookupFlags[filter.key]?.[moduleId];
               continue;
             }
-            cb(cache);
+            cb(cachedValue);
             return noop;
           }
           return this.subscribe(cb);
         }
-        if (cache || this.forceLoad()) {
-          cb(cache);
+        if (cachedValue || this.forceLoad()) {
+          cb(cachedValue);
           return noop;
         }
         moduleId = void 0;
@@ -588,11 +570,11 @@
         return subscribeModuleLazy(proxy, cb);
       },
       get cache() {
-        return cache;
+        return cachedValue;
       },
       forceLoad() {
-        cache ??= find.eager(filter);
-        return cache;
+        cachedValue ??= find.eager(filter);
+        return cachedValue;
       }
     };
     var proxy = lazyValue(() => context.forceLoad(), {
@@ -608,7 +590,7 @@
   var init_lazy2 = __esm({
     "libraries/modules/src/utils/lazy.ts"() {
       "use strict";
-      init_src();
+      init_src2();
       init_functions();
       init_lazy();
       init_finders();
@@ -658,11 +640,11 @@
       init_metro();
       init_lazy2();
       findId = Object.assign(function findModuleId(filter) {
-        var { cache, finish } = cacherFor(filter.key);
+        var { cache: cache2, finish } = cacherFor(filter.key);
         for (var [id, moduleExports] of modulesForFinder(filter.key)) {
           var { exports, isDefaultExport } = filterExports(moduleExports, id, filter);
           if (typeof exports !== "undefined") {
-            cache(id, exports);
+            cache2(id, exports);
             finish(false);
             return [
               id,
@@ -679,12 +661,12 @@
              * @returns A generator that yields an array containing the module ID and whether the export is the default export
              */
         all: function* findModuleIdAll(filter) {
-          var { cache, finish } = cacherFor(filter.key);
+          var { cache: cache2, finish } = cacherFor(filter.key);
           var found = false;
-          for (var [id, moduleExports] of modulesForFinder(filter.key)) {
+          for (var [id, moduleExports] of modulesForFinder(filter.key, true)) {
             var { exports, isDefaultExport } = filterExports(moduleExports, id, filter);
             if (typeof exports !== "undefined") {
-              cache(id, exports);
+              cache2(id, exports);
               found = true;
               yield [
                 id,
@@ -692,7 +674,7 @@
               ];
             }
           }
-          finish(found);
+          finish(found, true);
         }
       });
       find = Object.assign(function findModule(filter) {
@@ -705,54 +687,62 @@
              */
         all: function* findModuleAll(filter) {
           for (var [id, isDefaultExport] of findId.all(filter)) {
-            if (typeof id !== "number") return;
-            yield isDefaultExport ? requireModule(id).default : requireModule(id);
+            if (typeof id === "number") yield isDefaultExport ? requireModule(id).default : requireModule(id);
           }
         },
         eager: function findModuleEager(filter) {
           var [id, defaultExport] = findId(filter);
-          if (typeof id !== "number") return;
-          return defaultExport ? requireModule(id).default : requireModule(id);
+          if (typeof id === "number") return defaultExport ? requireModule(id).default : requireModule(id);
         }
       });
-      findByProps = Object.assign((prop, ...props) => find(byProps(prop, ...props)), {
-        async(prop, ...propsAndOrTimeout) {
+      findByProps = Object.assign(function findByPropsLazy(prop, ...props) {
+        return find(byProps(prop, ...props));
+      }, {
+        async: function findByPropsAsync(prop, ...propsAndOrTimeout) {
           var cloned = [
             ...propsAndOrTimeout
           ];
           var timeout = typeof cloned[cloned.length - 1] === "number" ? cloned.pop() : 1e3;
           return new Promise((resolve) => {
-            var id = setTimeout(resolve, timeout);
+            var id = setTimeout(() => resolve(void 0), timeout);
             findByProps(prop, ...cloned)[lazyContextSymbol].getExports((exp) => {
               clearTimeout(id);
               resolve(exp);
             });
           });
         },
-        eager: (prop, ...props) => find.eager(byProps(prop, ...props)),
+        eager: function findByPropsEager(prop, ...props) {
+          return find.eager(byProps(prop, ...props));
+        },
         /**
-         * Yield all exports with specified properties
-         *
-         * - Filter: `m[prop] && props.every(p => m[p])`
-         * - Returns: `m`
-         *
-         * @param prop The property to search for
-         * @param props Additional properties to search for
-         * @returns The module exports
-         */
-        all: (prop, ...props) => find.all(byProps(prop, ...props))
+             * Yield all exports with specified properties
+             *
+             * - Filter: `m[prop] && props.every(p => m[p])`
+             * - Returns: `m`
+             *
+             * @param prop The property to search for
+             * @param props Additional properties to search for
+             * @returns The module exports
+             */
+        all: function findByPropsAll(prop, ...props) {
+          return find.all(byProps(prop, ...props));
+        }
       });
-      findByName = Object.assign((name, returnDefaultExport = true) => find(returnDefaultExport ? byName(name) : byName.raw(name)), {
-        async(name, returnDefaultExport = true, timeout = 1e3) {
+      findByName = Object.assign(function findByNameLazy(name, returnDefaultExport = true) {
+        return find(returnDefaultExport ? byName(name) : byName.raw(name));
+      }, {
+        async: function findByNameAsync(name, returnDefaultExport = true, timeout = 1e3) {
           return new Promise((resolve) => {
-            var id = setTimeout(resolve, timeout);
+            var id = setTimeout(() => resolve(void 0), timeout);
             findByName(name, returnDefaultExport)[lazyContextSymbol].getExports((exp) => {
               clearTimeout(id);
               resolve(exp);
             });
           });
         },
-        eager: (name, returnDefaultExport = true) => find.eager(returnDefaultExport ? byName(name) : byName.raw(name)),
+        eager: function findByNameEager(name, returnDefaultExport = true) {
+          return find.eager(returnDefaultExport ? byName(name) : byName.raw(name));
+        },
         /**
              * Yields all exports with matching name
              *
@@ -763,19 +753,25 @@
              * @param returnDefaultExport Whether to return the default export instead of the whole module
              * @returns The module exports
              */
-        all: (name, returnDefaultExport = true) => find.all(returnDefaultExport ? byName(name) : byName.raw(name))
+        all: function findByNameAll(name, returnDefaultExport = true) {
+          return find.all(returnDefaultExport ? byName(name) : byName.raw(name));
+        }
       });
-      findByDisplayName = Object.assign((name, returnDefaultExport = true) => find(returnDefaultExport ? byDisplayName(name) : byDisplayName.raw(name)), {
-        async(name, returnDefaultExport = true, timeout = 1e3) {
+      findByDisplayName = Object.assign(function findByDisplayNameLazy(name, returnDefaultExport = true) {
+        return find(returnDefaultExport ? byDisplayName(name) : byDisplayName.raw(name));
+      }, {
+        async: function findByDisplayNameAsync(name, returnDefaultExport = true, timeout = 1e3) {
           return new Promise((resolve) => {
-            var id = setTimeout(resolve, timeout);
+            var id = setTimeout(() => resolve(void 0), timeout);
             findByDisplayName(name, returnDefaultExport)[lazyContextSymbol].getExports((exp) => {
               clearTimeout(id);
               resolve(exp);
             });
           });
         },
-        eager: (name, returnDefaultExport = true) => find.eager(returnDefaultExport ? byDisplayName(name) : byDisplayName.raw(name)),
+        eager: function findByDisplayNameEager(name, returnDefaultExport = true) {
+          return find.eager(returnDefaultExport ? byDisplayName(name) : byDisplayName.raw(name));
+        },
         /**
              * Yields all exports with matching display name
              *
@@ -786,19 +782,25 @@
              * @param returnDefaultExport Whether to return the default export instead of the whole module
              * @returns The module exports
              */
-        all: (name, returnDefaultExport = true) => find.all(returnDefaultExport ? byDisplayName(name) : byDisplayName.raw(name))
+        all: function findByDisplayNameAll(name, returnDefaultExport = true) {
+          return find.all(returnDefaultExport ? byDisplayName(name) : byDisplayName.raw(name));
+        }
       });
-      findByTypeName = Object.assign((name, returnDefaultExport = true) => find(returnDefaultExport ? byTypeName(name) : byTypeName.raw(name)), {
-        async(name, returnDefaultExport = true, timeout = 1e3) {
+      findByTypeName = Object.assign(function findByTypeNameLazy(name, returnDefaultExport = true) {
+        return find(returnDefaultExport ? byTypeName(name) : byTypeName.raw(name));
+      }, {
+        async: function findByTypeNameAsync(name, returnDefaultExport = true, timeout = 1e3) {
           return new Promise((resolve) => {
-            var id = setTimeout(resolve, timeout);
+            var id = setTimeout(() => resolve(void 0), timeout);
             findByTypeName(name, returnDefaultExport)[lazyContextSymbol].getExports((exp) => {
               clearTimeout(id);
               resolve(exp);
             });
           });
         },
-        eager: (name, returnDefaultExport = true) => find.eager(returnDefaultExport ? byTypeName(name) : byTypeName.raw(name)),
+        eager: function findByTypeNameEager(name, returnDefaultExport = true) {
+          return find.eager(returnDefaultExport ? byTypeName(name) : byTypeName.raw(name));
+        },
         /**
              * Yields all exports by its type name (`x.type.name`)
              *
@@ -809,93 +811,84 @@
              * @param returnDefaultExport Whether to return the default export instead of the whole module
              * @returns The module exports
              */
-        all: (name, returnDefaultExport = true) => find.all(returnDefaultExport ? byTypeName(name) : byTypeName.raw(name))
+        all: function findByTypeNameAll(name, returnDefaultExport = true) {
+          return find.all(returnDefaultExport ? byTypeName(name) : byTypeName.raw(name));
+        }
       });
-      findByStoreName = Object.assign((name) => find(byStoreName(name)), {
-        async(name, timeout = 5e3) {
+      findByStoreName = Object.assign(function findByStoreNameLazy(name) {
+        return find(byStoreName(name));
+      }, {
+        async: function findByStoreNameAsync(name, timeout = 5e3) {
           return new Promise((resolve) => {
-            var id = setTimeout(resolve, timeout);
+            var id = setTimeout(() => resolve(void 0), timeout);
             findByStoreName(name)[lazyContextSymbol].getExports((exp) => {
               clearTimeout(id);
               resolve(exp);
             });
           });
         },
-        eager: (name) => find.eager(byStoreName(name))
+        eager: function findByStoreNameEager(name) {
+          return find.eager(byStoreName(name));
+        }
       });
-      findByFilePath = Object.assign((path, returnDefaultExport = true) => find(byFilePath(path, returnDefaultExport)), {
-        async(path, returnDefaultExport = true, timeout = 1e3) {
+      findByFilePath = Object.assign(function findByFilePathLazy(path, returnDefaultExport = true) {
+        return find(byFilePath(path, returnDefaultExport));
+      }, {
+        async: function findByFilePathAsync(path, returnDefaultExport = true, timeout = 1e3) {
           return new Promise((resolve) => {
-            var id = setTimeout(resolve, timeout);
+            var id = setTimeout(() => resolve(void 0), timeout);
             findByFilePath(path, returnDefaultExport)[lazyContextSymbol].getExports((exp) => {
               clearTimeout(id);
               resolve(exp);
             });
           });
         },
-        eager: (path, returnDefaultExport = true) => find.eager(byFilePath(path, returnDefaultExport))
+        eager: function findByFilePathEager(path, returnDefaultExport = true) {
+          return find.eager(byFilePath(path, returnDefaultExport));
+        }
       });
-      findProp = Object.assign((prop, ...filterProps) => lazyValue(() => findByProps(prop, ...filterProps)[prop]), {
-        async: (prop, ...filterPropsAndOrTimeout) => findByProps.async(prop, ...filterPropsAndOrTimeout).then((exports) => exports[prop]),
-        eager: (prop, ...filterProps) => findByProps.eager(prop, ...filterProps)[prop]
+      findProp = Object.assign(function findPropLazy(prop, ...filterProps) {
+        return lazyValue(() => findByProps(prop, ...filterProps)?.[prop]);
+      }, {
+        async: function findPropAsync(prop, ...filterPropsAndOrTimeout) {
+          return findByProps.async(prop, ...filterPropsAndOrTimeout).then((exports) => exports?.[prop]);
+        },
+        eager: function findPropEager(prop, ...filterProps) {
+          return findByProps.eager(prop, ...filterProps)?.[prop];
+        }
       });
-      findBySingleProp = Object.assign((name, returnDefaultExport = true) => find(returnDefaultExport ? bySingleProp(name) : bySingleProp.raw(name)), {
-        async(name, returnDefaultExport = true, timeout = 1e3) {
+      findBySingleProp = Object.assign(function findBySinglePropLazy(name, returnDefaultExport = true) {
+        return find(returnDefaultExport ? bySingleProp(name) : bySingleProp.raw(name));
+      }, {
+        async: function findBySinglePropAsync(name, returnDefaultExport = true, timeout = 1e3) {
           return new Promise((resolve) => {
-            var id = setTimeout(resolve, timeout);
+            var id = setTimeout(() => resolve(void 0), timeout);
             findBySingleProp(name, returnDefaultExport)[lazyContextSymbol].getExports((exp) => {
               clearTimeout(id);
               resolve(exp);
             });
           });
         },
-        eager: (name, returnDefaultExport = true) => find.eager(returnDefaultExport ? bySingleProp(name) : bySingleProp.raw(name))
+        eager: function findBySinglePropEager(name, returnDefaultExport = true) {
+          return find.eager(returnDefaultExport ? bySingleProp(name) : bySingleProp.raw(name));
+        }
       });
-      findByQuery = Object.assign(() => {
+      findByQuery = Object.assign(function findByQueryLazy() {
         throw new Error("Lazy finding for byQuery(...) is not supported, use findByQuery.eager(...) instead");
       }, {
-        eager: (query, caseSensitive = false) => find(byQuery(query, caseSensitive)),
+        eager: function findByQueryEager(query, caseSensitive = false) {
+          return find(byQuery(query, caseSensitive));
+        },
         /**
              * Yields all exports that match a query string **(very expensive, only use for debugging)**
              * @param query The query string to search for
              * @param caseSensitive Whether the search should be case-sensitive
              * @returns All module exports
              */
-        all: (query, caseSensitive = false) => find.all(byQuery(query, caseSensitive))
+        all: function findByQueryAll(query, caseSensitive = false) {
+          return find.all(byQuery(query, caseSensitive));
+        }
       });
-    }
-  });
-
-  // libraries/modules/src/native/modules.ts
-  var nmp, CacheModule, FileModule, ClientInfoModule, DeviceModule, BundleUpdaterManager, ThemeModule;
-  var init_modules = __esm({
-    "libraries/modules/src/native/modules.ts"() {
-      "use strict";
-      init_lazy();
-      nmp = nativeModuleProxy;
-      CacheModule = lazyValue(() => nmp.NativeCacheModule ?? nmp.MMKVManager);
-      FileModule = lazyValue(() => nmp.NativeFileModule ?? nmp.RTNFileManager ?? nmp.DCDFileManager);
-      ClientInfoModule = lazyValue(() => nmp.NativeClientInfoModule ?? nmp.RTNClientInfoManager ?? nmp.InfoDictionaryManager);
-      DeviceModule = lazyValue(() => nmp.NativeDeviceModule ?? nmp.RTNDeviceManager ?? nmp.DCDDeviceManager);
-      BundleUpdaterManager = lazyValue(() => nmp.BundleUpdaterManager);
-      ThemeModule = lazyValue(() => nmp.NativeThemeModule ?? nmp.RTNThemeManager ?? nmp.DCDThemeManager);
-    }
-  });
-
-  // libraries/modules/src/native/index.ts
-  var native_exports = {};
-  __export(native_exports, {
-    BundleUpdaterManager: () => BundleUpdaterManager,
-    CacheModule: () => CacheModule,
-    ClientInfoModule: () => ClientInfoModule,
-    DeviceModule: () => DeviceModule,
-    FileModule: () => FileModule,
-    ThemeModule: () => ThemeModule
-  });
-  var init_native = __esm({
-    "libraries/modules/src/native/index.ts"() {
-      "use strict";
-      init_modules();
     }
   });
 
@@ -910,13 +903,13 @@
       var savedCache = yield CacheModule.getItem(MetroCacheKey);
       if (!savedCache) return false;
       var storedCache = JSON.parse(savedCache);
-      logger.log(`Cache found, validating... (compare: ${storedCache.v} === ${MetroCacheVersion}, ${storedCache.b} === ${ClientInfoModule.Build}, ${storedCache.t} === ${metroDependencies.size})`);
-      if (storedCache.v !== MetroCacheVersion || storedCache.b !== ClientInfoModule.Build || storedCache.t !== metroDependencies.size) return false;
-      logger.log(`Restoring cache of ${metroDependencies.size} modules`);
-      metroCache.totalModules = storedCache.t;
-      metroCache.exportsFlags = storedCache.e;
-      metroCache.lookupFlags = storedCache.l;
-      metroCache.assetModules = storedCache.a;
+      logger.log(`Cache found, validating... (compare: ${storedCache.v} === ${MetroCacheVersion}, ${storedCache.b} === ${ClientInfoModule.Build}, ${storedCache.t} === ${dependencies.size})`);
+      if (storedCache.v !== MetroCacheVersion || storedCache.b !== ClientInfoModule.Build || storedCache.t !== dependencies.size) return false;
+      logger.log(`Restoring cache of ${dependencies.size} modules`);
+      cache.totalModules = storedCache.t;
+      cache.exportsFlags = storedCache.e;
+      cache.lookupFlags = storedCache.l;
+      cache.assetModules = storedCache.a;
       return true;
     });
     return _restoreCache.apply(this, arguments);
@@ -925,7 +918,7 @@
     var [assetsRegistryModuleId] = findId(byProps("registerAsset"));
     if (!assetsRegistryModuleId) return void logger.warn("Unable to create asset cache, cannot find assets-registry module ID, some assets may not load");
     var assetsRegistryExporterModuleId = 0;
-    for (var id of metroDependencies) {
+    for (var id of dependencies) {
       var module = modules[id];
       if (!module?.dependencyMap) continue;
       if (module.dependencyMap.length === 1 && module.dependencyMap[0] === assetsRegistryModuleId) {
@@ -935,7 +928,7 @@
     }
     if (!assetsRegistryExporterModuleId) return void logger.warn("Unable to create asset cache, cannot find assets-registry exporter module ID, some assets may not load");
     logger.log("Importing all assets modules...");
-    for (var id1 of metroDependencies) {
+    for (var id1 of dependencies) {
       var module1 = modules[id1];
       if (!module1?.dependencyMap) continue;
       if (module1.dependencyMap.length === 1 && module1.dependencyMap[0] === assetsRegistryExporterModuleId) requireModule(id1);
@@ -947,12 +940,13 @@
       CacheModule.setItem(MetroCacheKey, JSON.stringify({
         v: MetroCacheVersion,
         b: ClientInfoModule.Build,
-        t: metroCache.totalModules,
-        e: metroCache.exportsFlags,
-        l: metroCache.lookupFlags,
-        a: metroCache.assetModules
+        t: cache.totalModules,
+        e: cache.exportsFlags,
+        l: cache.lookupFlags,
+        a: cache.assetModules,
+        p: cache.patchableModules
       }));
-      logger.log(`Cache saved (${metroCache.totalModules} modules)`);
+      logger.log(`Cache saved (${cache.totalModules} modules)`);
     }, 1e3);
   }
   function invalidateCache() {
@@ -960,40 +954,41 @@
     logger.warn("Cache invalidated");
   }
   function cacherFor(key) {
-    var registry = metroCache.lookupFlags[key] ??= {};
+    var registry = cache.lookupFlags[key] ??= {};
     var invalidated = false;
     return {
       cache: (id, exports) => {
         registry[id] ??= (invalidated = true, 0);
-        if (moduleHasBadExports(exports)) {
+        if (isModuleExportsBad(exports)) {
           blacklistModule(id);
           invalidated = true;
           if (id in registry) delete registry[id];
         }
       },
-      finish: (notFound) => {
+      finish: (notFound, fullLookup = false) => {
         registry.flags ??= 0;
         if (notFound) registry.flags |= MetroModuleLookupFlags.NotFound;
+        if (fullLookup) registry.flags |= MetroModuleLookupFlags.FullLookup;
         if (invalidated) saveCache();
       }
     };
   }
   function cacheModuleAsBlacklisted(id) {
-    metroCache.exportsFlags[id] |= MetroModuleFlags.Blacklisted;
+    cache.exportsFlags[id] |= MetroModuleFlags.Blacklisted;
   }
   function cacheAsset(name, index, moduleId) {
-    metroCache.assets[name] = index;
-    metroCache.assetModules[name] = moduleId;
+    cache.assets[name] = index;
+    cache.assetModules[name] = moduleId;
     saveCache();
   }
   function* indexedModuleIdsForLookup(key) {
-    var modulesMap = metroCache.lookupFlags[key];
+    var modulesMap = cache.lookupFlags[key];
     if (!modulesMap) return void 0;
     for (var k in modulesMap) {
       if (k !== "flags") yield Number(k);
     }
   }
-  var metroCache, saveCacheDebounceTimeoutId;
+  var cache, saveCacheDebounceTimeoutId;
   var init_caches = __esm({
     "libraries/modules/src/metro/caches.ts"() {
       "use strict";
@@ -1004,7 +999,7 @@
       init_native();
       init_shared();
       init_metro();
-      metroCache = {
+      cache = {
         /**
          * Flags for each module's exports
          * @see {@link MetroModuleFlags}
@@ -1026,6 +1021,16 @@
          */
         assetModules: {},
         /**
+         * Registry for patchable modules, the key being the patch, and the value being the module ID of the module to patch
+         *
+         * - `f`: File path tracking
+         * - `r`: Fix native component registry duplicate register
+         * - `b`: Blacklist freezing module
+         * - `d`: Block Discord analytics
+         * - `s`: Block Sentry initialization
+         */
+        patchableModules: {},
+        /**
          * The total modules count
          */
         totalModules: 0
@@ -1033,88 +1038,79 @@
     }
   });
 
-  // libraries/modules/src/metro/patcher.ts
-  function getPatchStatus(patch) {
-    return status & MetroPatcherPatches[patch];
-  }
-  function patchModuleOnLoad(exports, id) {
-    if (!getPatchStatus("TrackFilePath") && exports.fileFinishedImporting) {
-      patcher.before(exports, "fileFinishedImporting", ([filePath]) => {
+  // libraries/modules/src/metro/patches.ts
+  function initializeModulePatches(patcher5, logger3, metroModules) {
+    subscribePatchableModule("f", (exports) => exports.fileFinishedImporting, (exports) => {
+      patcher5.before(exports, "fileFinishedImporting", ([filePath]) => {
         var importingModuleId2 = getImportingModuleId();
         if (importingModuleId2 === -1 || !filePath) return;
-        getMetroModules()[importingModuleId2][metroModuleFilePathKey] = filePath;
+        metroModules[importingModuleId2][MetroModuleFilePathKey] = filePath;
       }, "trackFilePath");
-      status |= MetroPatcherPatches.TrackFilePath;
-    }
-    if (!getPatchStatus("FixNativeComponentRegistryDuplicateRegister") && [
+    });
+    subscribePatchableModule("r", (exports) => [
       "customBubblingEventTypes",
       "customDirectEventTypes",
       "register",
       "get"
-    ].every((x2) => exports[x2])) {
-      patcher.instead(exports, "register", (args, origFunc) => {
+    ].every((x2) => exports[x2]), (exports) => {
+      patcher5.instead(exports, "register", (args, origFunc) => {
         try {
           return origFunc(...args);
         } catch (e) {
         }
       }, "fixNativeComponentRegistryDuplicateRegister");
-      status |= MetroPatcherPatches.FixNativeComponentRegistryDuplicateRegister;
-    }
-    if (!getPatchStatus("BlacklistedFreezingModule") && exports.default?.reactProfilingEnabled) {
-      var problematicModule = getMetroModules()[id + 1];
-      if (!problematicModule?.publicModule.exports.default) {
-        if (!isModuleBlacklisted(id + 1)) {
-          blacklistModule(id + 1);
-          status |= MetroPatcherPatches.BlacklistedFreezingModule;
-          logger.log(`Blacklisted module ${id + 1} as it causes freeze when initialized`);
-        }
+    });
+    subscribePatchableModule("b", (exports, id) => {
+      return exports.default?.reactProfilingEnabled && !metroModules[id + 1]?.publicModule.exports.default;
+    }, (_2, id) => {
+      if (!isModuleBlacklisted(id + 1)) {
+        blacklistModule(id + 1);
+        logger3.log(`Blacklisted module ${id + 1} as it causes freeze when initialized`);
       }
-    }
-    exports.initSentry &&= () => void (status |= MetroPatcherPatches.DisableSentry);
-    if (exports.default?.track && exports.default.trackMaker) exports.default.track = () => Promise.resolve(void (status |= MetroPatcherPatches.DisableTracking));
-    exports.startTracking &&= () => void (status |= MetroPatcherPatches.DisableJankStatsTracking);
+    });
+    subscribePatchableModule("s", (m2) => m2.initSentry, (m2) => m2.initSentry = noop);
+    subscribePatchableModule("d", (m2) => m2.default?.track && m2.default.trackMaker, (m2) => m2.default.track = () => noopPromise);
   }
-  var status, getStatus, metroModuleFilePathKey, MetroPatcherPatches;
-  var init_patcher = __esm({
-    "libraries/modules/src/metro/patcher.ts"() {
+  function subscribePatchableModule(patchId, filter, patch) {
+    var cachedId = cache.patchableModules[patchId];
+    var unsub = cachedId ? subscribeModule(cachedId, (exports) => {
+      unsub();
+      patch(exports, cachedId);
+    }) : subscribeModule.all((id, exports) => {
+      if (!filter(exports, id)) return;
+      unsub();
+      cache.patchableModules[patchId] = id;
+      patch(exports, id);
+    });
+  }
+  var init_patches = __esm({
+    "libraries/modules/src/metro/patches.ts"() {
       "use strict";
-      init_enums();
-      init_shared();
+      init_constants();
       init_metro();
-      status = 0;
-      getStatus = () => status;
-      metroModuleFilePathKey = "__moduleFilePath";
-      MetroPatcherPatches = createBitFlagEnum("DisableSentry", "DisableJankStatsTracking", "DisableTracking", "FixNativeComponentRegistryDuplicateRegister", "TrackFilePath", "FixMomentLocale", "BlacklistedFreezingModule");
+      init_functions();
     }
   });
 
   // libraries/modules/src/metro/index.ts
   var metro_exports = {};
   __export(metro_exports, {
-    MetroPatcherPatches: () => MetroPatcherPatches,
     blacklistModule: () => blacklistModule,
+    cache: () => cache,
     cacheAsset: () => cacheAsset,
     cacheModuleAsBlacklisted: () => cacheModuleAsBlacklisted,
     cacherFor: () => cacherFor,
+    dependencies: () => dependencies,
     getImportingModuleId: () => getImportingModuleId,
     getMetroModules: () => getMetroModules,
-    getPatchStatus: () => getPatchStatus,
-    getStatus: () => getStatus,
     indexedModuleIdsForLookup: () => indexedModuleIdsForLookup,
     initializeModules: () => initializeModules,
     invalidateCache: () => invalidateCache,
     isModuleBlacklisted: () => isModuleBlacklisted,
-    metroCache: () => metroCache,
-    metroDependencies: () => metroDependencies,
-    metroModuleFilePathKey: () => metroModuleFilePathKey,
-    moduleHasBadExports: () => moduleHasBadExports,
+    isModuleExportsBad: () => isModuleExportsBad,
     modulesForFinder: () => modulesForFinder,
-    patchModuleOnLoad: () => patchModuleOnLoad,
-    requireAssetModules: () => requireAssetModules,
     requireModule: () => requireModule,
     resolveModuleDependencies: () => resolveModuleDependencies,
-    restoreCache: () => restoreCache,
-    saveCache: () => saveCache,
     subscribeModule: () => subscribeModule
   });
   function getMetroModules() {
@@ -1159,12 +1155,11 @@
           unpatch2();
           blacklistModule(id);
         }
-        if (moduleHasBadExports(moduleObject.exports)) blacklistModule(id);
+        if (isModuleExportsBad(moduleObject.exports)) blacklistModule(id);
         else {
           var subs = subscriptions.get(id);
           if (subs) for (var sub of subs) sub(id, moduleObject.exports);
           for (var sub1 of allSubscriptionSet) sub1(id, moduleObject.exports);
-          patchModuleOnLoad(moduleObject.exports, id);
         }
         importingModuleId = originalImportingId;
       }, "moduleFactory");
@@ -1177,8 +1172,11 @@
     _initializeModules = _async_to_generator(function* () {
       var metroModules = getMetroModules();
       if (metroModules[IndexMetroModuleId]?.isInitialized) throw new Error("Metro modules has already been initialized");
-      var cacheRestored = yield restoreCache();
-      recordTimestamp("Modules_TriedRestoreCache");
+      var cacheRestoredPromise = restoreCache().then((result) => {
+        recordTimestamp("Modules_TriedRestoreCache");
+        return result;
+      });
+      initializeModulePatches(patcher, logger, metroModules);
       var moduleIds = [
         ...metroDependencies
       ];
@@ -1188,25 +1186,25 @@
         var metroModule = metroModules[id];
         tryHookModule(id, metroModule);
       }
+      logger.log("Importing index module...");
+      __r(IndexMetroModuleId);
+      recordTimestamp("Modules_IndexRequired");
       setImmediate(() => {
         for (; lastHookedIndex < moduleIds.length; lastHookedIndex++) {
           var id2 = moduleIds[lastHookedIndex];
           var metroModule2 = metroModules[id2];
           tryHookModule(id2, metroModule2);
         }
+        recordTimestamp("Modules_HookedFactories");
       });
-      recordTimestamp("Modules_HookedFactories");
-      if (!cacheRestored) setImmediate(() => {
+      if (!(yield cacheRestoredPromise)) {
         var unpatch2 = patcher.before(ReactNative.AppRegistry, "runApplication", () => {
           unpatch2();
           requireAssetModules();
           recordTimestamp("Modules_RequiredAssets");
         }, "createAssetCache");
-      });
-      logger.log("Importing index module...");
-      __r(IndexMetroModuleId);
-      recordTimestamp("Modules_IndexRequired");
-      metroCache.totalModules = metroDependencies.size;
+      }
+      cache.totalModules = metroDependencies.size;
       saveCache();
     });
     return _initializeModules.apply(this, arguments);
@@ -1220,7 +1218,7 @@
   }
   function requireModule(id) {
     var metroModules = getMetroModules();
-    if (isModuleBlacklisted(id)) return false;
+    if (isModuleBlacklisted(id)) return;
     var metroModule = metroModules[id];
     if (metroModule?.isInitialized && !metroModule.hasError) return __r(id);
     var ogHandler = ErrorUtils.getGlobalHandler();
@@ -1238,31 +1236,31 @@
       blacklistModule(id);
     } finally {
       importingModuleId = originalImportingId;
+      ErrorUtils.setGlobalHandler(ogHandler);
     }
-    ErrorUtils.setGlobalHandler(ogHandler);
     return moduleExports;
   }
   function isModuleBlacklisted(id) {
-    if (!(id in metroCache.exportsFlags)) return 0;
-    return metroCache.exportsFlags[id] & MetroModuleFlags.Blacklisted;
+    if (!(id in cache.exportsFlags)) return 0;
+    return cache.exportsFlags[id] & MetroModuleFlags.Blacklisted;
   }
-  function* modulesForFinder(key) {
-    var lookupCache = metroCache.lookupFlags[key];
-    if (lookupCache?.flags) {
-      if (!(lookupCache.flags & MetroModuleLookupFlags.NotFound)) for (var id in indexedModuleIdsForLookup(key)) {
-        if (isModuleBlacklisted(id)) continue;
-        yield [
-          id,
-          requireModule(Number(id))
-        ];
-      }
-    } else {
+  function* modulesForFinder(key, fullLookup = false) {
+    var lookupCache = cache.lookupFlags[key];
+    if (lookupCache?.flags && // Check if any modules were found
+    !(lookupCache.flags & MetroModuleLookupFlags.NotFound) && // Pass immediately if it's not a full lookup, otherwise check if it's a full lookup
+    (!fullLookup || lookupCache.flags & MetroModuleLookupFlags.FullLookup)) for (var id in indexedModuleIdsForLookup(key)) {
+      if (isModuleBlacklisted(id)) continue;
+      yield [
+        id,
+        requireModule(Number(id))
+      ];
+    }
+    else {
       for (var id1 of metroDependencies) {
-        if (lookupCache?.[id1]) continue;
         var mid = Number(id1);
         if (isModuleBlacklisted(mid)) continue;
         var exports = requireModule(mid);
-        if (moduleHasBadExports(exports)) {
+        if (isModuleExportsBad(exports)) {
           blacklistModule(id1);
           continue;
         }
@@ -1273,26 +1271,26 @@
       }
     }
   }
-  function moduleHasBadExports(exports) {
+  function isModuleExportsBad(exports) {
     return !exports || exports === globalThis || exports[""] === null || exports.__proto__ === Object.prototype && Reflect.ownKeys(exports).length === 0;
   }
-  var importingModuleId, subscriptions, allSubscriptionSet, metroDependencies, resolvedModules, subscribeModule;
+  var importingModuleId, subscriptions, allSubscriptionSet, metroDependencies, dependencies, resolvedModules, subscribeModule;
   var init_metro = __esm({
     "libraries/modules/src/metro/index.ts"() {
       "use strict";
       init_async_to_generator();
-      init_src2();
+      init_src();
       init_constants();
       init_shared();
       init_caches();
-      init_patcher();
+      init_patches();
       init_caches();
-      init_patcher();
       importingModuleId = -1;
       subscriptions = /* @__PURE__ */ new Map();
       allSubscriptionSet = /* @__PURE__ */ new Set();
       subscriptions.set("all", allSubscriptionSet);
       metroDependencies = /* @__PURE__ */ new Set();
+      dependencies = metroDependencies;
       resolvedModules = /* @__PURE__ */ new Set();
       subscribeModule = Object.assign(function subscribeModule2(id, callback) {
         if (!subscriptions.has(id)) subscriptions.set(id, /* @__PURE__ */ new Set());
@@ -1372,8 +1370,8 @@
   var init_filters2 = __esm({
     "libraries/modules/src/filters.ts"() {
       "use strict";
+      init_constants();
       init_metro();
-      init_patcher();
       init_filters();
       init_filters();
       byProps = createFilter((props, m2) => props.length === 0 ? m2[props[0]] : props.every((p) => m2[p]), (props) => `revenge.props(${props.join(",")})`);
@@ -1383,18 +1381,40 @@
       byTypeName = createFilter(([typeName], m2) => m2.type?.name === typeName, (name) => `revenge.typeName(${name})`);
       byStoreName = createFilter(([name], m2) => m2.getName?.length === 0 && m2.getName() === name, (name) => `revenge.storeName(${name})`);
       byFilePath = createFilter(([path, returnDefaultExport], _2, id, isDefaultExport) => {
-        return returnDefaultExport === isDefaultExport && getMetroModules()[id]?.[metroModuleFilePathKey] === path;
+        return returnDefaultExport === isDefaultExport && getMetroModules()[id]?.[MetroModuleFilePathKey] === path;
       }, ([path, returnDefaultExport]) => `revenge.filePath(${path},${returnDefaultExport})`);
       bySingleProp = createFilter(([prop], m2) => m2[prop] && Object.keys(m2).length === 1, (prop) => `revenge.singleProp(${prop})`);
       byQuery = createFilter(([query, caseSensitive], m2) => {
         var applyStringTransformation = (str) => caseSensitive ? str : str.toLowerCase();
         var transformedQuery = applyStringTransformation(query);
         try {
-          return m2.name?.toLowerCase()?.includes(transformedQuery) || m2.displayName?.toLowerCase()?.includes(transformedQuery) || m2.type?.name?.toLowerCase()?.includes(transformedQuery) || m2.getName?.length === 0 && m2.getName?.()?.toLowerCase()?.includes(transformedQuery) || getMetroModules()[m2.id]?.[metroModuleFilePathKey]?.toLowerCase()?.includes(transformedQuery) || Object.keys(m2).some((k) => k.toLowerCase().includes(transformedQuery)) || Object.values(m2).some((v2) => String(v2).toLowerCase().includes(transformedQuery));
+          return m2.name?.toLowerCase()?.includes(transformedQuery) || m2.displayName?.toLowerCase()?.includes(transformedQuery) || m2.type?.name?.toLowerCase()?.includes(transformedQuery) || m2.getName?.length === 0 && m2.getName?.()?.toLowerCase()?.includes(transformedQuery) || getMetroModules()[m2.id]?.[MetroModuleFilePathKey]?.toLowerCase()?.includes(transformedQuery) || Object.keys(m2).some((k) => k.toLowerCase().includes(transformedQuery)) || Object.values(m2).some((v2) => String(v2).toLowerCase().includes(transformedQuery));
         } catch (e) {
           return false;
         }
       }, ([query, caseSensitive]) => `revenge.query(${caseSensitive ? query : query.toLowerCase()})`);
+    }
+  });
+
+  // shims/react.ts
+  var React2, react_default;
+  var init_react = __esm({
+    "shims/react.ts"() {
+      "use strict";
+      init_finders();
+      React2 = findByProps("useEffect");
+      react_default = React2;
+    }
+  });
+
+  // shims/react-native.ts
+  var ReactNative2, react_native_default;
+  var init_react_native = __esm({
+    "shims/react-native.ts"() {
+      "use strict";
+      init_finders();
+      ReactNative2 = findByProps("AppRegistry");
+      react_native_default = ReactNative2;
     }
   });
 
@@ -1536,8 +1556,8 @@
     Logger: () => Logger,
     NavigationNative: () => NavigationNative,
     NavigationStack: () => NavigationStack,
-    React: () => React2,
-    ReactNative: () => ReactNative2,
+    React: () => React3,
+    ReactNative: () => ReactNative3,
     TextStyleSheet: () => TextStyleSheet,
     alerts: () => alerts,
     assetsRegistry: () => assetsRegistry,
@@ -1551,7 +1571,6 @@
     intlModule: () => intlModule,
     invites: () => invites,
     legacy_alerts: () => legacy_alerts,
-    legacy_i18n: () => legacy_i18n,
     links: () => links,
     messages: () => messages,
     nobleHashesUtils: () => nobleHashesUtils,
@@ -1561,12 +1580,14 @@
     tokens: () => tokens,
     xxhash64: () => xxhash64
   });
-  var constants, tokens, intl, intlModule, Logger, legacy_i18n, legacy_alerts, alerts, channels, links, clipboard, invites, commands, toasts, messages, NavigationStack, NavigationNative, TextStyleSheet, createStyles, Flux, FluxDispatcher, assetsRegistry, React2, ReactNative2, semver, xxhash64, nobleHashesUtils;
+  var constants, tokens, intl, intlModule, Logger, legacy_alerts, alerts, channels, links, clipboard, invites, commands, toasts, messages, NavigationStack, NavigationNative, TextStyleSheet, createStyles, Flux, FluxDispatcher, assetsRegistry, React3, ReactNative3, semver, xxhash64, nobleHashesUtils;
   var init_common = __esm({
     "libraries/modules/src/common/index.ts"() {
       "use strict";
       init_lazy();
       init_finders();
+      init_react();
+      init_react_native();
       init_components();
       init_stores();
       init_events();
@@ -1575,11 +1596,10 @@
       intl = findByProps("intl");
       intlModule = findByProps("runtimeHashMessageKey");
       Logger = findByName("Logger");
-      legacy_i18n = findByProps("Messages");
       legacy_alerts = findByProps("openLazy", "close");
       alerts = findByProps("openAlert", "dismissAlert");
       channels = findByProps("getVoiceChannelId");
-      links = findByProps("openDeeplink");
+      links = findByProps("openDeepLink");
       clipboard = findByProps("getImagePNG");
       invites = findByProps("createInvite");
       commands = findByProps("getBuiltInCommands");
@@ -1587,12 +1607,12 @@
       messages = findByProps("sendBotMessage");
       NavigationStack = findByProps("createStackNavigator");
       NavigationNative = findByProps("NavigationContainer");
-      ({ TextStyleSheet, createStyles } = lazyDestructure(() => findByProps.eager("TextInput", "ContextMenu")));
+      ({ TextStyleSheet, createStyles } = lazyDestructure(() => findByProps.eager("createStyles", "TextStyleSheet")));
       Flux = findByProps("connectStores");
       FluxDispatcher = findByProps("_interceptors");
       assetsRegistry = findByProps("registerAsset");
-      React2 = globalThis.React = findByProps("createElement");
-      ReactNative2 = globalThis.ReactNative = findByProps("AppRegistry");
+      React3 = globalThis.React = react_default;
+      ReactNative3 = globalThis.ReactNative = react_native_default;
       semver = findByProps("SEMVER_SPEC_VERSION");
       xxhash64 = findByProps("XXH64");
       nobleHashesUtils = findByProps("randomBytes");
@@ -1600,35 +1620,103 @@
   });
 
   // libraries/modules/src/index.ts
-  var ModulesLibrary;
+  var src_exports = {};
+  __export(src_exports, {
+    constants: () => constants_exports,
+    createModulesLibrary: () => createModulesLibrary
+  });
+  function createModulesLibrary() {
+    return _createModulesLibrary.apply(this, arguments);
+  }
+  function _createModulesLibrary() {
+    _createModulesLibrary = _async_to_generator(function* () {
+      yield initializeModules();
+      var common = yield Promise.resolve().then(() => (init_common(), common_exports));
+      var native = yield Promise.resolve().then(() => (init_native(), native_exports));
+      return {
+        constants: constants_exports,
+        common,
+        filters: filters_exports,
+        native,
+        metro: metro_exports,
+        ...finders_exports
+      };
+    });
+    return _createModulesLibrary.apply(this, arguments);
+  }
   var init_src3 = __esm({
     "libraries/modules/src/index.ts"() {
       "use strict";
       init_async_to_generator();
-      init_library();
       init_constants();
       init_filters2();
       init_finders();
       init_metro();
-      ModulesLibrary = library_default.create({
-        name: "modules",
-        uses: [
-          "logger",
-          "patcher"
-        ]
-      }, /* @__PURE__ */ _async_to_generator(function* () {
-        yield initializeModules();
-        var common = yield Promise.resolve().then(() => (init_common(), common_exports));
-        var native = yield Promise.resolve().then(() => (init_native(), native_exports));
-        return {
-          constants: constants_exports,
-          common,
-          filters: filters_exports,
-          native,
-          metro: metro_exports,
-          ...finders_exports
-        };
-      }));
+    }
+  });
+
+  // libraries/ui/src/colors.ts
+  var colors_exports = {};
+  __export(colors_exports, {
+    RawColor: () => RawColor,
+    SemanticColor: () => SemanticColor,
+    isSemanticColor: () => isSemanticColor,
+    resolveSemanticColor: () => resolveSemanticColor
+  });
+  function isSemanticColor(key) {
+    return tokens.internal.isSemanticColor(key);
+  }
+  function resolveSemanticColor(key, theme = ThemeStore.theme) {
+    return tokens.internal.resolveSemanticColor(theme, key);
+  }
+  var SemanticColor, RawColor;
+  var init_colors = __esm({
+    "libraries/ui/src/colors.ts"() {
+      "use strict";
+      init_common();
+      init_stores();
+      init_lazy();
+      SemanticColor = lazyValue(() => tokens.colors);
+      RawColor = lazyValue(() => tokens.unsafe_rawColors);
+    }
+  });
+
+  // libraries/ui/src/settings.ts
+  var settings_exports = {};
+  __export(settings_exports, {
+    SettingsUILibrary: () => SettingsUILibrary,
+    customData: () => customData
+  });
+  function createSettingsSection(section) {
+    if (section.name in customData.sections) throw new Error(`The settings section with the name "${section.name}" already exists`);
+    customData.sections[section.name] = section;
+    return () => delete customData.sections[section.name];
+  }
+  function createSettingsRoute(key, route) {
+    customData.rows[key] = route;
+    return () => delete customData.rows[key];
+  }
+  function addSettingsRowsToSection(name, rows2) {
+    if (!(name in customData.sections)) throw new Error(`No setting section exists with the name "${name}"`);
+    var section = customData.sections[name];
+    Object.assign(section.settings, rows2);
+    return () => {
+      for (var key in rows2) delete section.settings[key];
+    };
+  }
+  var customData, SettingsUILibrary;
+  var init_settings = __esm({
+    "libraries/ui/src/settings.ts"() {
+      "use strict";
+      customData = {
+        sections: {},
+        rows: {}
+      };
+      SettingsUILibrary = {
+        addRowsToSection: addSettingsRowsToSection,
+        createSection: createSettingsSection,
+        createRoute: createSettingsRoute
+      };
     }
   });
 
@@ -1652,388 +1740,6 @@
       Fragment = Symbol.for("react.fragment");
       jsx = (...args) => jsxRuntime.jsx(...unproxyFirstArg(args));
       jsxs = (...args) => jsxRuntime.jsxs(...unproxyFirstArg(args));
-    }
-  });
-
-  // shims/react.ts
-  var React3, react_default;
-  var init_react = __esm({
-    "shims/react.ts"() {
-      "use strict";
-      init_finders();
-      React3 = findByProps("useEffect");
-      react_default = React3;
-    }
-  });
-
-  // libraries/ui/src/colors.ts
-  var colors_exports = {};
-  __export(colors_exports, {
-    RawColor: () => RawColor,
-    SemanticColor: () => SemanticColor,
-    isSemanticColor: () => isSemanticColor,
-    resolveSemanticColor: () => resolveSemanticColor
-  });
-  function isSemanticColor(key) {
-    return tokens.internal.isSemanticColor(key);
-  }
-  function resolveSemanticColor(key, theme = ThemeStore.theme) {
-    return tokens.internal.resolveSemanticColor(theme, key);
-  }
-  var SemanticColor, RawColor;
-  var init_colors = __esm({
-    "libraries/ui/src/colors.ts"() {
-      "use strict";
-      init_common();
-      init_lazy();
-      init_stores();
-      SemanticColor = lazyValue(() => tokens.colors);
-      RawColor = lazyValue(() => tokens.unsafe_rawColors);
-    }
-  });
-
-  // libraries/utils/src/errors.ts
-  function getErrorStack(e) {
-    return e?.stack || String(e);
-  }
-  var init_errors = __esm({
-    "libraries/utils/src/errors.ts"() {
-      "use strict";
-    }
-  });
-
-  // libraries/app/src/components/ErrorBoundaryScreen.tsx
-  var ErrorBoundaryScreen_exports = {};
-  __export(ErrorBoundaryScreen_exports, {
-    LabeledCard: () => LabeledCard,
-    default: () => ErrorBoundaryScreen
-  });
-  function ErrorBoundaryScreen(props) {
-    var styles2 = useErrorBoundaryStyles();
-    var error = props.error;
-    return /* @__PURE__ */ jsxs(SafeAreaView, {
-      style: styles2.view,
-      children: [
-        /* @__PURE__ */ jsxs(ReactNative.View, {
-          style: {
-            gap: 4
-          },
-          children: [
-            /* @__PURE__ */ jsx(Text, {
-              variant: "display-lg",
-              children: "Error!"
-            }),
-            /* @__PURE__ */ jsxs(Text, {
-              variant: "text-md/normal",
-              children: [
-                "An error was thrown while rendering components. This could be caused by plugins, Revenge or Discord.",
-                " ",
-                Math.floor(Number(ClientInfoModule.Build) % 1e3 / 100) > 0 ? /* @__PURE__ */ jsx(Text, {
-                  variant: "text-md/normal",
-                  color: "text-danger",
-                  children: "You are not on a stable version of Discord which may explain why you are experiencing this issue."
-                }) : null
-              ]
-            }),
-            /* @__PURE__ */ jsxs(Text, {
-              variant: "text-sm/normal",
-              color: "text-muted",
-              children: [
-                ClientInfoModule.Version,
-                " (",
-                ClientInfoModule.Build,
-                ") \u2022 Revenge ",
-                "local"
-              ]
-            })
-          ]
-        }),
-        /* @__PURE__ */ jsxs(LabeledCard, {
-          label: "Error",
-          rawContent: getErrorStack(error),
-          children: [
-            /* @__PURE__ */ jsx(Text, {
-              variant: "text-md/medium",
-              children: String(error)
-            }),
-            error instanceof Error && error.stack && /* @__PURE__ */ jsxs(Fragment, {
-              children: [
-                /* @__PURE__ */ jsx(Text, {
-                  variant: "heading-xl/semibold",
-                  children: "Call Stack"
-                }),
-                /* @__PURE__ */ jsx(ReactNative.ScrollView, {
-                  style: styles2.nestedView,
-                  fadingEdgeLength: 64,
-                  children: parseStackTrace(error.stack?.slice(String(error).length + 1)).map(({ at, file, line, column }) => (
-                    // biome-ignore lint/correctness/useJsxKeyInIterable: This never gets rerendered
-                    /* @__PURE__ */ jsxs(Text, {
-                      variant: "heading-md/extrabold",
-                      style: {
-                        fontFamily: "monospace",
-                        fontWeight: "bold"
-                      },
-                      children: [
-                        at,
-                        "\n",
-                        /* @__PURE__ */ jsxs(Text, {
-                          variant: "text-sm/medium",
-                          style: {
-                            fontFamily: "monospace"
-                          },
-                          color: "text-muted",
-                          children: [
-                            file,
-                            typeof line === "number" && typeof column === "number" && /* @__PURE__ */ jsxs(Fragment, {
-                              children: [
-                                ":",
-                                line,
-                                ":",
-                                column
-                              ]
-                            })
-                          ]
-                        })
-                      ]
-                    })
-                  ))
-                })
-              ]
-            })
-          ]
-        }),
-        error instanceof Error && "componentStack" in error && /* @__PURE__ */ jsx(LabeledCard, {
-          scrollable: true,
-          label: "Component Stack",
-          style: {
-            flex: 1
-          },
-          rawContent: error.componentStack,
-          children: /* @__PURE__ */ jsx(Text, {
-            selectable: true,
-            variant: "text-md/medium",
-            children: [
-              ...error.componentStack.slice(1).split("\n").map((line) => [
-                "<",
-                /* @__PURE__ */ jsx(Text, {
-                  variant: "text-md/bold",
-                  children: line.slice(7)
-                }),
-                "/>\n"
-              ])
-            ]
-          })
-        }),
-        /* @__PURE__ */ jsxs(Card, {
-          style: {
-            gap: 16,
-            flexDirection: "row"
-          },
-          children: [
-            /* @__PURE__ */ jsx(Button, {
-              style: {
-                flex: 1
-              },
-              variant: "destructive",
-              text: "Reload Discord",
-              onPress: props.reload
-            }),
-            /* @__PURE__ */ jsx(Button, {
-              style: {
-                flex: 1
-              },
-              text: "Retry Render",
-              onPress: props.rerender
-            })
-          ]
-        })
-      ]
-    });
-  }
-  function LabeledCard(props) {
-    var ViewComponent = props.scrollable ? ReactNative.ScrollView : ReactNative.View;
-    return /* @__PURE__ */ jsxs(Card, {
-      ...props,
-      style: [
-        styles.nestedView,
-        ...Array.isArray(props.style) ? props.style : [
-          props.style
-        ]
-      ],
-      children: [
-        /* @__PURE__ */ jsxs(ReactNative.View, {
-          style: {
-            flexDirection: "row",
-            alignItems: "center"
-          },
-          children: [
-            /* @__PURE__ */ jsx(Text, {
-              variant: "heading-xl/semibold",
-              style: styles.headerText,
-              children: props.label
-            }),
-            props.rawContent && /* @__PURE__ */ jsx(Button, {
-              variant: "secondary",
-              size: "sm",
-              text: "Copy",
-              onPress: () => clipboard.setString(props.rawContent)
-            })
-          ]
-        }),
-        /* @__PURE__ */ jsx(ViewComponent, {
-          style: styles.nestedView,
-          fadingEdgeLength: 32,
-          children: props.children
-        })
-      ]
-    });
-  }
-  function parseStackTrace(stackTrace) {
-    var frames = [];
-    var lines = stackTrace.split("\n");
-    for (var line of lines) {
-      var match = StackFrameRegex.exec(line.trim());
-      if (match) {
-        var at = void 0;
-        var path = void 0;
-        var ln = null;
-        var col = null;
-        if (match[3] && match[4]) {
-          at = match[1];
-          path = match[2];
-          ln = Number(match[3]);
-          col = Number(match[4]);
-        } else {
-          at = match[5];
-          path = match[6];
-        }
-        if (path === IndexBundleFilePath) path = "(Discord)";
-        frames.push({
-          at,
-          file: path,
-          line: ln,
-          column: col
-        });
-      } else {
-        frames.push({
-          at: "UNABLE TO PARSE LINE",
-          file: line,
-          line: null,
-          column: null
-        });
-      }
-    }
-    return frames;
-  }
-  var useErrorBoundaryStyles, styles, IndexBundleFilePath, StackFrameRegex;
-  var init_ErrorBoundaryScreen = __esm({
-    "libraries/app/src/components/ErrorBoundaryScreen.tsx"() {
-      "use strict";
-      init_react_jsx_runtime();
-      init_common();
-      init_components();
-      init_native();
-      init_colors();
-      init_errors();
-      useErrorBoundaryStyles = createStyles({
-        view: {
-          backgroundColor: SemanticColor.BG_BASE_SECONDARY,
-          paddingHorizontal: 16,
-          paddingVertical: 24,
-          flex: 1,
-          gap: 16
-        }
-      });
-      styles = ReactNative.StyleSheet.create({
-        nestedView: {
-          gap: 8,
-          flex: 1
-        },
-        headerText: {
-          flexGrow: 1
-        }
-      });
-      IndexBundleFilePath = HermesInternal.getFunctionLocation(__r).fileName;
-      StackFrameRegex = /at (.+) \(([^:]+):(\d+):(\d+)\)|at (.+)? \(([^)]+)\)/;
-    }
-  });
-
-  // libraries/app/src/index.tsx
-  var initCbs, isInitialized, AppLibrary, patcher2;
-  var init_src4 = __esm({
-    "libraries/app/src/index.tsx"() {
-      "use strict";
-      init_async_to_generator();
-      init_react_jsx_runtime();
-      init_src2();
-      init_src3();
-      init_native();
-      init_library();
-      init_react();
-      initCbs = /* @__PURE__ */ new Set();
-      isInitialized = false;
-      AppLibrary = library_default.create({
-        name: "app",
-        uses: [
-          "patcher"
-        ]
-      }, ({ patcher: patcher3 }) => {
-        var afterInitialized = (callback) => {
-          if (isInitialized) throw new Error("Cannot attach a callback after the app has already been initialized");
-          initCbs.add(callback);
-        };
-        afterInitialized(() => isInitialized = true);
-        var unpatchBefore = patcher3.before(react_default, "createElement", () => {
-          unpatchBefore();
-          recordTimestamp("App_CreateElementCalled");
-          setImmediate(() => {
-            recordTimestamp("App_BeforeRunCallbacks");
-            for (var callback of initCbs) callback();
-            recordTimestamp("App_AfterRunCallbacks");
-          });
-        });
-        library_default.instanceFor(ModulesLibrary).then(/* @__PURE__ */ function() {
-          var _ref = _async_to_generator(function* (modules2) {
-            var { default: Screen } = yield Promise.resolve().then(() => (init_ErrorBoundaryScreen(), ErrorBoundaryScreen_exports));
-            afterInitialized(() => {
-              setImmediate(() => {
-                patcher3.instead.await(modules2.findByName.async("ErrorBoundary").then((it) => it.prototype), "render", function() {
-                  if (this.state.error && this.discordErrorsSet) return /* @__PURE__ */ jsx(Screen, {
-                    error: this.state.error,
-                    rerender: () => this.setState({
-                      error: null,
-                      info: null
-                    }),
-                    reload: this.handleReload
-                  });
-                  return this.props.children;
-                });
-              });
-            });
-          });
-          return function(modules2) {
-            return _ref.apply(this, arguments);
-          };
-        }());
-        return {
-          /**
-               * Whether the app has finished initializing
-               */
-          get initialized() {
-            return isInitialized;
-          },
-          /**
-               * Attaches a callback to be called when the app has been initialized
-               * @param callback The callback to be called
-               */
-          afterInitialized,
-          /**
-               * Reloads the app
-               */
-          reload: () => BundleUpdaterManager.reload()
-        };
-      });
-      ({ patcher: patcher2 } = library_default.contextFor(AppLibrary));
     }
   });
 
@@ -2617,6 +2323,17 @@
   });
 
   // libraries/storage/src/index.ts
+  var src_exports2 = {};
+  __export(src_exports2, {
+    awaitStorage: () => awaitStorage,
+    createStorage: () => createStorage,
+    getPreloadedStorage: () => getPreloadedStorage,
+    loadStorage: () => loadStorage,
+    removeStorage: () => removeStorage,
+    saveStorage: () => saveStorage,
+    storageContextSymbol: () => storageContextSymbol,
+    useObservable: () => useObservable
+  });
   function createJSONFile(path) {
     var actualPath = `${FileModule.getConstants().DocumentsDirPath}/${path}`;
     var file = {
@@ -2652,6 +2369,16 @@
         for (var o2 of observables) v.unobserve(o2, listener);
       };
     }, []);
+  }
+  function saveStorage(path, value) {
+    return _saveStorage.apply(this, arguments);
+  }
+  function _saveStorage() {
+    _saveStorage = _async_to_generator(function* (path, value) {
+      loadedStorages[path] = value;
+      createJSONFile(path).write(value);
+    });
+    return _saveStorage.apply(this, arguments);
   }
   function createStorage(path, { initial = {} } = {}) {
     var readyPromise = new Promise((r) => resolve = r);
@@ -2719,11 +2446,39 @@
       }
     });
   }
+  function loadStorage(path) {
+    return _loadStorage.apply(this, arguments);
+  }
+  function _loadStorage() {
+    _loadStorage = _async_to_generator(function* (path) {
+      if (loadedStorages[path]) return true;
+      var backend = createJSONFile(path);
+      if (yield backend.exists()) {
+        loadedStorages[path] = yield backend.read();
+        return false;
+      }
+      return true;
+    });
+    return _loadStorage.apply(this, arguments);
+  }
+  function removeStorage(path) {
+    return _removeStorage.apply(this, arguments);
+  }
+  function _removeStorage() {
+    _removeStorage = _async_to_generator(function* (path) {
+      yield FileModule.removeFile("documents", path);
+      delete loadedStorages[path];
+    });
+    return _removeStorage.apply(this, arguments);
+  }
   function awaitStorage(...storages) {
     return Promise.all(storages.map((proxy) => proxy[storageContextSymbol].readyPromise));
   }
+  function getPreloadedStorage(path) {
+    return loadedStorages[path];
+  }
   var storageContextSymbol, loadedStorages;
-  var init_src5 = __esm({
+  var init_src4 = __esm({
     "libraries/storage/src/index.ts"() {
       "use strict";
       init_async_to_generator();
@@ -2735,15 +2490,448 @@
     }
   });
 
-  // libraries/plugins/src/shared.ts
-  var app;
-  var init_shared2 = __esm({
-    "libraries/plugins/src/shared.ts"() {
+  // libraries/preferences/src/index.ts
+  var src_exports3 = {};
+  __export(src_exports3, {
+    settings: () => settings
+  });
+  var settings;
+  var init_src5 = __esm({
+    "libraries/preferences/src/index.ts"() {
       "use strict";
       init_src4();
-      init_lazy();
-      init_library();
-      app = lazyValue(() => library_default.instanceFor(AppLibrary));
+      settings = createStorage("revenge/settings.json", {
+        initial: {
+          safeMode: {
+            enabled: false,
+            enabledNextLaunch: false
+          },
+          developer: {
+            settingsPageShown: false,
+            patchErrorBoundary: true
+          }
+        }
+      });
+    }
+  });
+
+  // libraries/app/src/components/ErrorBoundaryScreen.tsx
+  var ErrorBoundaryScreen_exports = {};
+  __export(ErrorBoundaryScreen_exports, {
+    LabeledCard: () => LabeledCard,
+    default: () => ErrorBoundaryScreen
+  });
+  function ErrorBoundaryScreen(props) {
+    var errorBoundaryStyles = useErrorBoundaryStyles();
+    var error = props.error;
+    return /* @__PURE__ */ jsxs(SafeAreaView, {
+      style: errorBoundaryStyles.view,
+      children: [
+        /* @__PURE__ */ jsxs(ReactNative.View, {
+          style: {
+            gap: 4
+          },
+          children: [
+            /* @__PURE__ */ jsx(Text, {
+              variant: "display-lg",
+              children: "Error!"
+            }),
+            /* @__PURE__ */ jsxs(Text, {
+              variant: "text-md/normal",
+              children: [
+                "An error was thrown while rendering components. This could be caused by plugins, Revenge or Discord.",
+                " ",
+                Math.floor(Number(ClientInfoModule.Build) % 1e3 / 100) > 0 ? /* @__PURE__ */ jsx(Text, {
+                  variant: "text-md/normal",
+                  color: "text-danger",
+                  children: "You are not on a stable version of Discord which may explain why you are experiencing this issue."
+                }) : null
+              ]
+            }),
+            /* @__PURE__ */ jsxs(Text, {
+              variant: "text-sm/normal",
+              color: "text-muted",
+              children: [
+                ClientInfoModule.Version,
+                " (",
+                ClientInfoModule.Build,
+                ") \u2022 Revenge ",
+                "local"
+              ]
+            })
+          ]
+        }),
+        /* @__PURE__ */ jsxs(LabeledCard, {
+          label: "Error",
+          rawContent: getErrorStack(error),
+          children: [
+            /* @__PURE__ */ jsx(Text, {
+              variant: "text-md/medium",
+              children: String(error)
+            }),
+            error instanceof Error && error.stack && /* @__PURE__ */ jsxs(Fragment, {
+              children: [
+                /* @__PURE__ */ jsx(Text, {
+                  variant: "heading-xl/semibold",
+                  children: "Call Stack"
+                }),
+                /* @__PURE__ */ jsx(ReactNative.ScrollView, {
+                  style: styles.nestedView,
+                  fadingEdgeLength: 64,
+                  children: parseStackTrace(error.stack?.slice(String(error).length + 1)).map(({ at, file, line, column }) => (
+                    // biome-ignore lint/correctness/useJsxKeyInIterable: This never gets rerendered
+                    /* @__PURE__ */ jsxs(Text, {
+                      variant: "heading-md/extrabold",
+                      style: {
+                        fontFamily: "monospace",
+                        fontWeight: "bold"
+                      },
+                      children: [
+                        at,
+                        "\n",
+                        /* @__PURE__ */ jsxs(Text, {
+                          variant: "text-sm/medium",
+                          style: {
+                            fontFamily: "monospace"
+                          },
+                          color: "text-muted",
+                          children: [
+                            file,
+                            typeof line === "number" && typeof column === "number" && /* @__PURE__ */ jsxs(Fragment, {
+                              children: [
+                                ":",
+                                line,
+                                ":",
+                                column
+                              ]
+                            })
+                          ]
+                        })
+                      ]
+                    })
+                  ))
+                })
+              ]
+            })
+          ]
+        }),
+        error instanceof Error && "componentStack" in error && /* @__PURE__ */ jsx(LabeledCard, {
+          scrollable: true,
+          label: "Component Stack",
+          style: {
+            flex: 1
+          },
+          rawContent: error.componentStack,
+          children: /* @__PURE__ */ jsx(Text, {
+            selectable: true,
+            variant: "text-md/medium",
+            children: [
+              ...error.componentStack.slice(1).split("\n").map((line) => [
+                "<",
+                /* @__PURE__ */ jsx(Text, {
+                  variant: "text-md/bold",
+                  children: line.slice(7)
+                }),
+                "/>\n"
+              ])
+            ]
+          })
+        }),
+        /* @__PURE__ */ jsxs(Card, {
+          style: {
+            gap: 16,
+            flexDirection: "row"
+          },
+          children: [
+            /* @__PURE__ */ jsx(Button, {
+              style: {
+                flex: 1
+              },
+              variant: "destructive",
+              text: "Reload Discord",
+              onPress: props.reload
+            }),
+            /* @__PURE__ */ jsx(Button, {
+              style: {
+                flex: 1
+              },
+              text: "Retry Render",
+              onPress: props.rerender
+            })
+          ]
+        })
+      ]
+    });
+  }
+  function LabeledCard(props) {
+    var ViewComponent = props.scrollable ? ReactNative.ScrollView : ReactNative.View;
+    return /* @__PURE__ */ jsxs(Card, {
+      ...props,
+      style: [
+        styles.nestedView,
+        ...Array.isArray(props.style) ? props.style : [
+          props.style
+        ]
+      ],
+      children: [
+        /* @__PURE__ */ jsxs(ReactNative.View, {
+          style: {
+            flexDirection: "row",
+            alignItems: "center"
+          },
+          children: [
+            /* @__PURE__ */ jsx(Text, {
+              variant: "heading-xl/semibold",
+              style: styles.headerText,
+              children: props.label
+            }),
+            props.rawContent && /* @__PURE__ */ jsx(Button, {
+              variant: "secondary",
+              size: "sm",
+              text: "Copy",
+              onPress: () => clipboard.setString(props.rawContent)
+            })
+          ]
+        }),
+        /* @__PURE__ */ jsx(ViewComponent, {
+          style: styles.nestedView,
+          fadingEdgeLength: 32,
+          children: props.children
+        })
+      ]
+    });
+  }
+  function parseStackTrace(stackTrace) {
+    var frames = [];
+    var lines = stackTrace.split("\n");
+    for (var line of lines) {
+      var match = StackFrameRegex.exec(line.trim());
+      if (match) {
+        var at = void 0;
+        var path = void 0;
+        var ln = null;
+        var col = null;
+        if (match[3] && match[4]) {
+          at = match[1];
+          path = match[2];
+          ln = Number(match[3]);
+          col = Number(match[4]);
+        } else {
+          at = match[5];
+          path = match[6];
+        }
+        if (path === IndexBundleFilePath) path = "(Discord)";
+        frames.push({
+          at,
+          file: path,
+          line: ln,
+          column: col
+        });
+      } else {
+        frames.push({
+          at: "UNABLE TO PARSE LINE",
+          file: line,
+          line: null,
+          column: null
+        });
+      }
+    }
+    return frames;
+  }
+  var useErrorBoundaryStyles, styles, IndexBundleFilePath, StackFrameRegex;
+  var init_ErrorBoundaryScreen = __esm({
+    "libraries/app/src/components/ErrorBoundaryScreen.tsx"() {
+      "use strict";
+      init_react_jsx_runtime();
+      init_common();
+      init_components();
+      init_native();
+      init_colors();
+      init_errors();
+      useErrorBoundaryStyles = createStyles({
+        view: {
+          backgroundColor: SemanticColor.BG_BASE_SECONDARY,
+          paddingHorizontal: 16,
+          paddingVertical: 24,
+          flex: 1,
+          gap: 16
+        }
+      });
+      styles = ReactNative.StyleSheet.create({
+        nestedView: {
+          gap: 8,
+          flex: 1
+        },
+        headerText: {
+          flexGrow: 1
+        }
+      });
+      IndexBundleFilePath = HermesInternal.getFunctionLocation(__r).fileName;
+      StackFrameRegex = /at (.+) \(([^:]+):(\d+):(\d+)\)|at (.+)? \(([^)]+)\)/;
+    }
+  });
+
+  // libraries/app/src/index.tsx
+  var src_exports4 = {};
+  __export(src_exports4, {
+    AppLibrary: () => AppLibrary,
+    afterAppInitialized: () => afterAppInitialized,
+    afterAppRendered: () => afterAppRendered,
+    isAppInitialized: () => isAppInitialized,
+    isAppRendered: () => isAppRendered
+  });
+  function afterAppInitialized(callback) {
+    if (isAppInitialized) throw new Error("Cannot attach a callback after the app has already been initialized");
+    initializeCallbacks.add(callback);
+  }
+  function afterAppRendered(callback) {
+    if (isAppRendered) throw new Error("Cannot attach a callback after the App component has been rendered");
+    renderCallbacks.add(callback);
+  }
+  var patcher2, initializeCallbacks, renderCallbacks, isAppInitialized, isAppRendered, unpatchRunApplication, unpatchCreateElement, AppLibrary;
+  var init_src6 = __esm({
+    "libraries/app/src/index.tsx"() {
+      "use strict";
+      init_async_to_generator();
+      init_react_jsx_runtime();
+      init_src();
+      init_finders();
+      init_native();
+      init_src2();
+      init_src4();
+      patcher2 = createPatcherInstance("revenge.library.app");
+      initializeCallbacks = /* @__PURE__ */ new Set();
+      renderCallbacks = /* @__PURE__ */ new Set();
+      isAppInitialized = false;
+      isAppRendered = false;
+      afterAppInitialized(() => isAppInitialized = true);
+      afterAppRendered(() => isAppRendered = true);
+      unpatchRunApplication = patcher2.after(ReactNative.AppRegistry, "runApplication", () => {
+        unpatchRunApplication();
+        recordTimestamp("App_RunApplicationCalled");
+        for (var callback of initializeCallbacks) callback();
+        recordTimestamp("App_AfterRunCallbacks");
+      }, "runInitializeCallbacks");
+      unpatchCreateElement = patcher2.after(React, "createElement", () => {
+        unpatchCreateElement();
+        recordTimestamp("App_CreateElementCalled");
+        for (var callback of renderCallbacks) callback();
+      }, "runRenderCallbacks");
+      afterAppInitialized(/* @__PURE__ */ function() {
+        var _patchErrorBoundary = _async_to_generator(function* () {
+          var { settings: settings2 } = yield Promise.resolve().then(() => (init_src5(), src_exports3));
+          yield awaitStorage(settings2);
+          if (!settings2.developer.patchErrorBoundary) return;
+          var { default: Screen } = yield Promise.resolve().then(() => (init_ErrorBoundaryScreen(), ErrorBoundaryScreen_exports));
+          setImmediate(() => {
+            patcher2.after.await(findByName.async("ErrorBoundary").then((it) => it.prototype), "render", function() {
+              if (this.state.error) return /* @__PURE__ */ jsx(Screen, {
+                error: this.state.error,
+                rerender: () => this.setState({
+                  error: null,
+                  info: null
+                }),
+                reload: this.handleReload
+              });
+            }, "patchErrorBoundary");
+          });
+        });
+        function patchErrorBoundary() {
+          return _patchErrorBoundary.apply(this, arguments);
+        }
+        return patchErrorBoundary;
+      }());
+      AppLibrary = {
+        /**
+         * Whether the app has finished initializing
+         */
+        get initialized() {
+          return isAppInitialized;
+        },
+        /**
+         * Whether the App component has been rendered
+         */
+        get rendered() {
+          return isAppRendered;
+        },
+        /**
+         * Attaches a callback to be called when the app has been rendered
+         * @param callback The callback to be called
+         */
+        afterRendered: afterAppRendered,
+        /**
+         * Attaches a callback to be called when the app has been initialized
+         * @param callback The callback to be called
+         */
+        afterInitialized: afterAppInitialized,
+        /**
+         * Reloads the app
+         */
+        reload: () => BundleUpdaterManager.reload()
+      };
+    }
+  });
+
+  // libraries/assets/src/index.ts
+  var src_exports5 = {};
+  __export(src_exports5, {
+    AssetsLibrary: () => AssetsLibrary
+  });
+  function getAssetByName(name) {
+    return getAssetByIndex(cache.assets[name]);
+  }
+  function getAssetByIndex(index) {
+    return assets[index];
+  }
+  function getAssetIndexByName(name) {
+    var cachedId = cache.assets[name];
+    if (cachedId) return cachedId;
+    var moduleId = cache.assetModules[name];
+    if (!moduleId) return;
+    return cache.assets[name] = requireModule(moduleId);
+  }
+  var patcher3, assets, AssetsLibrary;
+  var init_src7 = __esm({
+    "libraries/assets/src/index.ts"() {
+      "use strict";
+      init_common();
+      init_metro();
+      init_src2();
+      patcher3 = createPatcherInstance("revenge.library.assets");
+      patcher3.after(assetsRegistry, "registerAsset", ([asset], index) => {
+        var moduleId = getImportingModuleId();
+        cacheAsset(asset.name, index, moduleId);
+      }, "patchRegisterAsset");
+      assets = new Proxy(Object.fromEntries(Object.entries(cache.assets).map(([key, index]) => [
+        key,
+        assetsRegistry.getAssetByID(index)
+      ])), {
+        get(cache2, prop) {
+          if (cache2[prop]) return cache2[prop];
+          return assetsRegistry.getAssetByID(Number(prop));
+        }
+      });
+      AssetsLibrary = {
+        assets,
+        getByName: getAssetByName,
+        getIndexByName: getAssetIndexByName,
+        getByIndex: getAssetByIndex
+      };
+    }
+  });
+
+  // libraries/plugins/src/constants.ts
+  var PluginIdRegex, PluginStatus;
+  var init_constants2 = __esm({
+    "libraries/plugins/src/constants.ts"() {
+      "use strict";
+      PluginIdRegex = /^[a-z0-9-_\.]{1,128}$/;
+      PluginStatus = {
+        Stopped: 1,
+        Fetching: 2,
+        Starting: 3,
+        Started: 4
+      };
     }
   });
 
@@ -2752,14 +2940,19 @@
     var cleanups = /* @__PURE__ */ new Set();
     if (plugins.has(definition.id)) throw new Error(`Plugin "${definition.id}" already exists`);
     if (!PluginIdRegex.test(definition.id)) throw new Error(`Cannot register plugin "${definition.id}", invalid ID format`);
+    var prepareStorageAndPatcher = () => {
+      instance.patcher ||= createPatcherInstance(`revenge.plugins.plugin#${definition.id}`);
+      instance.storage ||= createStorage(`revenge/plugins/${definition.id}/storage.json`, {
+        initial: definition.initializeStorage?.() ?? {}
+      });
+    };
     var internalPlugin = objectSeal({
       ...definition,
       // Enabled by default if it is a core plugin, otherwise its enabled state will be modified after core plugins have started
       enabled: predicate?.() ?? core,
       core,
       status: PluginStatus.Stopped,
-      getSettingsComponent: definition.settings,
-      patcher: createPatcherInstance(`revenge.plugins.plugin#${definition.id}`),
+      SettingsComponent: definition.settings,
       errors: [],
       get stopped() {
         return this.status === PluginStatus.Stopped;
@@ -2773,30 +2966,36 @@
         this.enabled = true;
         return !!this.beforeAppRender;
       },
-      experimental_startMetroModuleSubscription() {
-        if (this.onMetroModuleLoad) subscribeModule.all(this.onMetroModuleLoad);
+      startMetroModuleSubscriptions() {
+        if (this.onMetroModuleLoad) {
+          prepareStorageAndPatcher();
+          var unsub = subscribeModule.all((id, exports) => this.onMetroModuleLoad(instance, id, exports, unsub));
+        }
       },
       start() {
         return _async_to_generator(function* () {
           if (!this.enabled) throw new Error(`Plugin "${this.id}" must be enabled before starting`);
           if (!this.stopped) throw new Error(`Plugin "${this.id}" is already started`);
+          prepareStorageAndPatcher();
           this.status = PluginStatus.Starting;
           var handleError = (e, stage) => {
             this.errors.push(e);
             this.stop();
-            throw new Error(`Plugin "${this.id}" failed to start at "${stage}"`, {
+            throw new Error(`Plugin "${this.id}" failed to start at "${stage}":
+${String(e)}`, {
               cause: e
             });
           };
-          if (app.initialized && this.beforeAppRender) handleError(new Error(`Plugin "${this.id}" requires running before app is initialized`), "beforeAppRender");
+          if (isAppRendered && this.beforeAppRender) handleError(new Error(`Plugin "${this.id}" requires running before app is initialized`), "beforeAppRender");
           try {
             instance.context.beforeAppRender = yield this.beforeAppRender?.(instance);
           } catch (e) {
             handleError(e, "onAppLaunched");
           }
           var _this = this;
-          if (this.afterAppRender) appInitCallbacks.add(/* @__PURE__ */ _async_to_generator(function* () {
+          if (this.afterAppRender) appRenderedCallbacks.add(/* @__PURE__ */ _async_to_generator(function* () {
             try {
+              yield awaitStorage(instance.storage);
               instance.context.afterAppRender = yield _this.afterAppRender(instance);
               _this.status = PluginStatus.Started;
             } catch (e) {
@@ -2816,7 +3015,7 @@
           }));
         } finally {
           for (var cleanup of cleanups) cleanup();
-          if (!this.patcher.destroyed) this.patcher.destroy();
+          if (!instance.patcher.destroyed) instance.patcher.destroy();
         }
       }
     });
@@ -2844,10 +3043,8 @@
         afterAppRender: null
       },
       plugin: proxy,
-      patcher: internalPlugin.patcher,
-      storage: createStorage(`revenge/plugins/${definition.id}/storage.json`, {
-        initial: definition.initializeStorage?.() ?? {}
-      }),
+      patcher: null,
+      storage: null,
       revenge: lazyValue(() => revenge),
       cleanup: (...funcs) => {
         for (var cleanup of funcs) cleanups.add(cleanup);
@@ -2858,102 +3055,77 @@
     if (internalPlugin.beforeAppRender) highPriorityPluginIds.add(internalPlugin.id);
     return proxy;
   }
-  var PluginIdRegex, appInitCallbacks, corePluginIds, highPriorityPluginIds, plugins, WhitelistedPluginObjectKeys, PluginStatus;
+  var appRenderedCallbacks, corePluginIds, plugins, highPriorityPluginIds;
   var init_internals = __esm({
     "libraries/plugins/src/internals.ts"() {
       "use strict";
       init_async_to_generator();
+      init_src6();
       init_metro();
-      init_src();
-      init_src5();
+      init_src2();
+      init_src4();
       init_functions();
       init_lazy();
-      init_shared2();
-      PluginIdRegex = /^[a-z0-9-_\.]{1,128}$/;
-      appInitCallbacks = /* @__PURE__ */ new Set();
+      init_constants2();
+      appRenderedCallbacks = /* @__PURE__ */ new Set();
       corePluginIds = /* @__PURE__ */ new Set();
-      highPriorityPluginIds = /* @__PURE__ */ new Set();
       plugins = /* @__PURE__ */ new Map();
-      WhitelistedPluginObjectKeys = [
-        "description",
-        "disable",
-        "icon",
-        "id",
-        "name",
-        "version",
-        "stop",
-        "author",
-        "errors"
-      ];
-      PluginStatus = {
-        Stopped: 1,
-        Fetching: 2,
-        Starting: 3,
-        Started: 4
-      };
+      highPriorityPluginIds = /* @__PURE__ */ new Set();
     }
   });
 
-  // libraries/ui/src/settings.ts
-  function createSettingsSection(section) {
-    if (section.name in customData.sections) throw new Error(`The settings section with the name "${section.name}" already exists`);
-    customData.sections[section.name] = section;
-    return () => delete customData.sections[section.name];
-  }
-  function createSettingsRoute(key, route) {
-    customData.rows[key] = route;
-    return () => delete customData.rows[key];
-  }
-  function addSettingsRowsToSection(name, rows2) {
-    if (!(name in customData.sections)) throw new Error(`No setting section exists with the name "${name}"`);
-    var section = customData.sections[name];
-    Object.assign(section.settings, rows2);
-    return () => {
-      for (var key in rows2) delete section.settings[key];
-    };
-  }
-  var customData, SettingsUILibrary;
-  var init_settings = __esm({
-    "libraries/ui/src/settings.ts"() {
-      "use strict";
-      init_library();
-      customData = {
-        sections: {},
-        rows: {}
-      };
-      SettingsUILibrary = library_default.create({
-        name: "ui.settings",
-        uses: []
-      }, () => {
-        return {
-          addRowsToSection: addSettingsRowsToSection,
-          createSection: createSettingsSection,
-          createRoute: createSettingsRoute
-        };
-      });
-    }
+  // libraries/plugins/src/index.ts
+  var src_exports6 = {};
+  __export(src_exports6, {
+    PluginsLibrary: () => PluginsLibrary,
+    definePlugin: () => definePlugin,
+    startCorePlugins: () => startCorePlugins,
+    startCorePluginsMetroModuleSubscriptions: () => startCorePluginsMetroModuleSubscriptions
   });
-
-  // libraries/preferences/src/index.ts
-  var src_exports = {};
-  __export(src_exports, {
-    settings: () => settings
-  });
-  var settings;
-  var init_src6 = __esm({
-    "libraries/preferences/src/index.ts"() {
-      "use strict";
-      init_src5();
-      settings = createStorage("revenge/settings.json", {
-        initial: {
-          safeMode: {
-            enabled: false,
-            enabledNextLaunch: false
-          },
-          developerSettingsEnabled: false,
-          willBeMoved_staffSettingsEnabled: false
+  function definePlugin(definition) {
+    return registerPlugin(definition);
+  }
+  function startCorePlugins() {
+    return _startCorePlugins.apply(this, arguments);
+  }
+  function _startCorePlugins() {
+    _startCorePlugins = _async_to_generator(function* () {
+      var promises = [];
+      for (var id of corePluginIds) {
+        try {
+          var plugin = plugins.get(id);
+          if (plugin.enabled) promises.push(plugin.start());
+        } catch (e) {
+          throw new Error(`Core plugin "${id}" had an error while starting`, {
+            cause: e
+          });
         }
+      }
+      return void (yield Promise.all(promises));
+    });
+    return _startCorePlugins.apply(this, arguments);
+  }
+  function startCorePluginsMetroModuleSubscriptions() {
+    for (var plugin of plugins.values()) plugin.startMetroModuleSubscriptions();
+  }
+  var PluginsLibrary;
+  var init_src8 = __esm({
+    "libraries/plugins/src/index.ts"() {
+      "use strict";
+      init_async_to_generator();
+      init_src6();
+      init_internals();
+      afterAppRendered(() => {
+        for (var cb of appRenderedCallbacks) cb();
       });
+      PluginsLibrary = {
+        /**
+         * Defines a plugin
+         * @param definition The plugin definition
+         * @returns The plugin object
+         */
+        definePlugin
+      };
     }
   });
 
@@ -2965,8 +3137,8 @@
       init_common();
       init_native();
       init_internals();
-      MinimumSupportedBuildNumber = ReactNative2.Platform.select({
-        android: 25e4,
+      MinimumSupportedBuildNumber = ReactNative3.Platform.select({
+        android: 254e3,
         ios: 65235
       });
       registerPlugin(
@@ -3081,7 +3253,7 @@ Your Build: ${ClientInfoModule.Version} (${ClientInfoModule.Build})`
 
   // src/plugins/settings/pages/About.tsx
   function AboutSettingsPage() {
-    var hermesProps = HermesInternal.getRuntimeProperties();
+    var runtimeProps = HermesInternal.getRuntimeProperties();
     return /* @__PURE__ */ jsxs(Stack, {
       style: {
         paddingHorizontal: 16,
@@ -3127,14 +3299,14 @@ Your Build: ${ClientInfoModule.Version} (${ClientInfoModule.Build})`
               icon: {
                 uri: react_default2
               },
-              trailing: hermesProps["OSS Release Version"].slice(7)
+              trailing: runtimeProps["OSS Release Version"].slice(7)
             },
             {
               label: "Hermes Bytecode",
               icon: {
                 uri: hermes_default
               },
-              trailing: `${hermesProps["Bytecode Version"]} (${hermesProps.Build})`
+              trailing: `${runtimeProps["Bytecode Version"]} (${runtimeProps.Build})`
             }
           ].map((props) => (
             // biome-ignore lint/correctness/useJsxKeyInIterable: This page never gets updated
@@ -3230,7 +3402,7 @@ Your Build: ${ClientInfoModule.Version} (${ClientInfoModule.Build})`
     "src/plugins/settings/pages/DebugPerformanceTimes.tsx"() {
       "use strict";
       init_react_jsx_runtime();
-      init_src2();
+      init_src();
       init_components();
       PerformanceTimesKeys = Object.keys(PerformanceTimes).sort((a, b3) => timeOf(a) - timeOf(b3));
     }
@@ -3240,7 +3412,10 @@ Your Build: ${ClientInfoModule.Version} (${ClientInfoModule.Build})`
   function DeveloperSettingsPage() {
     var { assets: assets3, modules: modules2 } = revenge;
     var navigation = NavigationNative.useNavigation();
-    var inputRef = React.useRef("");
+    var evalCodeRef = React.useRef("");
+    useObservable([
+      settings
+    ]);
     return /* @__PURE__ */ jsxs(Stack, {
       style: {
         paddingHorizontal: 16,
@@ -3249,45 +3424,55 @@ Your Build: ${ClientInfoModule.Version} (${ClientInfoModule.Build})`
       spacing: 16,
       direction: "vertical",
       children: [
-        /* @__PURE__ */ jsx(TableRowGroup, {
-          title: "Tools",
-          children: /* @__PURE__ */ jsx(TableRow, {
-            label: "Evaluate JavaScript",
-            icon: /* @__PURE__ */ jsx(TableRowIcon, {
-              source: assets3.getIndexByName("PaperIcon")
+        /* @__PURE__ */ jsxs(TableRowGroup, {
+          children: [
+            /* @__PURE__ */ jsx(TableSwitchRow, {
+              label: "Patch ErrorBoundary",
+              subLabel: "Allows you to see a more detailed error screen, but may slow down the app during startup.",
+              icon: /* @__PURE__ */ jsx(TableRowIcon, {
+                source: assets3.getIndexByName("ScreenXIcon")
+              }),
+              value: settings.developer.patchErrorBoundary,
+              onValueChange: (v2) => settings.developer.patchErrorBoundary = v2
             }),
-            onPress: () => {
-              alerts.openAlert("revenge.plugins.settings.developer.evaluate", /* @__PURE__ */ jsx(AlertModal, {
-                title: "Evaluate JavaScript",
-                extraContent: /* @__PURE__ */ jsx(TextArea, {
-                  autoFocus: true,
-                  label: "Code",
-                  size: "md",
-                  placeholder: "ReactNative.NativeModules.BundleUpdaterManager.reload()",
-                  onChange: (v2) => inputRef.current = v2
-                }),
-                actions: /* @__PURE__ */ jsxs(Stack, {
-                  children: [
-                    /* @__PURE__ */ jsx(AlertActionButton, {
-                      text: "Evaluate",
-                      variant: "primary",
-                      onPress: () => alert(modules2.findProp("inspect")(
-                        // biome-ignore lint/security/noGlobalEval: This is intentional
-                        globalThis.eval(inputRef.current),
-                        {
-                          depth: 5
-                        }
-                      ))
-                    }),
-                    /* @__PURE__ */ jsx(AlertActionButton, {
-                      text: "Cancel",
-                      variant: "secondary"
-                    })
-                  ]
-                })
-              }));
-            }
-          })
+            /* @__PURE__ */ jsx(TableRow, {
+              label: "Evaluate JavaScript",
+              icon: /* @__PURE__ */ jsx(TableRowIcon, {
+                source: assets3.getIndexByName("PaperIcon")
+              }),
+              onPress: () => {
+                alerts.openAlert("revenge.plugins.settings.developer.evaluate", /* @__PURE__ */ jsx(AlertModal, {
+                  title: "Evaluate JavaScript",
+                  extraContent: /* @__PURE__ */ jsx(TextArea, {
+                    autoFocus: true,
+                    label: "Code",
+                    size: "md",
+                    placeholder: "ReactNative.NativeModules.BundleUpdaterManager.reload()",
+                    onChange: (v2) => evalCodeRef.current = v2
+                  }),
+                  actions: /* @__PURE__ */ jsxs(Stack, {
+                    children: [
+                      /* @__PURE__ */ jsx(AlertActionButton, {
+                        text: "Evaluate",
+                        variant: "primary",
+                        onPress: () => alert(modules2.findProp("inspect")(
+                          // biome-ignore lint/security/noGlobalEval: This is intentional
+                          globalThis.eval(evalCodeRef.current),
+                          {
+                            depth: 5
+                          }
+                        ))
+                      }),
+                      /* @__PURE__ */ jsx(AlertActionButton, {
+                        text: "Cancel",
+                        variant: "secondary"
+                      })
+                    ]
+                  })
+                }));
+              }
+            })
+          ]
         }),
         /* @__PURE__ */ jsxs(TableRowGroup, {
           title: "Tests",
@@ -3353,6 +3538,8 @@ Your Build: ${ClientInfoModule.Version} (${ClientInfoModule.Build})`
       init_common();
       init_components();
       init_native();
+      init_src5();
+      init_src4();
     }
   });
 
@@ -3401,8 +3588,8 @@ Your Build: ${ClientInfoModule.Version} (${ClientInfoModule.Build})`
               icon: /* @__PURE__ */ jsx(TableRowIcon, {
                 source: assets3.getIndexByName("WrenchIcon")
               }),
-              value: settings.developerSettingsEnabled,
-              onValueChange: (v2) => settings.developerSettingsEnabled = v2
+              value: settings.developer.settingsPageShown,
+              onValueChange: (v2) => settings.developer.settingsPageShown = v2
             }),
             ...rows.map((Row, index) => /* @__PURE__ */ jsx(Row, {}, index.toString()))
           ]
@@ -3421,8 +3608,8 @@ Your Build: ${ClientInfoModule.Version} (${ClientInfoModule.Build})`
       init_common();
       init_components();
       init_native();
-      init_src6();
       init_src5();
+      init_src4();
       rows = [];
     }
   });
@@ -3432,11 +3619,11 @@ Your Build: ${ClientInfoModule.Version} (${ClientInfoModule.Build})`
   var init_settings2 = __esm({
     "src/plugins/settings/index.tsx"() {
       "use strict";
-      init_react2();
-      init_internals();
       init_components();
+      init_internals();
+      init_react2();
       init_settings();
-      init_src6();
+      init_src5();
       init_revenge();
       init_About();
       init_CustomPageRenderer();
@@ -3450,77 +3637,74 @@ Your Build: ${ClientInfoModule.Version} (${ClientInfoModule.Build})`
         id: "revenge.settings",
         version: "1.0.0",
         icon: "SettingsIcon",
-        afterAppRender({ patcher: patcher3, cleanup, revenge: { assets: assets3, modules: modules2, ui: { settings: sui } } }) {
-          var SettingsConstants = modules2.findByProps("SETTING_RENDERER_CONFIG");
-          var SettingsOverviewScreen = modules2.findByName("SettingsOverviewScreen", false);
-          var originalRendererConfig = SettingsConstants.SETTING_RENDERER_CONFIG;
-          var rendererConfig = originalRendererConfig;
-          Object.defineProperty(SettingsConstants, "SETTING_RENDERER_CONFIG", {
-            enumerable: true,
-            configurable: true,
-            get: () => ({
-              ...getCustomRows(),
-              ...rendererConfig
-            }),
-            set: (v2) => rendererConfig = v2
-          });
-          cleanup(() => {
+        afterAppRender({ patcher: patcher5, revenge: { assets: assets3, modules: modules2, ui: { settings: sui } } }) {
+          setTimeout(() => {
+            var SettingsConstants = modules2.findByProps("SETTING_RENDERER_CONFIG");
+            var SettingsOverviewScreen = modules2.findByName("SettingsOverviewScreen", false);
+            var originalRendererConfig = SettingsConstants.SETTING_RENDERER_CONFIG;
+            var rendererConfig = originalRendererConfig;
             Object.defineProperty(SettingsConstants, "SETTING_RENDERER_CONFIG", {
-              value: originalRendererConfig,
-              writable: true,
-              get: void 0,
-              set: void 0
+              enumerable: true,
+              configurable: true,
+              get: () => ({
+                ...getCustomRows(),
+                ...rendererConfig
+              }),
+              set: (v2) => rendererConfig = v2
+            });
+            patcher5.after(SettingsOverviewScreen, "default", (_2, children) => {
+              var registeredCustomRows = new Set(Object.values(customData.sections).flatMap(({ settings: settings2 }) => Object.keys(settings2)));
+              var { sections } = findInReactTree(children, (i) => i.props?.sections).props;
+              if (sections.findIndex((section2) => section2.settings.some((setting) => registeredCustomRows.has(setting))) !== -1) return;
+              var index = -~sections.findIndex((section2) => section2.settings.includes("ACCOUNT")) || 1;
+              for (var key in customData.sections) {
+                var section = customData.sections[key];
+                sections.splice(index++, 0, {
+                  label: section.name,
+                  settings: Object.keys(section.settings)
+                });
+              }
+            }, "addNewSettingsSections");
+            sui.createSection({
+              name: "Revenge",
+              settings: {
+                Revenge: {
+                  type: "route",
+                  label: "Revenge",
+                  icon: {
+                    uri: revenge_default
+                  },
+                  component: RevengeSettingsPage
+                },
+                RevengeDeveloper: {
+                  type: "route",
+                  label: "Developer",
+                  icon: assets3.getIndexByName("WrenchIcon"),
+                  component: DeveloperSettingsPage,
+                  predicate: () => settings.developer.settingsPageShown
+                }
+              }
+            });
+            sui.createRoute("RevengeAbout", {
+              type: "route",
+              label: "About",
+              component: AboutSettingsPage,
+              icon: assets3.getIndexByName("CircleInformationIcon")
+            });
+            sui.createRoute("RevengeDebugPerformanceTimes", {
+              type: "route",
+              label: "Debug Performance Times",
+              component: DebugPerformanceTimesSettingsPage,
+              icon: assets3.getIndexByName("TimerIcon")
+            });
+            sui.createRoute("RevengeCustomPage", {
+              type: "route",
+              label: "Revenge Page",
+              unsearchable: true,
+              component: CustomPageRenderer,
+              predicate: () => false
             });
           });
-          patcher3.after(SettingsOverviewScreen, "default", (_2, children) => {
-            var registeredCustomRows = new Set(Object.values(customData.sections).flatMap(({ settings: settings2 }) => Object.keys(settings2)));
-            var { sections } = findInReactTree(children, (i) => i.props?.sections).props;
-            if (sections.findIndex((section2) => section2.settings.some((setting) => registeredCustomRows.has(setting))) !== -1) return;
-            var index = -~sections.findIndex((section2) => section2.settings.includes("ACCOUNT")) || 1;
-            for (var key in customData.sections) {
-              var section = customData.sections[key];
-              sections.splice(index++, 0, {
-                label: section.name,
-                settings: Object.keys(section.settings)
-              });
-            }
-          }, "addNewSettingsSections");
-          cleanup(sui.createSection({
-            name: "Revenge",
-            settings: {
-              Revenge: {
-                type: "route",
-                label: "Revenge",
-                icon: {
-                  uri: revenge_default
-                },
-                component: RevengeSettingsPage
-              },
-              RevengeDeveloper: {
-                type: "route",
-                label: "Developer",
-                icon: assets3.getIndexByName("WrenchIcon"),
-                component: DeveloperSettingsPage,
-                predicate: () => settings.developerSettingsEnabled
-              }
-            }
-          }), sui.createRoute("RevengeAbout", {
-            type: "route",
-            label: "About",
-            component: AboutSettingsPage,
-            icon: assets3.getIndexByName("CircleInformationIcon")
-          }), sui.createRoute("RevengeDebugPerformanceTimes", {
-            type: "route",
-            label: "Debug Performance Times",
-            component: DebugPerformanceTimesSettingsPage,
-            icon: assets3.getIndexByName("TimerIcon")
-          }), sui.createRoute("RevengeCustomPage", {
-            type: "route",
-            label: "Revenge Page",
-            unsearchable: true,
-            component: CustomPageRenderer,
-            predicate: () => false
-          }));
         }
       }, true);
       getCustomRows = () => {
@@ -3540,9 +3724,9 @@ Your Build: ${ClientInfoModule.Version} (${ClientInfoModule.Build})`
           title: () => row.label,
           parent: row.parent ?? null,
           icon: row.icon,
-          IconComponent: () => TableRowIcon({
+          IconComponent: row.icon ? () => TableRowIcon({
             source: row.icon
-          }),
+          }) : void 0,
           unsearchable: row.unsearchable,
           screen: row.type === "route" ? {
             route: key,
@@ -3562,17 +3746,15 @@ Your Build: ${ClientInfoModule.Version} (${ClientInfoModule.Build})`
   });
 
   // src/plugins/staff-settings/index.tsx
-  var patchedStore, isStaffSettingsShown, byConstructorDisplayName;
+  var originalValue, isStaffSettingsShown;
   var init_staff_settings = __esm({
     "src/plugins/staff-settings/index.tsx"() {
       "use strict";
       init_react_jsx_runtime();
       init_components();
-      init_filters2();
-      init_src5();
       init_internals();
+      init_src4();
       init_Revenge();
-      patchedStore = false;
       isStaffSettingsShown = () => true;
       registerPlugin({
         name: "Staff Settings",
@@ -3581,18 +3763,22 @@ Your Build: ${ClientInfoModule.Version} (${ClientInfoModule.Build})`
         id: "revenge.staff-settings",
         version: "1.0.0",
         icon: "ic_progress_wrench_24px",
-        onMetroModuleLoad(_2, exports) {
-          if (!patchedStore && exports.default?.constructor?.displayName === "DeveloperExperimentStore") {
-            patchedStore = true;
+        onMetroModuleLoad(_2, __, exports, unsub) {
+          if (exports.default?.constructor?.displayName === "DeveloperExperimentStore") {
+            unsub();
             exports.default = new Proxy(exports.default, {
               get(target, property, receiver) {
-                if (property === "isDeveloper") return isStaffSettingsShown();
+                if (property === "isDeveloper") {
+                  originalValue &&= Reflect.get(target, property, receiver);
+                  return isStaffSettingsShown();
+                }
                 return Reflect.get(target, property, receiver);
               }
             });
           }
         },
-        beforeAppRender({ storage, revenge: { assets: assets3 } }) {
+        beforeAppRender({ cleanup, storage, revenge: { assets: assets3 } }) {
+          cleanup(() => isStaffSettingsShown = () => originalValue);
           isStaffSettingsShown = () => storage[storageContextSymbol].ready ? storage.enabled : true;
           internal_addTableRowsToAdvancedSectionInRevengePage(() => {
             useObservable([
@@ -3612,7 +3798,6 @@ Your Build: ${ClientInfoModule.Version} (${ClientInfoModule.Build})`
           enabled: false
         })
       }, true);
-      byConstructorDisplayName = createFilter(([name], m2) => m2.constructor?.displayName === name, (name) => `revenge.plugins.staff-settings.byConstructorDisplayName(${name})`);
     }
   });
 
@@ -3627,141 +3812,61 @@ Your Build: ${ClientInfoModule.Version} (${ClientInfoModule.Build})`
     }
   });
 
-  // src/index.tsx
+  // src/index.ts
   init_async_to_generator();
-  init_react_jsx_runtime();
   init_functions();
-  init_src2();
-  init_src4();
-
-  // libraries/assets/src/index.ts
-  init_src3();
-  init_common();
-  init_metro();
   init_library();
-  var AssetsLibrary = library_default.create({
-    name: "assets",
-    uses: [
-      "patcher"
-    ]
-  }, ({ patcher: patcher3 }) => {
-    library_default.instanceFor(ModulesLibrary).then(({ metro }) => {
-      patcher3.after(assetsRegistry, "registerAsset", ([asset], index) => {
-        var moduleId = getImportingModuleId();
-        metro.cacheAsset(asset.name, index, moduleId);
-      }, "patchRegisterAsset");
-    });
-    return {
-      assets,
-      getByName: getAssetByName,
-      getIndexByName: getAssetIndexByName,
-      getByIndex: getAssetByIndex
-    };
-  });
-  var assets = new Proxy(Object.fromEntries(Object.entries(metroCache.assets).map(([key, index]) => [
-    key,
-    assetsRegistry.getAssetByID(index)
-  ])), {
-    get(cache, prop) {
-      if (cache[prop]) return cache[prop];
-      return assetsRegistry.getAssetByID(Number(prop));
-    }
-  });
-  function getAssetByName(name) {
-    return getAssetByIndex(metroCache.assets[name]);
-  }
-  function getAssetByIndex(index) {
-    return assets[index];
-  }
-  function getAssetIndexByName(name) {
-    var cachedId = metroCache.assets[name];
-    if (cachedId) return cachedId;
-    var moduleId = metroCache.assetModules[name];
-    if (!moduleId) return;
-    return metroCache.assets[name] = requireModule(moduleId);
-  }
-
-  // src/index.tsx
-  init_src3();
+  init_src();
   init_constants();
   init_native();
-
-  // libraries/plugins/src/index.ts
-  init_async_to_generator();
-
-  // libraries/shared/src/symbols.ts
-  var internalSymbol = Symbol.for("revenge.shared.interal");
-
-  // libraries/plugins/src/index.ts
-  init_library();
-  init_internals();
-  init_shared2();
-  var PluginsLibrary = library_default.create({
-    name: "plugins",
-    uses: []
-  }, () => {
-    app.afterInitialized(() => {
-      for (var cb of appInitCallbacks) cb();
-    });
-    return {
-      definePlugin,
-      [internalSymbol]: {
-        plugins,
-        startCorePlugins() {
-          return _async_to_generator(function* () {
-            for (var id of corePluginIds) {
-              try {
-                var plugin = plugins.get(id);
-                if (plugin.enabled) yield plugin.start();
-              } catch (e) {
-                throw new Error(`Core plugin "${id}" had an error while starting`, {
-                  cause: e
-                });
-              }
-            }
-          })();
-        },
-        experimental_startCorePluginsMetroModuleSubscriptions() {
-          for (var plugin of plugins.values()) plugin.experimental_startMetroModuleSubscription();
-        }
-      }
-    };
-  });
-  function definePlugin(definition) {
-    return registerPlugin(definition);
-  }
-
-  // src/index.tsx
-  init_src5();
-  init_colors();
-  init_settings();
   init_errors();
-  init_library();
+  init_src2();
   function initialize() {
-    recordTimestamp("Init_Initialize");
-    Object.freeze = Object.seal = (o) => o;
-    try {
-      var promise = ModulesLibrary.new().then((modules2) => {
-        var promise2 = Promise.resolve().then(() => (init_src6(), src_exports));
-        var app2 = AppLibrary.new();
-        var plugins2 = PluginsLibrary.new();
-        var corePluginsPromise = Promise.resolve().then(() => (init_plugins(), plugins_exports)).then(() => {
+    return _initialize.apply(this, arguments);
+  }
+  function _initialize() {
+    _initialize = // ! This function is BLOCKING, so we need to make sure it's as fast as possible
+    _async_to_generator(function* () {
+      var [{ createModulesLibrary: createModulesLibrary2 }, UIColorsLibrary, { SettingsUILibrary: SettingsUILibrary2 }] = yield Promise.all([
+        Promise.resolve().then(() => (init_src3(), src_exports)),
+        Promise.resolve().then(() => (init_colors(), colors_exports)),
+        Promise.resolve().then(() => (init_settings(), settings_exports))
+      ]);
+      recordTimestamp("Init_Initialize");
+      Object.freeze = Object.seal = (o) => o;
+      var UILibrary = {
+        settings: SettingsUILibrary2,
+        colors: UIColorsLibrary
+      };
+      try {
+        var ModulesLibraryPromise = createModulesLibrary2();
+        var [{ AppLibrary: AppLibrary2 }, { AssetsLibrary: AssetsLibrary2 }] = yield Promise.all([
+          Promise.resolve().then(() => (init_src6(), src_exports4)),
+          Promise.resolve().then(() => (init_src7(), src_exports5))
+        ]);
+        var ModulesLibrary = yield ModulesLibraryPromise;
+        var [{ PluginsLibrary: PluginsLibrary2, startCorePlugins: startCorePlugins2, startCorePluginsMetroModuleSubscriptions: startCorePluginsMetroModuleSubscriptions2 }, { awaitStorage: awaitStorage2 }] = yield Promise.all([
+          Promise.resolve().then(() => (init_src8(), src_exports6)),
+          Promise.resolve().then(() => (init_src4(), src_exports2))
+        ]);
+        var PreferencesLibrary = Promise.resolve().then(() => (init_src5(), src_exports3));
+        var CorePlugins = Promise.resolve().then(() => (init_plugins(), plugins_exports)).then(() => {
           recordTimestamp("Plugins_CoreImported");
-          revenge.plugins[internalSymbol].experimental_startCorePluginsMetroModuleSubscriptions();
+          startCorePluginsMetroModuleSubscriptions2();
         });
         globalThis.revenge = {
-          app: app2,
-          assets: assets3,
-          modules: modules2,
-          plugins: plugins2,
-          ui
+          app: AppLibrary2,
+          assets: AssetsLibrary2,
+          modules: ModulesLibrary,
+          plugins: PluginsLibrary2,
+          ui: UILibrary
         };
-        promise2.then(/* @__PURE__ */ function() {
+        PreferencesLibrary.then(/* @__PURE__ */ function() {
           var _ref = _async_to_generator(function* ({ settings: settings2 }) {
-            yield awaitStorage(settings2);
+            yield awaitStorage2(settings2);
             recordTimestamp("Storage_Initialized");
-            corePluginsPromise.then(() => {
-              revenge.plugins[internalSymbol].startCorePlugins();
+            CorePlugins.then(() => {
+              startCorePlugins2();
               recordTimestamp("Plugins_CoreStarted");
             });
           });
@@ -3769,147 +3874,77 @@ Your Build: ${ClientInfoModule.Version} (${ClientInfoModule.Build})`
             return _ref.apply(this, arguments);
           };
         }());
-      });
-      var assets3 = AssetsLibrary.new();
-      var ui = {
-        settings: SettingsUILibrary.new(),
-        colors: colors_exports
-      };
-      return promise;
-    } catch (e) {
-      onError(e);
-    }
+      } catch (e) {
+        onError(e);
+      }
+    });
+    return _initialize.apply(this, arguments);
   }
   function onError(e) {
-    library_default.destroyAll();
     console.error(`Failed to load Revenge: ${getErrorStack(e)}`);
-    if (ReactNative && !ReactNative.AppRegistry.getAppKeys().includes("Discord")) {
-      var styles2 = ReactNative.StyleSheet.create({
-        view: {
-          flex: 1,
-          backgroundColor: "#000b",
-          padding: 16
-        },
-        head: {
-          fontSize: 24,
-          fontWeight: "bold",
-          color: "white"
-        },
-        desc: {
-          fontSize: 16,
-          color: "white"
-        },
-        stack: {
-          fontSize: 16,
-          fontFamily: "monospace",
-          color: "white"
-        }
-      });
-      ReactNative.AppRegistry.registerComponent("Discord", () => () => /* @__PURE__ */ jsxs(ReactNative.View, {
-        style: styles2.view,
-        children: [
-          /* @__PURE__ */ jsx(ReactNative.Text, {
-            style: styles2.head,
-            children: "Failed to load Revenge, and Discord!"
-          }),
-          /* @__PURE__ */ jsx(ReactNative.Text, {
-            style: [
-              styles2.desc,
-              {
-                marginBottom: 16
-              }
-            ],
-            children: "The app is unable to start at this stage, as the index module (module 0) could not be imported in time. This will result in a native crash if not caught by Revenge!"
-          }),
-          /* @__PURE__ */ jsx(ReactNative.Text, {
-            style: styles2.desc,
-            children: "Stack trace (scrollable):"
-          }),
-          /* @__PURE__ */ jsx(ReactNative.ScrollView, {
-            style: {
-              flex: 1
-            },
-            children: /* @__PURE__ */ jsx(ReactNative.Text, {
-              style: styles2.stack,
-              children: getErrorStack(e)
-            })
-          })
-        ]
-      }));
-    } else alert([
+    alert([
       "Failed to load Revenge\n",
       `Build Number: ${ClientInfoModule.Build}`,
       getErrorStack(e)
     ].join("\n"));
   }
-  library_default.create({
-    name: "init",
-    uses: [
-      "patcher",
-      "logger"
-    ]
-  }, ({ logger: logger2, patcher: patcher3, cleanup }) => {
-    var originalPromiseRejectionHandler = Promise._m;
-    var ErrorTypeWhitelist = [
-      ReferenceError,
-      TypeError,
-      RangeError
-    ];
-    Promise._m = (promise, err) => {
-      if (err) setTimeout(() => {
-        if (promise._h === 0) logger2.error(`Unhandled promise rejection: ${getErrorStack(err)}`);
-      }, ErrorTypeWhitelist.some((it) => err instanceof it) ? 0 : 2e3);
-    };
-    cleanup(() => {
-      if ("revenge" in globalThis) delete globalThis.revenge;
-      Promise._m = originalPromiseRejectionHandler;
-    });
-    if (typeof __r !== "undefined") return initialize();
-    function onceIndexRequired() {
-      recordTimestamp("Native_RequiredIndex");
-      var batchedBridge = __fbBatchedBridge;
-      var callQueue = [];
-      var unpatch2 = patcher3.instead(batchedBridge, "callFunctionReturnFlushedQueue", (args, orig) => {
-        if (args[0] === "AppRegistry" || !batchedBridge.getCallableModule(args[0])) {
-          callQueue.push(args);
-          return batchedBridge.flushedQueue();
-        }
-        return orig.apply(batchedBridge, args);
-      }, "holdNativeCalls");
-      initialize()?.then(() => {
-        recordTimestamp("Init_PromiseResolved");
-        unpatch2();
-        for (var queue of callQueue) batchedBridge.getCallableModule(queue[0]) && batchedBridge.__callFunction(...queue);
-      })?.catch(onError);
-    }
-    var requireFunc;
-    var initialized = false;
-    Object.defineProperties(globalThis, {
-      __r: {
-        configurable: true,
-        get: () => requireFunc,
-        set(metroRequire) {
-          requireFunc = function patchedRequire(id) {
-            if (id === IndexMetroModuleId) {
-              if (initialized) return;
-              initialized = true;
-              onceIndexRequired();
-              requireFunc = metroRequire;
-            } else return metroRequire(id);
-          };
-        }
-      },
-      __d: {
-        configurable: true,
-        get() {
-          globalThis.modules ??= __c?.();
-          return this.value;
-        },
-        set(v2) {
-          this.value = v2;
-        }
+  var requireFunc;
+  var initialized = false;
+  var patcher4 = createPatcherInstance("revenge.library.init");
+  var logger2 = createLogger("init");
+  var ErrorTypeWhitelist = [
+    ReferenceError,
+    TypeError,
+    RangeError
+  ];
+  Promise._m = (promise, err) => {
+    if (err) setTimeout(() => {
+      if (promise._h === 0) logger2.error(`Unhandled promise rejection: ${getErrorStack(err)}`);
+    }, ErrorTypeWhitelist.some((it) => err instanceof it) ? 0 : 2e3);
+  };
+  if (typeof __r !== "undefined") initialize();
+  function onceIndexRequired() {
+    recordTimestamp("Native_RequiredIndex");
+    var batchedBridge = __fbBatchedBridge;
+    var callQueue = [];
+    var unpatch2 = patcher4.instead(batchedBridge, "callFunctionReturnFlushedQueue", (args, orig) => {
+      if (args[0] === "AppRegistry" || !batchedBridge.getCallableModule(args[0])) {
+        callQueue.push(args);
+        return batchedBridge.flushedQueue();
       }
-    });
-  }).new();
+      return orig.apply(batchedBridge, args);
+    }, "holdNativeCalls");
+    initialize().then(() => {
+      recordTimestamp("Init_PromiseResolved");
+      unpatch2();
+      for (var queue of callQueue) batchedBridge.getCallableModule(queue[0]) && batchedBridge.__callFunction(...queue);
+    }).catch(onError);
+  }
+  Object.defineProperties(globalThis, {
+    __r: {
+      configurable: true,
+      get: () => requireFunc,
+      set(metroRequire) {
+        requireFunc = function patchedRequire(id) {
+          if (id === IndexMetroModuleId) {
+            if (initialized) return;
+            initialized = true;
+            onceIndexRequired();
+            requireFunc = metroRequire;
+          } else return metroRequire(id);
+        };
+      }
+    },
+    __d: {
+      configurable: true,
+      get() {
+        globalThis.modules ??= __c?.();
+        return this.value;
+      },
+      set(v2) {
+        this.value = v2;
+      }
+    }
+  });
 })();
 //# sourceURL=revenge
